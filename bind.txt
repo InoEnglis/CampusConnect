@@ -1,0 +1,23 @@
+
+
+celery -A CampusConnect worker --loglevel=info
+celery -A CampusConnect worker --pool=solo -l info
+
+daphne -p 8000 -b 0.0.0.0 CampusConnect.asgi:application
+.\
+cd capstone/CampusConnect
+
+
+python manage.py runserver
+
+
+ python manage.py migrate
+
+
+
+
+
+.\venv\Scripts\activate
+
+
+python manage.py makemigrations

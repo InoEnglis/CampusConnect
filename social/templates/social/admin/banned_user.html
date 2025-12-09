@@ -1,0 +1,128 @@
+{% extends "admin/change_form.html" %}
+{% load static %}
+
+{% block extrahead %}
+    {{ block.super }}
+    <style>
+        .profile-container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .profile-header {
+            color: #dc3545;
+            border-bottom: 2px solid #dc3545;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .profile-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        .profile-picture-container {
+            flex: 0 0 150px;
+        }
+        .profile-picture {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #dc3545;
+        }
+        .profile-details {
+            flex: 1;
+        }
+        .detail-row {
+            margin-bottom: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .detail-label {
+            font-weight: bold;
+            color: #555;
+            display: inline-block;
+            width: 120px;
+        }
+        .ban-status {
+            background-color: #dc3545;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-weight: bold;
+            display: inline-block;
+        }
+        .action-buttons {
+            margin-top: 30px;
+            text-align: right;
+        }
+        .button {
+            background: #dc3545;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+        .button:hover {
+            background: #c82333;
+        }
+        .no-picture {
+            color: #777;
+            font-style: italic;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="profile-container">
+        <h1 class="profile-header">User Profile - <span class="ban-status">BANNED</span></h1>
+        
+        <div class="profile-content">
+            <div class="profile-picture-container">
+                {% if user.profile.picture %}
+                    <img src="{{ user.profile.picture.url }}" alt="Profile Picture" class="profile-picture">
+                {% else %}
+                    <p class="no-picture">No profile picture</p>
+                {% endif %}
+            </div>
+            
+            <div class="profile-details">
+                <div class="detail-row">
+                    <span class="detail-label">Username:</span>
+                    {{ user.username }}
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Email:</span>
+                    {{ user.email|default:"Not provided" }}
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Full Name:</span>
+                    {{ user.get_full_name|default:"Not provided" }}
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Date Joined:</span>
+                    {{ user.date_joined|date:"F j, Y" }}
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Last Login:</span>
+                    {{ user.last_login|date:"F j, Y H:i"|default:"Never" }}
+                </div>
+            </div>
+        </div>
+
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.as_p }}
+            
+            <div class="action-buttons">
+                <button type="submit" name="_unban" class="button">Unban User</button>
+            </div>
+        </form>
+    </div>
+{% endblock %}

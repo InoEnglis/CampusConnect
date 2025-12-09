@@ -1,0 +1,470 @@
+{% extends 'landing/base.html' %}
+
+{% block content %}
+<div class="min-h-screen py-12 px-4 sm:px-6 lg:px-8" style="background-color: #0f161b;">
+  <div class="max-w-3xl mx-auto">
+    <!-- Header Section -->
+    <div class="text-center mb-8">
+      <h2 class="text-3xl font-extrabold text-red-600">Complete Your Profile</h2>
+      <p class="mt-2 text-lg text-white">Let's get you set up (Step <span id="current-step">1</span> of <span id="total-steps">5</span>)</p>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="mb-8">
+      <div class="flex justify-between mb-2 text-sm text-white">
+        <span>Profile Setup</span>
+        <span><span id="progress-percentage">20</span>% Complete</span>
+      </div>
+      <div class="w-full bg-gray-700 rounded-full h-2.5">
+        <div id="form-progress" class="bg-red-600 h-2.5 rounded-full" style="width: 20%"></div>
+      </div>
+    </div>
+
+    <!-- Form Container -->
+    <div class="bg-white shadow rounded-lg overflow-hidden">
+      <form method="POST" enctype="multipart/form-data" class="divide-y divide-gray-200">
+        {% csrf_token %}
+        
+        <!-- Slide 1: Name Fields -->
+        <div class="form-slide p-6" id="slide-1">
+          <h3 class="text-lg font-medium text-gray-900 mb-6">Personal Information</h3>
+          <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+            <div class="sm:col-span-3">
+              <label for="{{ form.first_name.id_for_label }}" class="block text-sm font-medium text-gray-700 required-field">First Name</label>
+              <div class="mt-1">
+                {{ form.first_name }}
+              </div>
+              <div id="first-name-error" class="mt-1 text-sm text-red-600 hidden">First name is required</div>
+            </div>
+
+            <div class="sm:col-span-3">
+              <label for="{{ form.middle_name.id_for_label }}" class="block text-sm font-medium text-gray-700">Middle Name (Optional)</label>
+              <div class="mt-1">
+                {{ form.middle_name }}
+              </div>
+            </div>
+
+            <div class="sm:col-span-3">
+              <label for="{{ form.last_name.id_for_label }}" class="block text-sm font-medium text-gray-700 required-field">Last Name</label>
+              <div class="mt-1">
+                {{ form.last_name }}
+              </div>
+              <div id="last-name-error" class="mt-1 text-sm text-red-600 hidden">Last name is required</div>
+            </div>
+
+            <div class="sm:col-span-3">
+              <label for="{{ form.extension.id_for_label }}" class="block text-sm font-medium text-gray-700">Extension (Optional)</label>
+              <div class="mt-1">
+                {{ form.extension }}
+              </div>
+            </div>
+          </div>
+          <div class="mt-8 flex justify-end">
+            <button type="button" class="next-slide bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-6 rounded-md shadow-sm transition duration-150 ease-in-out">
+              Continue
+            </button>
+          </div>
+        </div>
+
+        <!-- Slide 2: Birth Date with Flatpickr -->
+        <div class="form-slide p-6 hidden" id="slide-2">
+          <h3 class="text-lg font-medium text-gray-900 mb-6">Birth Information</h3>
+          <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+            <div class="sm:col-span-4">
+              <label for="{{ form.birth_date.id_for_label }}" class="block text-sm font-medium text-gray-700 required-field">Birth Date</label>
+              <div class="mt-1 relative">
+                {{ form.birth_date }}
+                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                  <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
+                  </svg>
+                </div>
+              </div>
+              <div id="birth-date-error" class="mt-1 text-sm text-red-600 hidden">Birth date is required and you must be at least 12 years old</div>
+              <p class="mt-2 text-sm text-gray-500">You must be at least 12 years old to continue</p>
+            </div>
+          </div>
+          <div class="mt-8 flex justify-between">
+            <button type="button" class="prev-slide bg-white hover:bg-gray-50 text-gray-700 font-medium py-2 px-6 border border-gray-300 rounded-md shadow-sm transition duration-150 ease-in-out">
+              Back
+            </button>
+            <button type="button" class="next-slide bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-6 rounded-md shadow-sm transition duration-150 ease-in-out">
+              Continue
+            </button>
+          </div>
+        </div>
+
+        <!-- Slide 3: Address -->
+        <div class="form-slide p-6 hidden" id="slide-3">
+          <h3 class="text-lg font-medium text-gray-900 mb-6">Address Details</h3>
+          <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+            <div class="sm:col-span-3">
+              <label for="municipality" class="block text-sm font-medium text-gray-700 required-field">Municipality</label>
+              <div class="mt-1">
+                <select id="municipality" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 py-2 px-3 sm:text-sm" name="municipality">
+                  <option value="">Select Municipality</option>
+                  {% for municipality in municipality_barangay_data %}
+                    <option value="{{ municipality }}">{{ municipality }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div id="municipality-error" class="mt-1 text-sm text-red-600 hidden">Municipality is required</div>
+            </div>
+            
+            <div class="sm:col-span-3">
+              <label for="barangay" class="block text-sm font-medium text-gray-700 required-field">Barangay</label>
+              <div class="mt-1">
+                <select id="barangay" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 py-2 px-3 sm:text-sm" name="barangay">
+                  <option value="">Select Barangay</option>
+                </select>
+              </div>
+              <div id="barangay-error" class="mt-1 text-sm text-red-600 hidden">Barangay is required</div>
+            </div>
+
+            <div class="sm:col-span-6">
+              <label for="{{ form.address.id_for_label }}" class="block text-sm font-medium text-gray-700">Street (Optional)</label>
+              <div class="mt-1">
+                {{ form.street }}
+              </div>
+            </div>
+          </div>
+          <div class="mt-8 flex justify-between">
+            <button type="button" class="prev-slide bg-white hover:bg-gray-50 text-gray-700 font-medium py-2 px-6 border border-gray-300 rounded-md shadow-sm transition duration-150 ease-in-out">
+              Back
+            </button>
+            <button type="button" class="next-slide bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-6 rounded-md shadow-sm transition duration-150 ease-in-out">
+              Continue
+            </button>
+          </div>
+        </div>
+
+        <!-- Slide 4: Current Work -->
+        <div class="form-slide p-6 hidden" id="slide-4">
+          <h3 class="text-lg font-medium text-gray-900 mb-6">Professional Information</h3>
+          <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+            <div class="sm:col-span-6">
+              <label for="{{ form.current_work.id_for_label }}" class="block text-sm font-medium text-gray-700">Current Work (Optional)</label>
+              <div class="mt-1">
+                {{ form.current_work }}
+              </div>
+              <p class="mt-2 text-sm text-gray-500">Your current job or occupation</p>
+            </div>
+          </div>
+          <div class="mt-8 flex justify-between">
+            <button type="button" class="prev-slide bg-white hover:bg-gray-50 text-gray-700 font-medium py-2 px-6 border border-gray-300 rounded-md shadow-sm transition duration-150 ease-in-out">
+              Back
+            </button>
+            <button type="button" class="next-slide bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-6 rounded-md shadow-sm transition duration-150 ease-in-out">
+              Continue
+            </button>
+          </div>
+        </div>
+
+        <!-- Slide 5: Final Step (Academic Info) -->
+        <div class="form-slide p-6 hidden" id="slide-5">
+          <h3 class="text-lg font-medium text-gray-900 mb-6">Academic Information</h3>
+          <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+            <div class="sm:col-span-2">
+              <label for="{{ form.year_level.id_for_label }}" class="block text-sm font-medium text-gray-700">Year Level (Optional)</label>
+              <div class="mt-1">
+                {{ form.year_level }}
+              </div>
+            </div>
+            
+            <div class="sm:col-span-2">
+              <label for="{{ form.course.id_for_label }}" class="block text-sm font-medium text-gray-700">Course (Optional)</label>
+              <div class="mt-1">
+                {{ form.course }}
+              </div>
+            </div>
+            
+            <div class="sm:col-span-2">
+              <label for="{{ form.department.id_for_label }}" class="block text-sm font-medium text-gray-700">Department (Optional)</label>
+              <div class="mt-1">
+                {{ form.department }}
+              </div>
+            </div>
+          </div>
+          <div class="mt-8 flex justify-between">
+            <button type="button" class="prev-slide bg-white hover:bg-gray-50 text-gray-700 font-medium py-2 px-6 border border-gray-300 rounded-md shadow-sm transition duration-150 ease-in-out">
+              Back
+            </button>
+            <button type="submit" name="submit" class="w-40 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-150 ease-in-out">
+              Submit
+            </button>
+          </div>
+          <!-- Skip button at bottom -->
+          <div class="mt-4 text-center">
+            
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<style>
+.required-field::after {
+  content: " *";
+  color: #ef4444;
+}
+
+.form-slide {
+  transition: all 0.3s ease;
+}
+
+/* Flatpickr customization */
+.flatpickr-calendar {
+  box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+  border-radius: 0.375rem;
+  font-family: inherit;
+}
+
+.flatpickr-day.selected {
+  background: #ef4444;
+  border-color: #ef4444;
+}
+
+.flatpickr-day.today {
+  border-color: #ef4444;
+  color: #ef4444;
+  font-weight: bold;
+}
+
+.flatpickr-day:hover {
+  background: #fee2e2;
+}
+
+/* Form input styling */
+input, select, textarea {
+  border-radius: 0.375rem;
+  border: 1px solid #d1d5db;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  transition: all 0.15s ease;
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: #ef4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+/* Error states */
+.is-invalid {
+  border-color: #ef4444;
+}
+
+.error-message {
+  color: #ef4444;
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+}
+</style>
+
+<!-- Include Flatpickr CSS and JS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize Flatpickr for birth date with year selector
+    flatpickr("#{{ form.birth_date.id_for_label }}", {
+        dateFormat: "m/d/Y",
+        maxDate: "today",
+        allowInput: true,
+        defaultDate: null,
+        yearSelector: true,
+        position: "auto",
+        required: true,
+        onOpen: function(selectedDates, dateStr, instance) {
+            // Ensure year input is visible and editable
+            setTimeout(() => {
+                const yearInput = instance.calendarContainer.querySelector('.numInput.cur-year');
+                if (yearInput) {
+                    yearInput.style.width = '70px';
+                    yearInput.readOnly = false;
+                }
+            }, 10);
+        }
+    });
+
+    // Municipality and Barangay dynamic dropdown
+    const municipalitySelect = document.getElementById('municipality');
+    const barangaySelect = document.getElementById('barangay');
+    const municipalityBarangayData = {{ municipality_barangay_data|safe }};
+
+    municipalitySelect.addEventListener('change', function() {
+        const selectedMunicipality = this.value;
+        barangaySelect.innerHTML = '<option value="">Select Barangay</option>';
+        
+        if (selectedMunicipality && municipalityBarangayData[selectedMunicipality]) {
+            municipalityBarangayData[selectedMunicipality].forEach(barangay => {
+                const option = document.createElement('option');
+                option.value = barangay;
+                option.textContent = barangay;
+                barangaySelect.appendChild(option);
+            });
+        }
+    });
+
+    // Form navigation and validation
+    const totalSlides = 5;
+    let currentSlide = 1;
+
+    function updateProgress() {
+        const progressPercentage = Math.round((currentSlide / totalSlides) * 100);
+        document.getElementById('current-step').textContent = currentSlide;
+        document.getElementById('total-steps').textContent = totalSlides;
+        document.getElementById('progress-percentage').textContent = progressPercentage;
+        document.getElementById('form-progress').style.width = `${progressPercentage}%`;
+    }
+
+    // Validate first and last name on slide 1
+    function validateNameFields() {
+        const firstName = document.getElementById('{{ form.first_name.id_for_label }}').value.trim();
+        const lastName = document.getElementById('{{ form.last_name.id_for_label }}').value.trim();
+        let isValid = true;
+
+        if (!firstName) {
+            document.getElementById('first-name-error').classList.remove('hidden');
+            document.getElementById('{{ form.first_name.id_for_label }}').classList.add('is-invalid');
+            isValid = false;
+        } else {
+            document.getElementById('first-name-error').classList.add('hidden');
+            document.getElementById('{{ form.first_name.id_for_label }}').classList.remove('is-invalid');
+        }
+
+        if (!lastName) {
+            document.getElementById('last-name-error').classList.remove('hidden');
+            document.getElementById('{{ form.last_name.id_for_label }}').classList.add('is-invalid');
+            isValid = false;
+        } else {
+            document.getElementById('last-name-error').classList.add('hidden');
+            document.getElementById('{{ form.last_name.id_for_label }}').classList.remove('is-invalid');
+        }
+
+        return isValid;
+    }
+
+    // Validate birth date on slide 2
+    function validateBirthDate() {
+        const birthDateInput = document.getElementById('{{ form.birth_date.id_for_label }}');
+        const birthDate = birthDateInput.value.trim();
+        let isValid = true;
+
+        // Check if birth date is entered
+        if (!birthDate) {
+            document.getElementById('birth-date-error').classList.remove('hidden');
+            birthDateInput.classList.add('is-invalid');
+            return false;
+        }
+
+        // Calculate age
+        const today = new Date();
+        const birthDateObj = new Date(birthDate);
+        let age = today.getFullYear() - birthDateObj.getFullYear();
+        const monthDiff = today.getMonth() - birthDateObj.getMonth();
+        
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDateObj.getDate())) {
+            age--;
+        }
+
+        // Check if age is at least 12
+        if (age < 12) {
+            document.getElementById('birth-date-error').classList.remove('hidden');
+            birthDateInput.classList.add('is-invalid');
+            return false;
+        }
+
+        document.getElementById('birth-date-error').classList.add('hidden');
+        birthDateInput.classList.remove('is-invalid');
+        return true;
+    }
+
+    // Validate address fields on slide 3
+    function validateAddressFields() {
+        const municipality = document.getElementById('municipality').value;
+        const barangay = document.getElementById('barangay').value;
+        let isValid = true;
+
+        if (!municipality) {
+            document.getElementById('municipality-error').classList.remove('hidden');
+            document.getElementById('municipality').classList.add('is-invalid');
+            isValid = false;
+        } else {
+            document.getElementById('municipality-error').classList.add('hidden');
+            document.getElementById('municipality').classList.remove('is-invalid');
+        }
+
+        if (!barangay) {
+            document.getElementById('barangay-error').classList.remove('hidden');
+            document.getElementById('barangay').classList.add('is-invalid');
+            isValid = false;
+        } else {
+            document.getElementById('barangay-error').classList.add('hidden');
+            document.getElementById('barangay').classList.remove('is-invalid');
+        }
+
+        return isValid;
+    }
+
+    // Next slide button handlers
+    document.querySelectorAll('.next-slide').forEach(button => {
+        button.addEventListener('click', function() {
+            // Validate based on current slide
+            let canProceed = true;
+            
+            if (currentSlide === 1) {
+                canProceed = validateNameFields();
+            } else if (currentSlide === 2) {
+                canProceed = validateBirthDate();
+            } else if (currentSlide === 3) {
+                canProceed = validateAddressFields();
+            }
+
+            if (canProceed && currentSlide < totalSlides) {
+                document.getElementById(`slide-${currentSlide}`).classList.add('hidden');
+                currentSlide++;
+                document.getElementById(`slide-${currentSlide}`).classList.remove('hidden');
+                updateProgress();
+                
+                // Smooth scroll to top of form
+                document.getElementById(`slide-${currentSlide}`).scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'start' 
+                });
+            }
+        });
+    });
+
+    // Previous slide button handlers
+    document.querySelectorAll('.prev-slide').forEach(button => {
+        button.addEventListener('click', function() {
+            if (currentSlide > 1) {
+                document.getElementById(`slide-${currentSlide}`).classList.add('hidden');
+                currentSlide--;
+                document.getElementById(`slide-${currentSlide}`).classList.remove('hidden');
+                updateProgress();
+                
+                // Smooth scroll to top of form
+                document.getElementById(`slide-${currentSlide}`).scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'start' 
+                });
+            }
+        });
+    });
+
+    // Initialize form styling
+    const formInputs = document.querySelectorAll('input, select, textarea');
+    formInputs.forEach(input => {
+        input.classList.add('block', 'w-full', 'rounded-md', 'border-gray-300', 'shadow-sm', 
+                          'focus:border-red-500', 'focus:ring-red-500', 'sm:text-sm');
+    });
+
+    updateProgress();
+});
+</script>
+{% endblock content %}

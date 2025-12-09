@@ -1,0 +1,32 @@
+# Python
+*.pyc
+*.pyo
+__pycache__/
+*.pyd
+
+# Environment / secrets
+.env
+secrets.txt
+
+# Django
+*.log
+db.sqlite3
+/media/
+staticfiles/
+
+# VSCode
+.vscode/
+
+# PyCharm
+.idea/
+
+# Virtual environment
+venv/
+ENV/
+env/
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db

@@ -1,0 +1,230 @@
+{% extends 'landing/base.html' %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <a href="#" onclick="event.preventDefault(); history.back();" class="btn btn-outline-danger mb-3 mt-10">
+            <i class="fas fa-arrow-left"></i> Back
+        </a>
+        
+        <!-- Header -->
+        <div class="flex justify-between items-center mb-8">
+            <div style="margin-top:100px">
+                <h1 class="text-3xl font-bold text-gray-900">Manage Users for {{ group.name }}</h1>
+                <p class="mt-2 text-sm text-gray-600">Administer member roles and permissions</p>
+            </div>
+            <div class="flex items-center space-x-4">
+                <span class="inline-flex items-center px-3 py-1 rounded-full bg-blue-100 text-blue-800 text-sm font-medium">
+                    {{ group.members.count }} members
+                </span>
+            </div>
+        </div>
+
+        <form method="POST" class="space-y-8">
+            {% csrf_token %}
+
+            <!-- Admins Section -->
+            <div class="bg-white shadow rounded-lg overflow-hidden">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                    <h2 class="text-xl font-semibold text-gray-800 flex items-center">
+                        <svg class="w-5 h-5 text-blue-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                        </svg>
+                        Admins
+                    </h2>
+                </div>
+                <div class="px-6 py-4">
+                    <ul class="space-y-3">
+                        <li class="flex items-center justify-between py-3 px-4 bg-blue-50 rounded-lg">
+                            <div class="flex items-center">
+                                <span class="font-medium">{{ group.creator.username }}</span>
+                                <span class="ml-2 text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-blue-600 bg-blue-200">Group Creator</span>
+                            </div>
+                        </li>
+                        {% for admin in group.admins.all %}
+                            {% if admin != group.creator %}
+                                <li class="flex items-center justify-between py-3 px-4 bg-green-50 rounded-lg">
+                                    <div class="flex items-center">
+                                        <span class="font-medium">{{ admin.username }}</span>
+                                        <span class="ml-2 text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-green-600 bg-green-200">Admin</span>
+                                    </div>
+                                </li>
+                            {% endif %}
+                        {% empty %}
+                            <li class="text-gray-500 py-3 px-4">No additional admins.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Moderators Section -->
+            <div class="bg-white shadow rounded-lg overflow-hidden">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                    <h2 class="text-xl font-semibold text-gray-800 flex items-center">
+                        <svg class="w-5 h-5 text-purple-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
+                        </svg>
+                        Moderators
+                    </h2>
+                </div>
+                <div class="px-6 py-4">
+                    <ul class="space-y-3">
+                        {% for member in members %}
+                            {% if member.id in moderator_ids and member not in group.admins.all and member != group.creator %}
+                                <li class="flex items-center justify-between py-3 px-4 hover:bg-gray-50 rounded-lg">
+                                    <div class="flex items-center">
+                                        <span class="font-medium">{{ member.username }}</span>
+                                        {% if member.id in muted_ids %}
+                                            <span class="ml-2 text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-yellow-600 bg-yellow-100">Muted</span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="flex space-x-2">
+                                        <button type="submit" name="action" value="demote-{{ member.id }}" 
+                                                class="inline-flex items-center px-3 py-1 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                            Demote
+                                        </button>
+                                        {% if member.id not in banned_ids %}
+                                            <button type="submit" name="action" value="ban-{{ member.id }}" 
+                                                    class="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                                                Ban
+                                            </button>
+                                        {% endif %}
+                                        {% if member.id not in muted_ids %}
+                                            <button type="submit" name="action" value="mute-{{ member.id }}" 
+                                                    class="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-yellow-500 hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500">
+                                                Mute
+                                            </button>
+                                        {% else %}
+                                            <button type="submit" name="action" value="unmute-{{ member.id }}" 
+                                                    class="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-yellow-500 hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500">
+                                                Unmute
+                                            </button>
+                                        {% endif %}
+                                        <button type="submit" name="action" value="kick-{{ member.id }}" 
+                                                class="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                                            Kick
+                                        </button>
+                                    </div>
+                                </li>
+                            {% endif %}
+                        {% empty %}
+                            <li class="text-gray-500 py-3 px-4">No moderators.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Members Section -->
+            <div class="bg-white shadow rounded-lg overflow-hidden">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                    <h2 class="text-xl font-semibold text-gray-800 flex items-center">
+                        <svg class="w-5 h-5 text-gray-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v1h8v-1zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-1a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v1h-3zM4.75 12.094A5.973 5.973 0 004 15v1H1v-1a3 3 0 013.75-2.906z" />
+                        </svg>
+                        Members
+                    </h2>
+                </div>
+                <div class="px-6 py-4">
+                    <ul class="space-y-3">
+                        {% for member in members %}
+                            {% if member not in group.admins.all and member != group.creator and member.id not in moderator_ids %}
+                                <li class="flex items-center justify-between py-3 px-4 hover:bg-gray-50 rounded-lg">
+                                    <div class="flex items-center">
+                                        <span class="font-medium">{{ member.username }}</span>
+                                        {% if member.id in muted_ids %}
+                                            <span class="ml-2 text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-yellow-600 bg-yellow-100">Muted</span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="flex space-x-2">
+                                        <button type="submit" name="action" value="promote-{{ member.id }}" 
+                                                class="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                                            Promote
+                                        </button>
+                                        {% if member.id not in banned_ids %}
+                                            <button type="submit" name="action" value="ban-{{ member.id }}" 
+                                                    class="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                                                Ban
+                                            </button>
+                                        {% endif %}
+                                        {% if member.id not in muted_ids %}
+                                            <button type="submit" name="action" value="mute-{{ member.id }}" 
+                                                    class="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-yellow-500 hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500">
+                                                Mute
+                                            </button>
+                                        {% else %}
+                                            <button type="submit" name="action" value="unmute-{{ member.id }}" 
+                                                    class="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-yellow-500 hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500">
+                                                Unmute
+                                            </button>
+                                        {% endif %}
+                                        <button type="submit" name="action" value="kick-{{ member.id }}" 
+                                                class="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                                            Kick
+                                        </button>
+                                    </div>
+                                </li>
+                            {% endif %}
+                        {% empty %}
+                            <li class="text-gray-500 py-3 px-4">No members found.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Banned Users Section -->
+            <div class="bg-white shadow rounded-lg overflow-hidden">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                    <h2 class="text-xl font-semibold text-gray-800 flex items-center">
+                        <svg class="w-5 h-5 text-red-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M13.477 14.89A6 6 0 015.11 6.524l8.367 8.368zm1.414-1.414L6.524 5.11a6 6 0 018.367 8.367zM18 10a8 8 0 11-16 0 8 8 0 0116 0z" clip-rule="evenodd" />
+                        </svg>
+                        Banned Users
+                    </h2>
+                </div>
+                <div class="px-6 py-4">
+                    <ul class="space-y-3">
+                        {% for banned_user in banned_users %}
+                            <li class="flex items-center justify-between py-3 px-4 hover:bg-gray-50 rounded-lg">
+                                <span class="font-medium">{{ banned_user.username }}</span>
+                                <button type="submit" name="action" value="unban-{{ banned_user.id }}" 
+                                        class="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                                    Unban
+                                </button>
+                            </li>
+                        {% empty %}
+                            <li class="text-gray-500 py-3 px-4">No banned users.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Muted Users Section -->
+            <div class="bg-white shadow rounded-lg overflow-hidden">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                    <h2 class="text-xl font-semibold text-gray-800 flex items-center">
+                        <svg class="w-5 h-5 text-yellow-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM14.657 2.929a1 1 0 011.414 0A9.972 9.972 0 0119 10a9.972 9.972 0 01-2.929 7.071 1 1 0 01-1.414-1.414A7.971 7.971 0 0017 10c0-2.21-.894-4.208-2.343-5.657a1 1 0 010-1.414zm-2.829 2.828a1 1 0 011.415 0A5.983 5.983 0 0115 10a5.984 5.984 0 01-1.757 4.243 1 1 0 01-1.415-1.415A3.984 3.984 0 0013 10a3.983 3.983 0 00-1.172-2.828 1 1 0 010-1.415z" clip-rule="evenodd" />
+                        </svg>
+                        Muted Users
+                    </h2>
+                </div>
+                <div class="px-6 py-4">
+                    <ul class="space-y-3">
+                        {% for muted_user in muted_users %}
+                            <li class="flex items-center justify-between py-3 px-4 hover:bg-gray-50 rounded-lg">
+                                <span class="font-medium">{{ muted_user.user.username }}</span>
+                                <button type="submit" name="action" value="unmute-{{ muted_user.user.id }}" 
+                                        class="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-yellow-500 hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500">
+                                    Unmute
+                                </button>
+                            </li>
+                        {% empty %}
+                            <li class="text-gray-500 py-3 px-4">No muted users.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

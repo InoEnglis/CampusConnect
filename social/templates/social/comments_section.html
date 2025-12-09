@@ -1,0 +1,370 @@
+{% extends 'landing/base.html' %}
+
+{% block content %}
+<!-- Comments Section -->
+<div class="col-md-12 col-sm-12">
+    <!-- Comments Count -->
+    <div class="mb-3">
+        <h6 class="text-muted">{{ comments.count }} comments</h6>
+    </div>
+
+    <!-- Add a Comment -->
+    <div class="mb-4 comment-box">
+        <form id="comment-form" class="d-flex align-items-start">
+            <img src="{{ request.user.profile.picture.url }}" alt="Profile Picture" 
+                 class="rounded-circle me-2" style="width: 40px; height: 40px; object-fit: cover;">
+            <div class="flex-grow-1">
+                {% csrf_token %}
+                <div class="form-group">
+                    <input type="text" class="form-control comment-input" placeholder="Write a comment..." 
+                           style="border-radius: 20px; background-color: #f0f2f5; border: none;">
+                </div>
+                <div class="comment-options d-none mt-2">
+                    <button type="submit" class="btn btn-primary btn-sm" style="border-radius: 6px; font-weight: 600;">
+                        Comment
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Comments List -->
+    <div id="comments-section">
+        {% for comment in comments %}
+        <div class="comment mb-3" id="comment-{{ comment.id }}">
+            <div class="d-flex">
+                <!-- Profile Picture -->
+                <img src="{{ comment.author.profile.picture.url }}" alt="Profile Picture" 
+                     class="rounded-circle me-2" style="width: 32px; height: 32px; object-fit: cover;">
+                
+                <!-- Comment Content -->
+                <div class="flex-grow-1">
+                    <div class="comment-bubble">
+                        <div class="d-flex align-items-center mb-1">
+                            <strong class="me-2">
+                                <a href="{% url 'profile' comment.author.profile.pk %}" 
+                                   class="text-decoration-none text-dark">
+                                    {{ comment.author }}
+                                </a>
+                            </strong>
+                            <small class="text-muted">{{ comment.created_on|timesince }} ago</small>
+                        </div>
+                        <p class="mb-1 text-gray-900">{{ comment.comment }}</p>
+                    </div>
+                    
+                    <div class="comment-actions mt-1 ms-2">
+                        <button class="btn btn-link p-0 me-2 text-blue-800 like-btn">
+                            Like
+                        </button>
+                        <button class="btn btn-link p-0 me-2 text-gray-500 reply-btn" data-parent-id="{{ comment.id }}">
+                            Reply
+                        </button>
+                        {% if request.user == comment.author %}
+                        <button class="btn btn-link p-0 text-muted">
+                            <a href="{% url 'comment-delete' post.pk comment.pk %}" class="text-decoration-none text-muted">
+                                Delete
+                            </a>
+                        </button>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Replies -->
+                    <div class="replies-container ms-3 mt-2">
+                        {% for reply in comment.replies.all %}
+                        <div class="reply mb-2" id="comment-{{ reply.id }}">
+                            <div class="d-flex">
+                                <img src="{{ reply.author.profile.picture.url }}" alt="Profile Picture" 
+                                     class="rounded-circle me-2" style="width: 32px; height: 32px; object-fit: cover;">
+                                <div class="flex-grow-1">
+                                    <div class="comment-bubble">
+                                        <div class="d-flex align-items-center mb-1">
+                                            <strong class="me-2">
+                                                <a href="{% url 'profile' reply.author.profile.pk %}" 
+                                                   class="text-decoration-none text-dark">
+                                                    {{ reply.author }}
+                                                </a>
+                                            </strong>
+                                            <small class="text-muted">{{ reply.created_on|timesince }} ago</small>
+                                        </div>
+                                        <p class="mb-1 text-gray-700">{{ reply.comment }}</p>
+                                    </div>
+                                    <div class="comment-actions mt-1 ms-2">
+                                        <button class="btn btn-link p-0 me-2 text-blue-700 like-btn">
+                                            Like
+                                        </button>
+                                        <button class="btn btn-link p-0 me-2 text-gray-700 reply-btn" data-parent-id="{{ reply.id }}">
+                                            Reply
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+    /* Main comment styling */
+    .comment-box {
+        background-color: #fff;
+        padding: 8px 12px;
+        border-radius: 8px;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+    
+    .comment-input {
+        padding: 8px 12px;
+        font-size: 0.9375rem;
+    }
+    
+    .comment-input:focus {
+        box-shadow: none;
+        background-color: #fff;
+        border: 1px solid #1b74e4 !important;
+    }
+    
+    .comment-bubble {
+        background-color: #f0f2f5;
+        padding: 8px 12px;
+        border-radius: 18px;
+        max-width: 80%;
+        word-break: break-word;
+    }
+    
+    .comment-actions {
+        font-size: 0.8125rem;
+    }
+    
+    .comment-actions .btn-link {
+        text-decoration: none;
+    }
+    
+    .comment-actions .btn-link:hover {
+        text-decoration: underline;
+    }
+    
+    /* Reply styling */
+    .replies-container {
+        border-left: 1px solid #e4e6eb;
+        padding-left: 12px;
+    }
+    
+    .reply .comment-bubble {
+        background-color: #f0f2f5;
+    }
+    
+    /* Like button animation */
+    .like-btn:hover {
+        color: #1b74e4 !important;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .comment-bubble {
+            max-width: 100%;
+        }
+    }
+</style>
+
+<script type="text/javascript">
+    const postId = "{{ post.id|escapejs }}";
+    const commentsSection = document.getElementById('comments-section');
+    const commentForm = document.getElementById('comment-form');
+    const commentInput = commentForm.querySelector('.comment-input');
+    const commentOptions = commentForm.querySelector('.comment-options');
+    const wsProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+    const wsUrl = `${wsProtocol}://${window.location.host}/ws/social/${postId}/`;
+
+    const CommentSocket = new WebSocket(wsUrl);
+
+    // Show comment options when input is focused
+    commentInput.addEventListener('focus', function() {
+        commentOptions.classList.remove('d-none');
+    });
+
+    // Hide comment options if input is empty and loses focus
+    commentInput.addEventListener('blur', function() {
+        if (commentInput.value.trim() === '') {
+            commentOptions.classList.add('d-none');
+        }
+    });
+
+    CommentSocket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+
+        // Format the time display
+        const timeDisplay = 'Just now';
+        
+        if (data.parent_id === null) {
+            // Main comment
+            const commentHtml = `
+                <div class="comment mb-3" id="comment-${data.comment_id}">
+                    <div class="d-flex">
+                        <img src="{{ request.user.profile.picture.url }}" alt="Profile Picture" 
+                             class="rounded-circle me-2" style="width: 32px; height: 32px; object-fit: cover;">
+                        <div class="flex-grow-1">
+                            <div class="comment-bubble">
+                                <div class="d-flex align-items-center mb-1">
+                                    <strong class="me-2">${data.author}</strong>
+                                    <small class="text-muted">${timeDisplay}</small>
+                                </div>
+                                <p class="mb-1">${data.comment}</p>
+                            </div>
+                            <div class="comment-actions mt-1 ms-2">
+                                <button class="btn btn-link p-0 me-2 text-muted like-btn">
+                                    Like
+                                </button>
+                                <button class="btn btn-link p-0 me-2 text-muted reply-btn" data-parent-id="${data.comment_id}">
+                                    Reply
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            commentsSection.insertAdjacentHTML('afterbegin', commentHtml);
+        } else {
+            // Reply to comment
+            const parentComment = document.getElementById(`comment-${data.parent_id}`);
+            let repliesContainer = parentComment.querySelector('.replies-container');
+            
+            if (!repliesContainer) {
+                repliesContainer = document.createElement('div');
+                repliesContainer.classList.add('replies-container', 'ms-3', 'mt-2');
+                parentComment.querySelector('.flex-grow-1').appendChild(repliesContainer);
+            }
+            
+            const replyHtml = `
+                <div class="reply mb-2" id="comment-${data.comment_id}">
+                    <div class="d-flex">
+                        <img src="{{ request.user.profile.picture.url }}" alt="Profile Picture" 
+                             class="rounded-circle me-2" style="width: 32px; height: 32px; object-fit: cover;">
+                        <div class="flex-grow-1">
+                            <div class="comment-bubble">
+                                <div class="d-flex align-items-center mb-1">
+                                    <strong class="me-2">${data.author}</strong>
+                                    <small class="text-muted">${timeDisplay}</small>
+                                </div>
+                                <p class="mb-1">${data.comment}</p>
+                            </div>
+                            <div class="comment-actions mt-1 ms-2">
+                                <button class="btn btn-link p-0 me-2 text-muted like-btn">
+                                    Like
+                                </button>
+                                <button class="btn btn-link p-0 me-2 text-muted reply-btn" data-parent-id="${data.comment_id}">
+                                    Reply
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            repliesContainer.insertAdjacentHTML('beforeend', replyHtml);
+        }
+    };
+
+    commentForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const comment = commentInput.value;
+
+        if (comment.trim()) {
+            CommentSocket.send(JSON.stringify({
+                'comment': comment,
+                'author': '{{ request.user.username }}',
+                'parent_id': null
+            }));
+            commentInput.value = '';
+            commentOptions.classList.add('d-none');
+        }
+    });
+
+    // Handle reply button clicks
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('reply-btn')) {
+            e.preventDefault();
+            const parentId = e.target.dataset.parentId;
+            const commentElement = document.getElementById(`comment-${parentId}`);
+            
+            // Remove any existing reply forms
+            document.querySelectorAll('.reply-form-container').forEach(el => el.remove());
+            
+            const replyForm = `
+                <div class="reply-form-container mt-2 d-flex">
+                    <img src="{{ request.user.profile.picture.url }}" alt="Profile Picture" 
+                         class="rounded-circle me-2" style="width: 32px; height: 32px; object-fit: cover;">
+                    <form class="reply-form flex-grow-1" data-parent-id="${parentId}">
+                        <input type="text" class="form-control reply-input mb-2" placeholder="Write a reply..." 
+                               style="border-radius: 20px; background-color: #f0f2f5; border: none; font-size: 0.9375rem;">
+                        <div class="d-flex">
+                            <button type="submit" class="btn btn-primary btn-sm me-2" style="border-radius: 6px; font-weight: 600;">
+                                Reply
+                            </button>
+                            <button type="button" class="btn btn-light btn-sm cancel-reply" style="border-radius: 6px;">
+                                Cancel
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            `;
+            
+            // Find where to insert the reply form
+            let targetElement;
+            if (commentElement.querySelector('.replies-container')) {
+                targetElement = commentElement.querySelector('.replies-container');
+            } else {
+                // Create replies container if it doesn't exist
+                const repliesContainer = document.createElement('div');
+                repliesContainer.classList.add('replies-container', 'ms-3', 'mt-2');
+                commentElement.querySelector('.flex-grow-1').appendChild(repliesContainer);
+                targetElement = repliesContainer;
+            }
+            
+            targetElement.insertAdjacentHTML('beforeend', replyForm);
+            targetElement.querySelector('.reply-input').focus();
+        }
+        
+        // Handle cancel reply
+        if (e.target.classList.contains('cancel-reply')) {
+            e.target.closest('.reply-form-container').remove();
+        }
+    });
+
+    // Handle reply form submission
+    document.addEventListener('submit', function(e) {
+        if (e.target.classList.contains('reply-form')) {
+            e.preventDefault();
+            const replyInput = e.target.querySelector('.reply-input');
+            const replyText = replyInput.value;
+            const parentId = e.target.dataset.parentId;
+
+            if (replyText.trim()) {
+                CommentSocket.send(JSON.stringify({
+                    'comment': replyText,
+                    'author': '{{ request.user.username }}',
+                    'parent_id': parentId
+                }));
+                e.target.closest('.reply-form-container').remove();
+            }
+        }
+    });
+
+    // Add like functionality
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('like-btn')) {
+            e.preventDefault();
+            e.target.classList.toggle('text-primary');
+            if (e.target.classList.contains('text-primary')) {
+                e.target.innerHTML = 'Liked';
+            } else {
+                e.target.innerHTML = 'Like';
+            }
+        }
+    });
+</script>
+{% endblock %}

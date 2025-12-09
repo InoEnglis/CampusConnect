@@ -1,0 +1,432 @@
+<div class="mt-5">
+    <!-- Navbar -->
+    <nav class="fixed top-0 w-full z-50 shadow-lg bg-opacity-90 backdrop-blur-lg" style="background-color: rgba(15, 22, 27, 0.9);">
+        <div class="container mx-auto flex justify-between items-center px-4 lg:px-8 py-3">
+            <!-- Logo - Shows text on large screens, only logo on small -->
+            {% load static %}
+            <a href="{% url 'post-list' %}" class="flex items-center gap-2">
+                <img src="{% static 'images/ant.png' %}" alt="Logo" class="h-10 md:h-12 lg:h-16">
+                <div class="hidden sm:flex flex-col">
+                    <p class="text-white">Kasubay</p>
+                    <p class="text-white font-bold text-lg lg:text-xl tracking-wide">
+                        Campus <span class="text-red-500">Connect</span>
+                    </p>
+                </div>
+            </a>
+
+            <!-- Search Bar (Desktop) -->
+            <div class="hidden lg:flex flex-grow justify-center items-center mx-8">
+                <form action="{% url 'search' %}" method="get" class="flex items-center w-full max-w-lg">
+                    <div class="relative w-full">
+                        <input
+                            type="text"
+                            name="q"
+                            placeholder="Search..."
+                            value="{{query}}"
+                            class="w-full px-4 py-2 rounded-full bg-gray-800 text-white focus:outline-none focus:ring-1 focus:ring-red-500"
+                        />
+                        <button type="submit" class="absolute right-0 top-0 h-full px-4 text-gray-400 hover:text-white">
+                            <i class="fas fa-search text-red-500"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Icons - Visible on all screens -->
+            <div class="flex items-center space-x-3 sm:space-x-4 lg:space-x-6">
+                <!-- Search Icon for Mobile/Tablet -->
+                <div class="lg:hidden flex items-center">
+                    <button class="text-white hover:text-gray-300 p-2 transition-colors" id="toggleSearchBar" aria-label="Toggle Search">
+                        <i class="fas fa-search text-lg"></i>
+                    </button>
+                </div>
+
+                <!-- post Icon -->
+                <button class="text-white hover:bg-gray-700 p-2 rounded text-center bg-gray-800" data-bs-toggle="modal" data-bs-target="#addPostModal">
+                    <i class="fas fa-plus text-sm sm:text-base text-red-500 "></i>
+                    <span class="hidden sm:inline ml-1 text-sm ">Post</span>
+                </button>
+
+                <!-- Messages Icon -->
+                <div class="relative">
+                    <a href="{% url 'conversation_list' %}" class="text-white hover:text-blue-500 transition-colors w-8 h-8 flex items-center justify-center hover:bg-gray-800 rounded-full">
+                        <i class="fas fa-comments text-sm sm:text-base"></i>
+                        <span id="unreadMessageBadge" class="hidden absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full min-w-5 h-5 flex items-center justify-center p-0.5">0</span>
+                    </a>
+                </div>
+
+                <!-- Notifications Icon -->
+                <div class="relative">
+                    <a href="{% url 'notification-page' %}" class="text-white hover:text-blue-500 transition-colors w-8 h-8 flex items-center justify-center hover:bg-gray-800 rounded-full">
+                        <i class="fas fa-bell text-sm sm:text-base"></i>
+                        <span id="unreadNotificationBadge" class="hidden absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full min-w-5 h-5 flex items-center justify-center p-0.5">0</span>
+                    </a>
+                </div>
+
+                <!-- Profile Dropdown -->
+                {% if user.is_authenticated %}
+                <div class="relative">
+                    <button class="w-8 h-8 sm:w-9 sm:h-9 rounded-full overflow-hidden focus:outline-none focus:ring-2 focus:ring-blue-500" id="profileDropdownButton">
+                        <img src="{{ user.profile.picture.url }}" alt="Profile" class="w-full h-full object-cover">
+                    </button>
+                    <!-- Dropdown Menu -->
+                    <div class="absolute right-0 mt-2 w-48 bg-gray-800 rounded-lg shadow-lg z-10 hidden" id="profileDropdown">
+                        <a href="{% url 'profile' user.profile.pk %}" class="block px-4 py-2 text-white hover:bg-gray-700">
+                            <i class="fas fa-user mr-2"></i> Profile
+                        </a>
+                        <a href="{% url 'follower_list' user.profile.pk %}" class="block px-4 py-2 text-white hover:bg-gray-700">
+                            <i class="fas fa-users mr-2"></i> Followers
+                        </a>
+                        <a href="{% url 'followed_list' user.profile.pk %}" class="block px-4 py-2 text-white hover:bg-gray-700">
+                            <i class="fas fa-user-friends mr-2"></i> Following
+                        </a>
+                        <a href="{% url 'submit_feedback' %}" class="block px-4 py-2 text-white hover:bg-gray-700">
+                            <i class="fas fa-comment mr-2"></i> Feedback
+                        </a>
+                        <a href="{% url 'account_logout' %}" class="block px-4 py-2 text-white hover:bg-gray-700">
+                            <i class="fas fa-sign-out-alt mr-2"></i> Logout
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Mobile Menu Button -->
+                <button class="text-white p-2 focus:outline-none hover:bg-gray-800 rounded-full transition-colors md:hidden" id="mobileMenuButton" aria-label="Open Menu">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+                
+            </div>
+        </div>
+
+        <!-- Expanding Search Bar (Mobile) -->
+        <div class="lg:hidden px-4 py-2 bg-gray-800 hidden" id="mobileSearchBar">
+            <form action="{% url 'search' %}" method="get" class="flex items-center w-full">
+                <input
+                    type="text"
+                    name="q"
+                    placeholder="Search..."
+                    class="w-full px-4 py-2 rounded-full bg-gray-700 text-white focus:outline-none"
+                />
+                <button type="submit" class="px-4 text-gray-400 hover:text-white">
+                    <i class="fas fa-search"></i>
+                </button>
+                <button type="button" class="text-red-500 hover:text-red-700 ml-2" id="closeMobileSearchBar" aria-label="Close Search">
+                    <i class="fas fa-times"></i>
+                </button>
+            </form>
+        </div>
+    </nav>
+
+    <!-- NEW: Redesigned Off-Canvas Sidebar Menu -->
+    <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden transition-opacity duration-300 ease-in-out opacity-0"></div>
+    
+    <div id="sidebarMenu" class="fixed top-0 left-0 h-full w-64 md:w-80 bg-gray-900 shadow-2xl z-50 transform -translate-x-full transition-transform duration-300 ease-in-out overflow-hidden flex flex-col">
+        <!-- Header with close button -->
+        <div class="flex items-center justify-between p-4 border-b border-gray-800">
+            <div class="flex items-center gap-3">
+                {% load static %}
+                <img src="{% static 'images/ant.png' %}" alt="Logo" class="h-8 w-8">
+                <h2 class="text-xl font-bold text-white">Campus Connect</h2>
+            </div>
+            <button id="closeSidebarMenu" class="text-gray-400 hover:text-white p-2 rounded-full hover:bg-gray-800 transition-colors">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+        
+        <!-- User Profile Section (if authenticated) -->
+        {% if user.is_authenticated %}
+        <div class="p-4 border-b border-gray-800">
+            <div class="flex items-center space-x-3">
+                <img src="{{ user.profile.picture.url }}" alt="Profile" class="h-12 w-12 rounded-full object-cover">
+                <div>
+                    <p class="text-white font-medium">{{ user.get_full_name|default:user.username }}</p>
+                    <p class="text-gray-400 text-sm">@{{ user.username }}</p>
+                </div>
+            </div>
+            
+            <!-- Stats -->
+            <div class="flex justify-between mt-4 text-sm">
+                <a href="{% url 'follower_list' user.profile.pk %}" class="text-center text-gray-300 hover:text-white">
+                    <div class="font-bold">{{ user.profile.followers.count }}</div>
+                    <div>Followers</div>
+                </a>
+                <a href="{% url 'followed_list' user.profile.pk %}" class="text-center text-gray-300 hover:text-white">
+                    <div class="font-bold">{{ user.profile.following.count }}</div>
+                    <div>Following</div>
+                </a>
+                <a href="{% url 'profile' user.profile.pk %}" class="text-center text-gray-300 hover:text-white">
+                    <div class="font-bold">{{ user.posts.count }}</div>
+                    <div>Posts</div>
+                </a>
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Navigation Section -->
+<div class="flex-grow overflow-y-auto py-2 sidebar-scrollbar">
+    <div class="px-2">
+        <!-- Main Nav Links -->
+        <div class="mb-6">
+            <h3 class="px-4 text-xs uppercase text-gray-500 font-bold tracking-wider mb-2">Navigation</h3>
+            <a href="{% url 'post-list' %}" class="flex items-center px-4 py-3 text-white hover:bg-gray-800 rounded-lg mb-1">
+                <i class="fas fa-home mr-3 w-5 text-center"></i> Home
+            </a>
+            <a href="{% url 'group_list' %}" class="flex items-center px-4 py-3 text-white hover:bg-gray-800 rounded-lg mb-1">
+                <i class="fas fa-users mr-3 w-5 text-center"></i> Groups
+            </a>
+            <a href="{% url 'conversation_list' %}" class="flex items-center px-4 py-3 text-white hover:bg-gray-800 rounded-lg mb-1">
+                <i class="fas fa-comment-dots mr-3 w-5 text-center"></i> Messages
+            </a>
+            <a href="{% url 'notification-page' %}" class="flex items-center px-4 py-3 text-white hover:bg-gray-800 rounded-lg mb-1">
+                <i class="fas fa-bell mr-3 w-5 text-center"></i> Notifications
+            </a>
+            <a href="{% url 'event_list' %}" class="flex items-center px-4 py-3 text-white hover:bg-gray-800 rounded-lg mb-1">
+                <i class="fas fa-calendar-check mr-3 w-5 text-center"></i> Events
+            </a>
+            <button class="w-full flex items-center px-4 py-3 text-white hover:bg-gray-800 rounded-lg mb-1" data-bs-toggle="modal" data-bs-target="#addPostModal">
+                <i class="fas fa-pencil-alt mr-3 w-5 text-center"></i> Create Post
+            </button>
+        </div>
+
+        <!-- Support & Info Links -->
+        <div class="mb-6">
+            <h3 class="px-4 text-xs uppercase text-gray-500 font-bold tracking-wider mb-2">Support & Info</h3>
+            <a href="{% url 'about' %}" class="flex items-center px-4 py-3 text-white hover:bg-gray-800 rounded-lg mb-1">
+                <i class="fas fa-info-circle mr-3 w-5 text-center"></i> About
+            </a>
+            <a href="{% url 'about' %}" class="flex items-center px-4 py-3 text-white hover:bg-gray-800 rounded-lg mb-1">
+                <i class="fas fa-book mr-3 w-5 text-center"></i> Community Guidelines
+            </a>
+            <a href="{% url 'about' %}" class="flex items-center px-4 py-3 text-white hover:bg-gray-800 rounded-lg mb-1">
+                <i class="fas fa-shield-alt mr-3 w-5 text-center"></i> Privacy Policy
+            </a>
+            <!-- <a href="" class="flex items-center px-4 py-3 text-white hover:bg-gray-800 rounded-lg mb-1">
+                <i class="fas fa-file-contract mr-3 w-5 text-center"></i> Terms of Service
+            </a>
+            <a href="" class="flex items-center px-4 py-3 text-white hover:bg-gray-800 rounded-lg mb-1">
+                <i class="fas fa-question-circle mr-3 w-5 text-center"></i> Help Center
+            </a> -->
+            <a href="{% url 'submit_feedback' %}" class="flex items-center px-4 py-3 text-white hover:bg-gray-800 rounded-lg mb-1">
+                <i class="fas fa-comment mr-3 w-5 text-center"></i> Feedback
+            </a>
+        </div>
+    </div>
+</div>
+
+        
+        <!-- Footer with logout -->
+        <div class="border-t border-gray-800 p-4">
+            <a href="{% url 'account_logout' %}" class="flex items-center justify-center w-full px-4 py-2 text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors">
+                <i class="fas fa-sign-out-alt mr-2"></i> Logout
+            </a>
+            <div class="text-center mt-3 text-xs text-gray-500">
+                &copy; 2025 Kasubay Campus Connect
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Navbar Styles */
+    nav {
+        transition: background-color 0.3s ease-in-out;
+    }
+
+    /* Dropdown Menu Styles */
+    #profileDropdown {
+        display: none;
+    }
+
+    #profileDropdown.show {
+        display: block;
+    }
+
+    /* Badge styles */
+    .min-w-5 {
+        min-width: 1.25rem;
+    }
+
+    /* Sidebar scrollbar styling */
+    .sidebar-scrollbar::-webkit-scrollbar {
+        width: 4px;
+    }
+    
+    .sidebar-scrollbar::-webkit-scrollbar-track {
+        background: rgba(75, 85, 99, 0.1);
+    }
+    
+    .sidebar-scrollbar::-webkit-scrollbar-thumb {
+        background-color: rgba(75, 85, 99, 0.5);
+        border-radius: 20px;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 640px) {
+        .container {
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+    }
+    
+    /* Hide sidebar on larger screens */
+    @media (min-width: 768px) {
+        #sidebarMenu {
+            display: none !important;
+        }
+        #sidebarOverlay {
+            display: none !important;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Mobile Search Toggle
+        const toggleSearchBarBtn = document.getElementById('toggleSearchBar');
+        const closeMobileSearchBarBtn = document.getElementById('closeMobileSearchBar');
+        const mobileSearchBar = document.getElementById('mobileSearchBar');
+
+        if (toggleSearchBarBtn && mobileSearchBar) {
+            toggleSearchBarBtn.addEventListener('click', function () {
+                mobileSearchBar.classList.toggle('hidden');
+            });
+        }
+
+        if (closeMobileSearchBarBtn && mobileSearchBar) {
+            closeMobileSearchBarBtn.addEventListener('click', function () {
+                mobileSearchBar.classList.add('hidden');
+            });
+        }
+
+        // SIDEBAR MENU - NEW IMPLEMENTATION
+        const mobileMenuButton = document.getElementById('mobileMenuButton');
+        const closeSidebarMenu = document.getElementById('closeSidebarMenu');
+        const sidebarMenu = document.getElementById('sidebarMenu');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+        // Function to open sidebar
+        function openSidebar() {
+            // Show overlay first (with 0 opacity)
+            sidebarOverlay.classList.remove('hidden');
+            
+            // Force a reflow to ensure the transition works
+            sidebarOverlay.offsetHeight;
+            
+            // Add opacity for fade-in effect
+            sidebarOverlay.classList.add('opacity-100');
+            sidebarOverlay.classList.remove('opacity-0');
+            
+            // Slide in the sidebar
+            sidebarMenu.classList.remove('-translate-x-full');
+            
+            // Prevent body scrolling
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Function to close sidebar
+        function closeSidebar() {
+            // Start transitions
+            sidebarOverlay.classList.remove('opacity-100');
+            sidebarOverlay.classList.add('opacity-0');
+            sidebarMenu.classList.add('-translate-x-full');
+            
+            // Wait for transition to complete before hiding overlay
+            setTimeout(() => {
+                sidebarOverlay.classList.add('hidden');
+                // Restore body scrolling
+                document.body.style.overflow = '';
+            }, 300);
+        }
+
+        // Attach event listeners
+        if (mobileMenuButton) {
+            mobileMenuButton.addEventListener('click', openSidebar);
+        }
+        
+        if (closeSidebarMenu) {
+            closeSidebarMenu.addEventListener('click', closeSidebar);
+        }
+        
+        if (sidebarOverlay) {
+            sidebarOverlay.addEventListener('click', closeSidebar);
+        }
+
+        // Profile Dropdown
+        const profileDropdownButton = document.getElementById('profileDropdownButton');
+        const profileDropdown = document.getElementById('profileDropdown');
+
+        if (profileDropdownButton && profileDropdown) {
+            profileDropdownButton.addEventListener('click', function (event) {
+                event.stopPropagation();
+                profileDropdown.classList.toggle('show');
+            });
+
+            // Close when clicking outside
+            document.addEventListener('click', function (event) {
+                if (!profileDropdownButton.contains(event.target) && !profileDropdown.contains(event.target)) {
+                    profileDropdown.classList.remove('show');
+                }
+            });
+        }
+    });
+
+    // Fetch Unread Message Count
+    function fetchUnreadMessageCount() {
+        fetch("{% url 'unread_message_count' %}")
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                const unreadCount = data.unread_count;
+                const unreadBadge = document.getElementById('unreadMessageBadge');
+                
+                if (unreadCount > 0) {
+                    if (unreadBadge) {
+                        unreadBadge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+                        unreadBadge.classList.remove('hidden');
+                    }
+                } else {
+                    if (unreadBadge) unreadBadge.classList.add('hidden');
+                }
+            })
+            .catch(error => console.error('Error fetching unread message count:', error));
+    }
+
+    // Fetch Unread Notification Count
+    function fetchUnreadNotificationCount() {
+        fetch("{% url 'unread_notification_count' %}")
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                const unreadCount = data.unread_count;
+                const unreadBadge = document.getElementById('unreadNotificationBadge');
+                
+                if (unreadCount > 0) {
+                    if (unreadBadge) {
+                        unreadBadge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+                        unreadBadge.classList.remove('hidden');
+                    }
+                } else {
+                    if (unreadBadge) unreadBadge.classList.add('hidden');
+                }
+            })
+            .catch(error => console.error('Error fetching unread notification count:', error));
+    }
+
+    // Initial Fetch
+    document.addEventListener('DOMContentLoaded', function () {
+        fetchUnreadMessageCount();
+        fetchUnreadNotificationCount();
+        
+        // Setup polling for unread counts
+        setInterval(fetchUnreadMessageCount, 10000);
+        setInterval(fetchUnreadNotificationCount, 10000);
+    });
+</script>

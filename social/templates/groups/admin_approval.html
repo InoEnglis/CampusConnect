@@ -1,0 +1,312 @@
+{% extends 'landing/base.html' %}
+
+{% block content %}
+
+<div class="flex min-h-screen">
+    <!-- Sidebar -->
+    <div class="w-64 bg-gray-800 text-white p-5 fixed h-full">
+        <div class="flex items-center mb-8">
+            <i class="fas fa-shield-alt text-blue-400 text-xl mr-3"></i>
+            <h4 class="text-lg font-semibold">Group Admin Panel</h4>
+        </div>
+        <div class="mb-6 p-3 bg-gray-700 rounded-lg">
+            <div class="flex items-center">
+                {% if group.profile_image %}
+                    <img src="{{ group.profile_image.url }}" class="w-10 h-10 rounded-full mr-3" alt="{{ group.name }}">
+                {% else %}
+                    <div class="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center mr-3">
+                        <i class="fas fa-users text-white"></i>
+                    </div>
+                {% endif %}
+                <div>
+                    <h5 class="font-medium">{{ group.name }}</h5>
+                    <p class="text-xs text-gray-300">{{ group.members.count }} members</p>
+                </div>
+            </div>
+        </div>
+        <ul class="space-y-2">
+            <li>
+                <a href="{% url 'group_detail' group.id %}" class="flex items-center p-3 rounded hover:bg-gray-700">
+                    <i class="fas fa-arrow-left mr-3 text-gray-400"></i>
+                    Back to Group
+                </a>
+            </li>
+            <li>
+                <a href="#pendingRequests" id="pendingRequestsLink" class="flex items-center p-3 rounded bg-gray-700">
+                    <i class="fas fa-user-clock mr-3 text-blue-400"></i>
+                    Pending Requests
+                    {% if pending_requests %}
+                    <span class="ml-auto bg-blue-500 text-white text-xs px-2 py-1 rounded-full">
+                        {{ pending_requests|length }}
+                    </span>
+                    {% endif %}
+                </a>
+            </li>
+            <li>
+                <a href="#groupRules" id="groupRulesLink" class="flex items-center p-3 rounded hover:bg-gray-700">
+                    <i class="fas fa-gavel mr-3 text-gray-400"></i>
+                    Group Rules
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'manage_users' group.id %}" class="flex items-center p-3 rounded hover:bg-gray-700">
+                    <i class="fas fa-users mr-3 text-gray-400"></i>
+                    Manage Users
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'group_settings' group.id %}" class="flex items-center p-3 rounded hover:bg-gray-700">
+                    <i class="fas fa-cog mr-3 text-gray-400"></i>
+                    Group Settings
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="flex-1 p-8 ml-64">
+        <!-- Pending Requests Section (shown by default) -->
+        <div id="pendingRequests">
+            <div class="flex justify-between items-center mb-8">
+                <div>
+                </div>
+                <div class="flex space-x-3">
+                </div>
+            </div>
+
+            <!-- Pending Requests List -->
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                <div class="bg-gray-50 px-6 py-4 border-b flex justify-between items-center">
+                    <h5 class="text-lg font-semibold text-gray-800">
+                        <i class="fas fa-user-clock text-blue-500 mr-2"></i>Pending Requests
+                    </h5>
+                    <div class="text-sm text-gray-500">
+                        Showing {{ pending_requests|length }} request{{ pending_requests|pluralize }}
+                    </div>
+                </div>
+                
+                {% if pending_requests %}
+                <div class="divide-y divide-gray-200">
+                    {% for req in pending_requests %}
+                    <div class="p-6 hover:bg-gray-50 transition">
+                        <div class="flex justify-between items-start">
+                            <div class="flex items-start space-x-4">
+                                <div class="flex-shrink-0">
+                                    {% if req.user.profile.picture %}
+                                        <img class="h-12 w-12 rounded-full" src="{{ req.user.profile.picture.url }}" alt="{{ req.user.username }}">
+                                    {% else %}
+                                        <div class="h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center">
+                                            <i class="fas fa-user text-gray-400"></i>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <div class="flex items-center space-x-2">
+                                        <h4 class="text-lg font-medium text-gray-900">@{{ req.user.username }}</h4>
+                                        <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">New Member</span>
+                                    </div>
+                                    <p class="text-sm text-gray-500 mt-1">
+                                        Requested {{ req.created_at|timesince }} ago
+                                    </p>
+                                    <div class="mt-2 text-sm text-gray-600">
+                                        <p><strong>Message:</strong> 
+                                            {% if req.message %}
+                                                "{{ req.message }}"
+                                            {% else %}
+                                                No message provided
+                                            {% endif %}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex space-x-3">
+                                <form method="POST">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="request_id" value="{{ req.id }}">
+                                    <button name="action" value="approve" class="bg-green-50 text-green-700 px-4 py-2 rounded-lg hover:bg-green-100 transition flex items-center">
+                                        <i class="fas fa-check mr-2"></i> Approve
+                                    </button>
+                                </form>
+                                <form method="POST">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="request_id" value="{{ req.id }}">
+                                    <button name="action" value="reject" class="bg-red-50 text-red-700 px-4 py-2 rounded-lg hover:bg-red-100 transition flex items-center">
+                                        <i class="fas fa-times mr-2"></i> Reject
+                                    </button>
+                                </form>
+                                <button class="bg-gray-50 text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-100 transition">
+                                    <i class="fas fa-ellipsis-h"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="p-8 text-center">
+                    <div class="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                        <i class="fas fa-user-clock text-gray-400 text-3xl"></i>
+                    </div>
+                    <h4 class="text-lg font-medium text-gray-700 mb-2">No pending requests</h4>
+                    <p class="text-gray-500">When people request to join your group, they'll appear here.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Group Rules Section (hidden by default) -->
+        <div id="groupRules" class="hidden">
+            <div class="flex justify-between items-center mb-8">
+                <div>
+
+                </div>
+            </div>
+
+            <!-- Rule Creation Card -->
+            {% if request.user == group.creator or request.user in group.admins.all %}
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden mb-8">
+                <div class="bg-gray-50 px-6 py-4 border-b">
+                    <h5 class="text-lg font-semibold text-gray-800">
+                        <i class="fas fa-plus-circle text-blue-500 mr-2"></i>Create New Group Rule
+                    </h5>
+                </div>
+                <div class="p-6">
+                    <form method="POST" action="{% url 'create_group_rule' group.id %}">
+                        {% csrf_token %}
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                            <div>
+                                <label for="ruleTitle" class="block text-sm font-medium text-gray-700 mb-1">Rule Title*</label>
+                                <input type="text" id="ruleTitle" name="title" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="e.g. No Spamming" required>
+                            </div>
+                            <div>
+                                <label for="ruleSeverity" class="block text-sm font-medium text-gray-700 mb-1">Severity Level</label>
+                                <select id="ruleSeverity" name="severity" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                                    <option value="low">Low (Warning)</option>
+                                    <option value="medium" selected>Medium (Temporary Ban)</option>
+                                    <option value="high">High (Permanent Ban)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-6">
+                            <label for="ruleDescription" class="block text-sm font-medium text-gray-700 mb-1">Detailed Description*</label>
+                            <textarea id="ruleDescription" name="description" rows="4" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="Explain the rule in detail..." required></textarea>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center">
+                                <input id="pinRule" name="pinned" type="checkbox" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                                <label for="pinRule" class="ml-2 block text-sm text-gray-700">Pin this rule at the top</label>
+                            </div>
+                            <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition flex items-center">
+                                <i class="fas fa-save mr-2"></i> Save Rule
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Existing Rules List -->
+           
+        </div>
+
+        <!-- Manage Users Section (loaded dynamically) -->
+        <div id="manageUsersContainer" class="hidden"></div>
+    </div>
+</div>
+
+<script>
+    // Tab switching functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get all tab links and sections
+        const pendingRequestsLink = document.getElementById('pendingRequestsLink');
+        const groupRulesLink = document.getElementById('groupRulesLink');
+        const pendingRequestsSection = document.getElementById('pendingRequests');
+        const groupRulesSection = document.getElementById('groupRules');
+
+        // Pending Requests tab
+        if (pendingRequestsLink) {
+            pendingRequestsLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                // Show pending requests, hide others
+                pendingRequestsSection.classList.remove('hidden');
+                groupRulesSection.classList.add('hidden');
+                // Update active states
+                pendingRequestsLink.classList.add('bg-gray-700');
+                pendingRequestsLink.querySelector('i').classList.add('text-blue-400');
+                pendingRequestsLink.querySelector('i').classList.remove('text-gray-400');
+                groupRulesLink.classList.remove('bg-gray-700');
+                groupRulesLink.querySelector('i').classList.remove('text-blue-400');
+                groupRulesLink.querySelector('i').classList.add('text-gray-400');
+            });
+        }
+
+        // Group Rules tab
+        if (groupRulesLink) {
+            groupRulesLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                // Show group rules, hide others
+                groupRulesSection.classList.remove('hidden');
+                pendingRequestsSection.classList.add('hidden');
+                // Update active states
+                groupRulesLink.classList.add('bg-gray-700');
+                groupRulesLink.querySelector('i').classList.add('text-blue-400');
+                groupRulesLink.querySelector('i').classList.remove('text-gray-400');
+                pendingRequestsLink.classList.remove('bg-gray-700');
+                pendingRequestsLink.querySelector('i').classList.remove('text-blue-400');
+                pendingRequestsLink.querySelector('i').classList.add('text-gray-400');
+            });
+        }
+
+        // Manage Users loading
+        const loadManageUsers = document.getElementById("loadManageUsers");
+        if (loadManageUsers) {
+            loadManageUsers.addEventListener("click", function(e) {
+                e.preventDefault();
+                var groupId = e.target.getAttribute("data-group-id");
+                fetch(`/group/manage/${groupId}/`)
+                    .then(response => response.text())
+                    .then(data => {
+                        document.getElementById("manageUsersContainer").innerHTML = data;
+                        document.getElementById("manageUsersContainer").classList.remove('hidden');
+                        // Hide other sections
+                        pendingRequestsSection.classList.add('hidden');
+                        groupRulesSection.classList.add('hidden');
+                        // Update active states
+                        pendingRequestsLink.classList.remove('bg-gray-700');
+                        pendingRequestsLink.querySelector('i').classList.remove('text-blue-400');
+                        pendingRequestsLink.querySelector('i').classList.add('text-gray-400');
+                        groupRulesLink.classList.remove('bg-gray-700');
+                        groupRulesLink.querySelector('i').classList.remove('text-blue-400');
+                        groupRulesLink.querySelector('i').classList.add('text-gray-400');
+                    })
+                    .catch(error => {
+                        console.error('Error loading manage users:', error);
+                    });
+            });
+        }
+    });
+</script>
+
+<style>
+    body {
+        background-color: #f9fafb;
+    }
+    .sidebar-link.active {
+        background-color: #1e40af;
+        color: white;
+    }
+    .sidebar-link.active:hover {
+        background-color: #1e40af;
+    }
+    .sidebar-link.active i {
+        color: white;
+    }
+    .card {
+        border-radius: 0.75rem;
+        overflow: hidden;
+    }
+    button {
+        transition: all 0.2s ease;
+    }
+</style>
+{% endblock %}

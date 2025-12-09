@@ -1,0 +1,240 @@
+{% extends 'landing/base.html' %}
+
+{% block content %}
+<div class="min-h-screen bg-slate-950 text-white">
+  <!-- Header with wave background -->
+  <div class="relative overflow-hidden bg-red-500">
+    <div class="absolute inset-0">
+      <svg class="absolute bottom-0 w-full h-48 text-slate-950 opacity-20" viewBox="0 0 1440 320" preserveAspectRatio="none">
+        <path fill="currentColor" d="M0,288L48,272C96,256,192,224,288,197.3C384,171,480,149,576,165.3C672,181,768,235,864,250.7C960,267,1056,245,1152,224C1248,203,1344,181,1392,170.7L1440,160L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+      </svg>
+    </div>
+    <div class="relative px-4 py-16 mx-auto max-w-7xl sm:px-6 lg:px-8">
+      <div class="max-w-3xl mx-auto text-center">
+        <h1 class="text-4xl font-extrabold tracking-tight text-white sm:text-5xl md:text-6xl">
+          Report Content
+        </h1>
+        <p class="mt-6 text-xl text-indigo-100">
+          Help us maintain a safe and respectful community
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main content area -->
+  <div class="px-4 py-12 mx-auto max-w-7xl sm:px-6 lg:px-8">
+    <div class="max-w-3xl mx-auto">
+      <!-- Content Card -->
+      <div class="p-6 mb-8 bg-slate-900 rounded-xl shadow-xl">
+        <h2 class="flex items-center mb-4 text-lg font-medium text-indigo-300">
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          Content you're reporting
+        </h2>
+        
+        <!-- Post Preview -->
+        <div class="overflow-hidden bg-slate-800 rounded-xl">
+          <div class="p-4">
+            {% include 'social/post_card.html' with post=post %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Report Form -->
+      <div class="p-6 mb-8 bg-slate-900 rounded-xl shadow-xl">
+        <h2 class="mb-6 text-xl font-semibold text-white">Submit your report</h2>
+        
+        <form id="reportForm" method="post" action="{% url 'report-post' post.id %}" class="space-y-8">
+          {% csrf_token %}
+          
+          <!-- Reason Selection -->
+          <div>
+            <label for="reason" class="block mb-2 text-sm font-medium text-slate-300">
+              Why are you reporting this content? <span class="text-rose-500">*</span>
+            </label>
+            <div class="relative">
+              <select id="reason" name="reason" required
+                class="block w-full appearance-none py-3 pl-4 pr-10 text-base bg-slate-800 text-white rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                
+                {% for choice in form.reason.field.choices %}
+                  <option value="{{ choice.0 }}" {% if choice.0 == form.reason.value %}selected{% endif %}>
+                    {{ choice.1 }}
+                  </option>
+                {% endfor %}
+              </select>
+          
+              <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
+          </div>
+          
+          
+          <!-- Additional Details -->
+          <div>
+            <label for="additional_comments" class="block mb-2 text-sm font-medium text-slate-300">
+              Additional details
+            </label>
+            <textarea id="additional_comments" name="additional_comments" rows="4"
+              class="block w-full p-4 text-base bg-slate-800 rounded-lg resize-none focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+              placeholder="Help us understand the issue by providing specific details...">{{ form.additional_comments.value }}</textarea>
+          </div>
+          
+          <!-- Form Actions -->
+          <div class="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4">
+            <button type="submit"
+              class="inline-flex items-center justify-center px-6 py-3 text-base font-medium text-white bg-red-500 rounded-lg shadow-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:w-auto sm:order-2 w-full">
+              Submit Report
+            </button>
+            <button type="button" onclick="window.history.back();"
+              class="inline-flex items-center justify-center px-6 py-3 text-base font-medium text-slate-300 bg-slate-800 rounded-lg hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500 sm:w-auto sm:order-1 w-full">
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
+      
+      <!-- Information Card -->
+      <div class="p-6 mb-8  bg-red rounded-xl shadow-xl">
+        <h3 class="flex items-center mb-4 text-lg font-medium text-white">
+          <svg class="w-5 h-5 mr-2 text-indigo-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+          </svg>
+          What happens next?
+        </h3>
+        <ul class="space-y-3 text-slate-200">
+          <li class="flex">
+            <svg class="flex-shrink-0 w-5 h-5 mr-2 text-indigo-400" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+            </svg>
+            Your report will remain confidential
+          </li>
+          <li class="flex">
+            <svg class="flex-shrink-0 w-5 h-5 mr-2 text-indigo-400" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+            </svg>
+            Our team will review the content within 24 hours
+          </li>
+          <li class="flex">
+            <svg class="flex-shrink-0 w-5 h-5 mr-2 text-indigo-400" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+            </svg>
+            Appropriate action will be taken based on our community guidelines
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Success Modal -->
+<div id="successModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
+  <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+    <!-- Background overlay -->
+    <div class="fixed inset-0 transition-opacity bg-slate-900 bg-opacity-75 backdrop-blur-sm"></div>
+
+    <!-- Modal content -->
+    <div id="modalContent" class="inline-block px-4 pt-5 pb-4 overflow-hidden text-left align-bottom transition-all transform bg-slate-900 rounded-lg shadow-xl sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
+      <div>
+        <div class="flex items-center justify-center w-12 h-12 mx-auto bg-green-100 rounded-full">
+          <svg class="w-6 h-6 text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+        <div class="mt-3 text-center sm:mt-5">
+          <h3 class="text-lg font-medium leading-6 text-white" id="modalTitle">
+            Report Submitted
+          </h3>
+          <div class="mt-2">
+            <p class="text-sm text-slate-300" id="modalMessage">
+              Thank you for helping keep our community safe. We've received your report and will review it shortly.
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="mt-5 sm:mt-6">
+        <button type="button" id="modalCloseButton" class="inline-flex justify-center w-full px-4 py-2 text-base font-medium text-white bg-indigo-600 rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:text-sm">
+          Return to Community
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const form = document.getElementById('reportForm');
+  const successModal = document.getElementById('successModal');
+  const modalContent = document.getElementById('modalContent');
+  const modalCloseButton = document.getElementById('modalCloseButton');
+  
+  // Handle form submission
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(form);
+    const submitButton = form.querySelector('button[type="submit"]');
+    
+    // Show loading state
+    submitButton.disabled = true;
+    submitButton.innerHTML = `
+      <svg class="w-5 h-5 mr-3 -ml-1 text-white animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+      Processing...
+    `;
+    
+    fetch(form.action, {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'X-CSRFToken': formData.get('csrfmiddlewaretoken'),
+        'X-Requested-With': 'XMLHttpRequest'
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.status === 'success') {
+        // Show success modal
+        document.getElementById('modalTitle').textContent = 'Report Submitted';
+        document.getElementById('modalMessage').textContent = data.message || 'Thank you for your report. Our team will review it promptly.';
+        successModal.classList.remove('hidden');
+      } else {
+        // Handle error case
+        document.getElementById('modalTitle').textContent = 'Something Went Wrong';
+        document.getElementById('modalMessage').textContent = data.message || 'We encountered an issue processing your report. Please try again.';
+        successModal.classList.remove('hidden');
+        submitButton.disabled = false;
+        submitButton.innerHTML = 'Submit Report';
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      document.getElementById('modalTitle').textContent = 'Connection Error';
+      document.getElementById('modalMessage').textContent = 'Unable to connect to our servers. Please check your connection and try again.';
+      successModal.classList.remove('hidden');
+      submitButton.disabled = false;
+      submitButton.innerHTML = 'Submit Report';
+    });
+  });
+  
+  // Close modal and redirect
+  modalCloseButton.addEventListener('click', function() {
+    successModal.classList.add('hidden');
+    window.location.href = "{% url 'post-list' %}";
+  });
+  
+  // Close modal when clicking background
+  successModal.addEventListener('click', function(e) {
+    if (e.target === successModal) {
+      successModal.classList.add('hidden');
+      window.location.href = "{% url 'post-list' %}";
+    }
+  });
+});
+</script>
+{% endblock %}

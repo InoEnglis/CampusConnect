@@ -1,0 +1,459 @@
+{% extends "admin/change_form.html" %}
+
+{% load static %}
+
+{% block content %}
+<style>
+    /* Post Card Styling */
+    .post-card {
+        background-color: #15202b;
+        margin: 20px auto;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        overflow: hidden;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        border-radius: 4px;
+        max-width: 700px;
+    }
+    
+    .post-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+    }
+    
+    .post-card-content {
+        padding: 0px;
+    }
+    
+    /* Post Header */
+    .post-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 16px;
+        padding: 16px 20px; 
+        border-radius: 16px 16px 0 0
+    }
+    
+    .author-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    
+    .author-avatar img {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid #1d9bf0;
+    }
+    
+    .author-details {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .author-name {
+        color: #1d9bf0;
+        font-weight: 600;
+        text-decoration: none;
+        font-size: 1rem;
+        transition: color 0.2s ease;
+    }
+    
+    .author-name:hover {
+        color: #1a8cd8;
+        text-decoration: underline;
+    }
+    
+    .post-meta {
+        font-size: 0.85rem;
+        color: #8899a6;
+        margin-top: 2px;
+        display: flex;
+        align-items: center;
+    }
+    
+    .dot-separator {
+        display: inline-block;
+        width: 4px;
+        height: 4px;
+        background-color: #8899a6;
+        border-radius: 50%;
+        margin: 0 6px;
+    }
+    
+    /* Post Body */
+    .post-body {
+        font-size: 1rem;
+        line-height: 1.5;
+        color: #fff;
+        margin-bottom: 16px;
+        word-break: break-word;
+        padding: 0 20px;
+    }
+    
+    /* Post Media Layouts */
+    .post-media {
+        margin-bottom: 16px;
+        overflow: hidden;
+        border-radius: 12px;
+        padding: 0 20px;
+    }
+    
+    /* Image Grid System */
+    .image-grid {
+        display: grid;
+        gap: 8px;
+        margin-top: 8px;
+    }
+    
+    /* Single image layout */
+    .single-image {
+        width: 100%;
+        border-radius: 12px;
+        cursor: zoom-in;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .single-image:hover {
+        transform: scale(1.01);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+    }
+    
+    /* Two images layout */
+    .grid-2 {
+        grid-template-columns: 1fr 1fr;
+    }
+    
+    /* Three images layout */
+    .grid-3 {
+        grid-template-columns: 1fr 1fr;
+    }
+    
+    .grid-3 img:first-child {
+        grid-column: span 2;
+        height: 300px;
+        object-fit: cover;
+    }
+    
+    /* Four images layout */
+    .grid-4 {
+        grid-template-columns: 1fr 1fr;
+    }
+    
+    .grid-4 img {
+        height: 200px;
+        object-fit: cover;
+    }
+    
+    /* More than four images layout */
+    .grid-many {
+        grid-template-columns: 1fr 1fr;
+    }
+    
+    .grid-many img {
+        height: 180px;
+        object-fit: cover;
+    }
+    
+    .grid-many img:last-child {
+        position: relative;
+    }
+    
+    .grid-many img:last-child::after {
+        content: "+" attr(data-remaining);
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.7);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        font-weight: bold;
+    }
+    
+    /* Video Container */
+    .video-container {
+        border-radius: 12px;
+        overflow: hidden;
+        margin-top: 8px;
+    }
+    
+    .video-container video {
+        width: 100%;
+        height: auto;
+        max-height: 500px;
+        background-color: #000;
+        border-radius: 12px;
+    }
+    
+    /* Post Footer */
+    .post-footer {
+        padding: 10px 20px;
+        color: #8899a6;
+        font-size: 0.9rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .post-footer p {
+        margin: 5px 0;
+    }
+    
+    /* Time display */
+    .post-time {
+        color: #8899a6;
+        font-size: 0.85rem;
+        font-weight: normal;
+    }
+    
+    /* Lightbox/Gallery Styles */
+    .lightbox {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.9);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .lightbox.active {
+        display: flex;
+    }
+    
+    .lightbox-content {
+        position: relative;
+        max-width: 90%;
+        max-height: 90%;
+    }
+    
+    .lightbox-img {
+        max-width: 100%;
+        max-height: 80vh;
+        object-fit: contain;
+    }
+    
+    .lightbox-nav {
+        position: absolute;
+        top: 50%;
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        transform: translateY(-50%);
+    }
+    
+    .lightbox-btn {
+        background-color: rgba(0, 0, 0, 0.5);
+        color: white;
+        border: none;
+        font-size: 2rem;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 20px;
+        transition: background-color 0.3s;
+    }
+    
+    .lightbox-btn:hover {
+        background-color: rgba(0, 0, 0, 0.8);
+    }
+    
+    .lightbox-close {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background-color: rgba(0, 0, 0, 0.5);
+        color: white;
+        border: none;
+        font-size: 1.5rem;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background-color 0.3s;
+    }
+    
+    .lightbox-close:hover {
+        background-color: rgba(0, 0, 0, 0.8);
+    }
+    
+    .lightbox-counter {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        color: white;
+        background-color: rgba(0, 0, 0, 0.5);
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+    }
+</style>
+
+<div class="post-card">
+    <div class="post-card-content">
+        <div class="post-header">
+            <div class="author-info">
+                {% if original.author.profile.picture %}
+                <div class="author-avatar">
+                    <img src="{{ original.author.profile.picture.url }}" alt="{{ original.author }}'s Profile Picture">
+                </div>
+                {% endif %}
+                <div class="author-details">
+                    <a href="{% url 'profile' original.author.pk %}" class="author-name">@{{ original.author }}</a>
+                    <div class="post-meta">
+                        <span>{{ original.created_on|timesince }} ago</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="post-body">
+            <p>{{ original.body }}</p>
+        </div>
+        
+        <div class="post-media">
+            {% if original.video %}
+                <div class="video-container">
+                    <video controls>
+                        <source src="{{ original.video.url }}" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                </div>
+            {% endif %}
+            
+            {% if original.images.count > 0 %}
+                <div class="image-grid 
+                    {% if original.images.count == 1 %}grid-1{% endif %}
+                    {% if original.images.count == 2 %}grid-2{% endif %}
+                    {% if original.images.count == 3 %}grid-3{% endif %}
+                    {% if original.images.count == 4 %}grid-4{% endif %}
+                    {% if original.images.count > 4 %}grid-many{% endif %}">
+                    
+                    {% for image in original.images.all %}
+                        {% if forloop.counter <= 4 or original.images.count == 4 %}
+                            <img src="{{ image.image.url }}" 
+                                 alt="Post image" 
+                                 class="single-image"
+                                 onclick="openLightbox({{ forloop.counter0 }})">
+                        {% endif %}
+                        
+                        {% if forloop.last and original.images.count > 4 %}
+                            <img src="{{ image.image.url }}" 
+                                 alt="Post image" 
+                                 class="single-image"
+                                 data-remaining="{{ original.images.count|add:'-4' }}"
+                                 onclick="openLightbox({{ forloop.counter0| add:0 }})">
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Lightbox/Gallery HTML -->
+<div class="lightbox" id="lightbox">
+    <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
+    <div class="lightbox-content">
+        <img class="lightbox-img" id="lightbox-img" src="">
+        <div class="lightbox-nav">
+            <button class="lightbox-btn" onclick="changeImage(-1)">&#10094;</button>
+            <button class="lightbox-btn" onclick="changeImage(1)">&#10095;</button>
+        </div>
+        <div class="lightbox-counter" id="lightbox-counter"></div>
+    </div>
+</div>
+
+<script>
+    // Store all images for the lightbox
+    let lightboxImages = [];
+    let currentImageIndex = 0;
+    
+    // Initialize lightbox images
+    document.addEventListener('DOMContentLoaded', function() {
+        const images = document.querySelectorAll('.single-image');
+        lightboxImages = Array.from(images).map(img => img.src);
+    });
+    
+    // Open lightbox with specific image
+    function openLightbox(index) {
+        currentImageIndex = index;
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImg = document.getElementById('lightbox-img');
+        const counter = document.getElementById('lightbox-counter');
+        
+        lightboxImg.src = lightboxImages[index];
+        counter.textContent = `${index + 1} / ${lightboxImages.length}`;
+        lightbox.classList.add('active');
+        document.body.style.overflow = 'hidden'; // Prevent scrolling
+    }
+    
+    // Close lightbox
+    function closeLightbox() {
+        document.getElementById('lightbox').classList.remove('active');
+        document.body.style.overflow = ''; // Re-enable scrolling
+    }
+    
+    // Navigate between images
+    function changeImage(step) {
+        currentImageIndex += step;
+        
+        // Wrap around if at beginning or end
+        if (currentImageIndex >= lightboxImages.length) {
+            currentImageIndex = 0;
+        } else if (currentImageIndex < 0) {
+            currentImageIndex = lightboxImages.length - 1;
+        }
+        
+        const lightboxImg = document.getElementById('lightbox-img');
+        const counter = document.getElementById('lightbox-counter');
+        
+        lightboxImg.src = lightboxImages[currentImageIndex];
+        counter.textContent = `${currentImageIndex + 1} / ${lightboxImages.length}`;
+        
+        // Add fade effect
+        lightboxImg.style.opacity = 0;
+        setTimeout(() => {
+            lightboxImg.style.opacity = 1;
+        }, 100);
+    }
+    
+    // Close lightbox when clicking outside the image
+    document.getElementById('lightbox').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeLightbox();
+        }
+    });
+    
+    // Keyboard navigation
+    document.addEventListener('keydown', function(e) {
+        const lightbox = document.getElementById('lightbox');
+        if (!lightbox.classList.contains('active')) return;
+        
+        if (e.key === 'Escape') {
+            closeLightbox();
+        } else if (e.key === 'ArrowLeft') {
+            changeImage(-1);
+        } else if (e.key === 'ArrowRight') {
+            changeImage(1);
+        }
+    });
+</script>
+
+{% endblock %}

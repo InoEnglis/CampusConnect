@@ -1,0 +1,56 @@
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% block extrastyle %}
+  {{ block.super }}
+  <style>
+    .custom-navbar {
+      display: flex;
+      overflow-x: auto;
+      background-color: #f8f9fa;
+      border-bottom: 1px solid #ddd;
+      padding: 10px 20px;
+    }
+    .custom-navbar a {
+      margin-right: 20px;
+      text-decoration: none;
+      color: #333;
+      display: flex;
+      align-items: center;
+      font-weight: 500;
+    }
+    .custom-navbar a:hover {
+      color: #007bff;
+    }
+    .custom-navbar i {
+      margin-right: 8px;
+    }
+  </style>
+{% endblock %}
+
+{% block branding %}
+  <h1 id="site-name"><a href="{% url 'admin:index' %}">CampusConnect Admin</a></h1>
+{% endblock %}
+
+{% block nav-global %}
+
+  <div class="custom-navbar">
+    <a href="{% url 'admin:auth_user_changelist' %}">
+      <i class="fas fa-user"></i> Users
+    </a>
+    <a href="{% url 'admin:social_group_changelist' %}">
+      <i class="fas fa-users"></i> Groups
+    </a>
+    <a href="{% url 'admin:social_post_changelist' %}">
+      <i class="fas fa-pencil-alt"></i> Posts
+    </a>
+    <a href="{% url 'admin:social_feedback_changelist' %}">
+      <i class="fas fa-comment-dots"></i> Feedback
+    </a>
+    <a href="{% url 'admin:social_report_changelist' %}">
+      <i class="fas fa-flag"></i> Reports
+    </a>
+    <!-- Add more as needed -->
+  </div>
+
+{% endblock %}

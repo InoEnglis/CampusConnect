@@ -1,0 +1,14 @@
+{% extends "admin/index.html" %}
+
+{% block content %}
+    <!-- Custom content before the default admin index content -->
+    <div class="dashboard-apps">
+        <div class="app-list">
+            <h2>Reports</h2>
+            <p>New Reports: {{ new_reports_badge }}</p> <!-- Badge for new reports -->
+        </div>
+    </div>
+
+    <!-- This is where the rest of the default admin content goes -->
+    {{ block.super }}
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends 'landing/base.html' %}
+
+ {% block content %}
+<div class="messages">
+  {% for message in messages %}
+    <div class="message">
+      <strong>{{ message.sender.username }}</strong>: {{ message.content }}
+      <small>{{ message.timestamp|date:"M d, Y H:i" }}</small>
+    </div>
+  {% empty %}
+    <p>No messages yet.</p>
+  {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,151 @@
+<div class="event-list-container relative group">
+    <!-- Left/Previous Button (now always visible) -->
+    <button class="absolute left-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-black/70 hover:bg-black/90 rounded-full shadow-lg flex items-center justify-center text-white transition-all duration-200 ease-out focus:outline-none opacity-100 backdrop-blur-sm" id="scrollLeftBtn" aria-label="Scroll left">
+        <i class="fas fa-chevron-left"></i>
+    </button>
+    
+    <!-- Carousel with adjusted height and smooth scrolling -->
+    <div class="horizontal-event-list flex overflow-x-auto gap-4 pb-4 scroll-smooth px-4 h-[22rem] hide-scrollbar" id="eventList">
+        <!-- Add New Event Card -->
+        <div class="add-event-item flex-shrink-0 w-56 snap-start relative group h-full">
+            <div class="event-card h-full rounded-xl overflow-hidden bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center transition-all duration-300 hover:shadow-lg hover:-translate-y-1 transform-gpu">
+                <div class="text-center p-6">
+                    <div class="add-event-btn w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4 transition-all hover:bg-opacity-30 hover:scale-110">
+                        <a href="{% url 'create_event' %}" class="w-full h-full flex items-center justify-center">
+                            <i class="fas fa-plus text-gray-800 text-2xl"></i>
+                        </a>
+                    </div>
+                    <h5 class="event-title text-xl font-bold text-white mb-1">Create Event</h5>
+                    <p class="event-date text-sm text-white text-opacity-90">Share your activity</p>
+                </div>
+            </div>
+        </div>
+
+        {% for event in events %}
+            <a href="{% url 'event_detail' event.id %}" class="event-item flex-shrink-0 w-56 snap-start relative group h-full transition-transform duration-300 hover:scale-[1.02]">
+                <div class="event-card h-full rounded-xl overflow-hidden relative transition-all duration-300 hover:shadow-lg">
+                    <img src="{{ event.images.first.image.url }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" alt="{{ event.name }}">
+                    <div class="event-details absolute inset-0 flex flex-col justify-end p-5 bg-gradient-to-t from-black/90 via-black/50 to-transparent">
+                        <h5 class="event-title text-xl font-bold text-white mb-2">{{ event.name }}</h5>
+                        <div class="flex items-center text-gray-300 text-sm mb-2">
+                            <i class="far fa-calendar-alt mr-2 w-4 text-center"></i>
+                            <span>{{ event.date|date:"M d, Y" }} • {{ event.time|time:"g:i A" }}</span>
+                        </div>
+                        <div class="flex items-start text-gray-300 text-sm">
+                            <i class="fas fa-map-marker-alt mr-2 w-4 text-center mt-0.5"></i>
+                            <span>
+                                {% if event.location_type == 'inside' %}
+                                    University Of Antique
+                                    {% if event.department %} • {{ event.department }}{% endif %}
+                                    {% if event.building %} • {{ event.building }}{% endif %}
+                                    {% if event.room_number %} • Room {{ event.room_number }}{% endif %}
+                                {% else %}
+                                    {{ event.specific_location }}
+                                    {% if event.barangay %}, {{ event.barangay }}{% endif %}
+                                    {% if event.municipality %}, {{ event.municipality }}{% endif %}
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        {% empty %}
+            <p class="text-gray-500">No upcoming events</p>
+        {% endfor %}
+
+        <!-- See More Card -->
+        <div class="see-more-item flex-shrink-0 w-56 snap-start relative group h-full">
+            <div class="event-card h-full rounded-xl overflow-hidden bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+                <a href="{% url 'event_list' %}" class="text-center p-6 block">
+                    <div class="see-more-btn w-16 h-16 bg-white bg-opacity-10 rounded-full flex items-center justify-center mx-auto mb-4 transition-all hover:bg-opacity-20 hover:scale-110">
+                        <i class="fas fa-chevron-right text-white text-2xl"></i>
+                    </div>
+                    <h5 class="event-title text-xl font-bold text-white mb-1">See More</h5>
+                    <p class="event-date text-sm text-white text-opacity-90">Explore all events</p>
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Right/Next Button (now always visible) -->
+    <button class="absolute right-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-black/70 hover:bg-black/90 rounded-full shadow-lg flex items-center justify-center text-white transition-all duration-200 ease-out focus:outline-none opacity-100 backdrop-blur-sm" id="scrollRightBtn" aria-label="Scroll right">
+        <i class="fas fa-chevron-right"></i>
+    </button>
+    
+    <!-- Scroll gradient indicators -->
+    <div class="absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-white dark:from-gray-900 to-transparent pointer-events-none hidden md:block"></div>
+    <div class="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-white dark:from-gray-900 to-transparent pointer-events-none hidden md:block"></div>
+</div>
+
+<style>
+    .hide-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+    .hide-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+    
+    .event-card {
+        will-change: transform;
+    }
+    
+    #scrollLeftBtn, #scrollRightBtn {
+        transform: translateY(-50%) scale(1);
+        transition: opacity 200ms ease-out, background-color 200ms ease-out;
+    }
+    
+    #scrollLeftBtn:hover, #scrollRightBtn:hover {
+        transform: translateY(-50%) scale(1.1);
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const eventList = document.getElementById('eventList');
+    const scrollLeftBtn = document.getElementById('scrollLeftBtn');
+    const scrollRightBtn = document.getElementById('scrollRightBtn');
+    
+    // Amount to scroll (based on card width + gap)
+    const scrollAmount = 240; // 224px card + 16px gap
+    
+    // Scroll left button click handler
+    scrollLeftBtn.addEventListener('click', function() {
+        eventList.scrollBy({
+            left: -scrollAmount,
+            behavior: 'smooth'
+        });
+    });
+    
+    // Scroll right button click handler
+    scrollRightBtn.addEventListener('click', function() {
+        eventList.scrollBy({
+            left: scrollAmount,
+            behavior: 'smooth'
+        });
+    });
+    
+    // Update button visibility on scroll
+    function updateButtonVisibility() {
+        const showLeft = eventList.scrollLeft > 20;
+        const showRight = eventList.scrollLeft < (eventList.scrollWidth - eventList.clientWidth - 20);
+        
+        scrollLeftBtn.style.opacity = showLeft ? '1' : '0.5';
+        scrollLeftBtn.style.pointerEvents = showLeft ? 'auto' : 'none';
+        scrollLeftBtn.style.cursor = showLeft ? 'pointer' : 'default';
+        
+        scrollRightBtn.style.opacity = showRight ? '1' : '0.5';
+        scrollRightBtn.style.pointerEvents = showRight ? 'auto' : 'none';
+        scrollRightBtn.style.cursor = showRight ? 'pointer' : 'default';
+    }
+    
+    // Initialize button visibility
+    updateButtonVisibility();
+    
+    // Update on scroll
+    eventList.addEventListener('scroll', updateButtonVisibility);
+    
+    // Update on window resize
+    window.addEventListener('resize', updateButtonVisibility);
+});
+</script>

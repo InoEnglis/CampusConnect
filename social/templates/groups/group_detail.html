@@ -1,0 +1,1263 @@
+{% extends 'landing/base.html' %}
+
+{% block content %}
+     
+    <!-- Group Cover & Header Section - Redesigned -->
+    <div class="container-fluid p-0">
+        <div class="group-cover" data-banner-color="{{ group.banner_color|default:'#3498db' }}">
+            <div class="cover-gradient"></div>
+            <div class="container position-relative">
+                <div class="group-header-content">
+                    <a href="#" onclick="event.preventDefault(); history.back();" class="btn btn-outline-danger mb-3">
+                        <i class="fas fa-arrow-left"></i> Back
+                    </a>
+                    <div class="group-title-container">
+                        <h1 class="group-name">{{ group.name }}</h1>
+                        {% if group.is_private %}
+                        <span class="private-badge">
+                            <i class="fas fa-lock me-1"></i>Private Group
+                        </span>
+                        {% else %}
+                        <span class="public-badge">
+                            <i class="fas fa-globe-americas me-1"></i>Public Group
+                        </span>
+                        {% endif %}
+                    </div>
+                    <div class="group-stats">
+                        <div class="stat-item">
+                            <i class="fas fa-users"></i>
+                            <span>{{ group.members.count }} members</span>
+                        </div>
+                        <div class="stat-item">
+                            <i class="fas fa-chart-line"></i>
+                            <span>{{ posts.count }} posts</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container">
+        <!-- Profile Section - Redesigned -->
+        <div class="profile-container">
+            <div class="row g-0">
+                <div class="col-md-auto">
+                    {% if group.profile_image %}
+                        <img src="{{ group.profile_image.url }}" alt="{{ group.name }}" class="rounded group-avatar">
+                    {% else %}
+                        <div class="rounded bg-primary d-flex align-items-center justify-content-center group-avatar">
+                            <i class="fas fa-users fa-4x text-white"></i>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="col profile-content">
+                    <p class="group-description">{{ group.description }}</p>
+                    
+                    <div class="action-buttons">
+                        {% if group.is_private %}
+                            {% if request.user in group.members.all %}
+                                <div class="badge member-badge">
+                                    <i class="fas fa-check-circle me-1"></i> Member
+                                </div>
+                            {% else %}
+                                {% if pending_request %}
+                                    <div class="badge pending-badge">
+                                        <i class="fas fa-clock me-1"></i> Request Pending
+                                    </div>
+                                {% else %}
+                                    <form method="POST" action="{% url 'join_group' group.id %}">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-join">
+                                            <i class="fas fa-user-plus me-1"></i> Request to Join
+                                        </button>
+                                    </form>
+                                {% endif %}
+                            {% endif %}
+                        {% else %}
+                            {% if request.user not in group.members.all %}
+                                <form method="POST" action="{% url 'join_group' group.id %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-join">
+                                        <i class="fas fa-user-plus me-1"></i> Join Group
+                                    </button>
+                                </form>
+                            {% else %}
+                                <div class="badge member-badge">
+                                    <i class="fas fa-check-circle me-1"></i> Member
+                                </div>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Group Navigation - Redesigned -->
+        <ul class="nav nav-custom mb-4">
+            <li class="nav-item">
+                <a class="nav-link active" href="#" id="posts-tab">
+                    <i class="fas fa-newspaper me-1"></i> Posts
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" id="about-tab">
+                    <i class="fas fa-info-circle me-1"></i> About
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" id="members-tab">
+                    <i class="fas fa-users me-1"></i> Members
+                </a>
+            </li>
+            {% if request.user == group.creator or request.user in group.admins.all %}
+            <li class="nav-item ms-auto">
+                <a class="nav-link admin-link" href="{% url 'admin_approval' group.id %}">
+                    <i class="fas fa-cog me-1"></i> Manage Group
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+        
+        <div class="row">
+            <!-- Main Content Area -->
+            <div class="col-lg-8 order-lg-2">
+                <!-- Posts Section (default visible) -->
+                <div id="posts-section">
+                    <!-- Create Post Section - Redesigned -->
+                    {% if request.user in group.members.all %}
+                    <div class="content-card mb-4">
+                        <div class="create-post-wrapper" data-bs-toggle="modal" data-bs-target="#addPostModal">
+                            <div class="d-flex align-items-center">
+                                {% if request.user.profile.picture %}
+                                    <img src="{{ request.user.profile.picture.url }}" class="rounded-circle user-avatar" width="40" height="40">
+                                {% else %}
+                                    <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center user-avatar">
+                                        <i class="fas fa-user text-light"></i>
+                                    </div>
+                                {% endif %}
+                                <div class="create-post-input ms-2 flex-grow-1">
+                                    <span class="text-muted">Share something with the group...</span>
+                                </div>
+                            </div>
+                            <div class="post-actions">
+                                <button class="post-action-btn" type="button">
+                                    <i class="fas fa-font"></i>
+                                    <span>Text</span>
+                                </button>
+                                <button class="post-action-btn" type="button">
+                                    <i class="fas fa-image text-success"></i>
+                                    <span>Photo</span>
+                                </button>
+                                <button class="post-action-btn" type="button">
+                                    <i class="fas fa-link text-primary"></i>
+                                    <span>Link</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                
+                    <!-- Posts Section -->
+                    {% if posts %}
+                        {% for post in posts %}
+                            {% include "social/post_card.html" with post=post in_group=True %}
+                        {% endfor %}
+                    {% else %}
+                        <div class="content-card empty-posts">
+                            <i class="fas fa-newspaper"></i>
+                            <h4 class="text-secondary">No posts yet</h4>
+                            {% if request.user in group.members.all %}
+                                <p class="text-muted">Be the first to share something with the group!</p>
+                                <button class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#addPostModal">
+                                    <i class="fas fa-plus me-1"></i> Create First Post
+                                </button>
+                            {% else %}
+                                <p class="text-muted">Join the group to see and create posts.</p>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- About Section (hidden by default) -->
+                <div id="about-section" class="d-none">
+                    <div class="content-card">
+                        <div class="card-title-bar">
+                            <h5 class="card-title">About This Group</h5>
+                        </div>
+                        <div class="p-4">
+                            <p class="about-description">{{ group.description }}</p>
+                            
+                            <div class="group-details mt-4">
+                                <h6 class="section-title">Group Details</h6>
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="icon-circle">
+                                        <i class="fas fa-calendar-alt text-primary"></i>
+                                    </div>
+                                    <span>Created on {{ group.created_at|date:"F j, Y" }}</span>
+                                </div>
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="icon-circle">
+                                        <i class="fas fa-users text-primary"></i>
+                                    </div>
+                                    <span>{{ group.members.count }} members</span>
+                                </div>
+                                <div class="d-flex align-items-center">
+                                    <div class="icon-circle">
+                                        <i class="fas fa-{% if group.is_private %}lock{% else %}globe-americas{% endif %} text-primary"></i>
+                                    </div>
+                                    <span>{{ group.is_private|yesno:"Private,Public" }} group</span>
+                                </div>
+                            </div>
+                            
+                            {% if rules %}
+                            <div class="group-rules mt-4">
+                                <h6 class="section-title">Group Rules</h6>
+                                {% for rule in rules %}
+                                <div class="group-rule">
+                                    <h6 class="rule-title">{{ forloop.counter }}. {{ rule.title }}</h6>
+                                    <p class="rule-description">{{ rule.description }}</p>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Members Section (hidden by default) -->
+                <div id="members-section" class="d-none">
+                    <div class="content-card">
+                        <div class="card-title-bar">
+                            <h5 class="card-title">Group Members ({{ group.members.count }})</h5>
+                        </div>
+
+                        <div class="p-3">
+                            <!-- Creator -->
+                            <div class="group-member mb-3">
+                                {% if group.creator.profile and group.creator.profile.picture %}
+                                    <img src="{{ group.creator.profile.picture.url }}" class="rounded-circle member-img" alt="Creator">
+                                {% else %}
+                                    <div class="rounded-circle bg-secondary member-img d-flex align-items-center justify-content-center">
+                                        <i class="fas fa-user text-light"></i>
+                                    </div>
+                                {% endif %}
+                                <div class="member-info">
+                                    {% if group.creator.profile %}
+                                        <a href="{% url 'profile' group.creator.profile.pk %}" class="member-name">{{ group.creator }}</a>
+                                    {% else %}
+                                        <span class="member-name">{{ group.creator }}</span>
+                                    {% endif %}
+                                    <div class="badge creator-badge">Creator</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Admins -->
+                            {% if group.admins.all %}
+                                <h6 class="section-title mt-4 mb-3">Admins</h6>
+                                {% for admin in group.admins.all %}
+                                <div class="group-member mb-3">
+                                    {% if admin.profile.picture %}
+                                        <img src="{{ admin.profile.picture.url }}" class="rounded-circle member-img" alt="Admin">
+                                    {% else %}
+                                        <div class="rounded-circle bg-secondary member-img d-flex align-items-center justify-content-center">
+                                            <i class="fas fa-user text-light"></i>
+                                        </div>
+                                    {% endif %}
+                                    <div class="member-info">
+                                        <a href="{% url 'profile' admin.profile.pk %}" class="member-name">{{ admin }}</a>
+                                        <div class="badge admin-badge">Admin</div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            {% endif %}
+                            
+                            <!-- Regular Members -->
+                            <h6 class="section-title mt-4 mb-3">Members</h6>
+                            {% for member in group.members.all %}
+                                {% if member != group.creator and member not in group.admins.all %}
+                                <div class="group-member mb-3">
+                                    {% if member.profile.picture %}
+                                        <img src="{{ member.profile.picture.url }}" class="rounded-circle member-img" alt="Member">
+                                    {% else %}
+                                        <div class="rounded-circle bg-secondary member-img d-flex align-items-center justify-content-center">
+                                            <i class="fas fa-user text-light"></i>
+                                        </div>
+                                    {% endif %}
+                                    <div class="member-info">
+                                        <a href="{% url 'profile' member.profile.pk %}" class="member-name">{{ member }}</a>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sidebar (now sticky) -->
+            <div class="col-lg-4 order-lg-1">
+                <div class="sticky" style="top: 100px;">
+                    <!-- About Section -->
+                    <div class="content-card sidebar-section mb-3">
+                        <div class="card-title-bar">
+                            <h5 class="card-title">About</h5>
+                        </div>
+                        <div class="p-3">
+                            <p class="sidebar-description">{{ group.description }}</p>
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="icon-circle-sm">
+                                    <i class="fas fa-calendar-alt text-primary"></i>
+                                </div>
+                                <span>Created on {{ group.created_at|date:"F j, Y" }}</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <div class="icon-circle-sm">
+                                    <i class="fas fa-users text-primary"></i>
+                                </div>
+                                <span>{{ group.members.count }} members</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Rules Section -->
+                    {% if rules %}
+                    <div class="content-card sidebar-section mb-3">
+                        <div class="card-title-bar">
+                            <h5 class="card-title"><i class="fas fa-gavel me-2"></i>Group Rules</h5>
+                        </div>
+                        <div class="rules-container">
+                            {% for rule in rules %}
+                            <div class="group-rule">
+                                <h6 class="rule-title">{{ forloop.counter }}. {{ rule.title }}</h6>
+                                <p class="rule-description-sm">{{ rule.description }}</p>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="content-card sidebar-section">
+                        <div class="card-title-bar">
+                            <h5 class="card-title">Group Members</h5>
+                        </div>
+                    
+                        <!-- Creator -->
+                        <div class="sidebar-members">
+                            {% if group.creator and group.creator.profile %}
+                                <a href="{% url 'profile' group.creator.profile.pk %}" class="group-member d-flex align-items-center mb-2">
+                                    {% if group.creator.profile.picture %}
+                                        <img src="{{ group.creator.profile.picture.url }}" class="rounded-circle sidebar-member-img" alt="Creator">
+                                    {% else %}
+                                        <div class="rounded-circle bg-secondary sidebar-member-img d-flex align-items-center justify-content-center">
+                                            <i class="fas fa-user text-light"></i>
+                                        </div>
+                                    {% endif %}
+                                    <span class="member-name">{{ group.creator }}</span>
+                                    <span class="badge creator-badge-sm ms-auto">Creator</span>
+                                </a>
+                            {% else %}
+                                <div class="group-member d-flex align-items-center mb-2">
+                                    <div class="rounded-circle bg-secondary sidebar-member-img d-flex align-items-center justify-content-center">
+                                        <i class="fas fa-user text-light"></i>
+                                    </div>
+                                    <span class="member-name">{{ group.creator|default:"Unknown" }}</span>
+                                    <span class="badge creator-badge-sm ms-auto">Creator</span>
+                                </div>
+                            {% endif %}
+                        
+                            <!-- Admins -->
+                            {% if group.admins.all %}
+                                <div class="card-subtitle mt-3 mb-2">
+                                    <h6 class="sidebar-subtitle">Admins</h6>
+                                </div>
+                                {% for admin in group.admins.all %}
+                                    <a href="{% url 'profile' admin.profile.pk %}" class="group-member d-flex align-items-center mb-2">
+                                        {% if admin.profile.picture %}
+                                            <img src="{{ admin.profile.picture.url }}" class="rounded-circle sidebar-member-img" alt="Admin">
+                                        {% else %}
+                                            <div class="rounded-circle bg-secondary sidebar-member-img d-flex align-items-center justify-content-center">
+                                                <i class="fas fa-user text-light"></i>
+                                            </div>
+                                        {% endif %}
+                                        <span class="member-name">{{ admin.username }}</span>
+                                        <span class="badge admin-badge-sm ms-auto">Admin</span>
+                                    </a>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                
+                        {% if user in group.members.all %}
+                            <div class="p-3 border-top">
+                                <form action="{% url 'leave_group' group.id %}" method="post" onsubmit="return confirm('Are you sure you want to leave this group?');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-leave-group">Leave Group</button>
+                                </form>
+                            </div>
+                        {% endif %}
+                    
+                        <!-- Moderators -->
+                        {% if moderators %}
+                        <div class="content-card sidebar-section mt-3">
+                            <div class="card-title-bar">
+                                <h5 class="card-title">Moderators</h5>
+                            </div>
+                            <div class="sidebar-members">
+                                {% for moderator in moderators %}
+                                <a href="{% url 'profile' moderator.profile.pk %}" class="group-member d-flex align-items-center mb-2">
+                                    {% if moderator.profile.picture %}
+                                        <img src="{{ moderator.profile.picture.url }}" class="rounded-circle sidebar-member-img" alt="Moderator">
+                                    {% else %}
+                                        <div class="rounded-circle bg-secondary sidebar-member-img d-flex align-items-center justify-content-center">
+                                            <i class="fas fa-user text-light"></i>
+                                        </div>
+                                    {% endif %}
+                                    <span class="member-name">{{ moderator }}</span>
+                                    <span class="badge moderator-badge ms-auto">Moderator</span>
+                                </a>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    
+                        {% if request.user == group.creator or request.user in group.admins.all %}
+                            <div class="p-3 border-top">
+                                <a href="{% url 'admin_approval' group.id %}" class="btn btn-admin">
+                                    <i class="fas fa-user-check me-1"></i> Manage Join Requests
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>     
+            </div>
+        </div>
+    </div>
+
+    <!-- Post Modal - Redesigned -->
+    <div class="modal fade" id="addPostModal" tabindex="-1" aria-labelledby="addPostModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addPostModalLabel">Share with the Group</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form method="POST" enctype="multipart/form-data" id="postForm">
+                        {% csrf_token %}
+                        <div class="post-author-info mb-3">
+                            <div class="d-flex align-items-center">
+                                {% if request.user.profile.picture %}
+                                    <img src="{{ request.user.profile.picture.url }}" class="rounded-circle post-author-img" width="48" height="48">
+                                {% else %}
+                                    <div class="rounded-circle bg-secondary post-author-img d-flex align-items-center justify-content-center">
+                                        <i class="fas fa-user text-light"></i>
+                                    </div>
+                                {% endif %}
+                                <div class="ms-2">
+                                    <div class="post-author-name">{{ request.user }}</div>
+                                    <div class="posting-to">
+                                        <i class="fas fa-users me-1"></i> {{ group.name }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <textarea name="body" class="form-control post-textarea" id="id_body" rows="5" placeholder="What would you like to share?"></textarea>
+                        </div>
+
+                        <div id="imagePreviewContainer" class="mb-3 d-none">
+                            <h6 class="image-preview-title">Image Preview</h6>
+                            <div class="row g-2" id="previewImagesWrapper"></div>
+                        </div>
+
+                        <div class="post-options mb-3">
+                            <div class="post-options-header">
+                                <h6>Add to your post</h6>
+                            </div>
+                            <div class="post-options-buttons">
+                                <label for="id_images" class="post-option-button">
+                                    <i class="fas fa-image text-success"></i>
+                                    <span>Photo</span>
+                                </label>
+                                <input type="file" name="images" class="d-none" id="id_images" accept="image/*" multiple>
+                                
+                                <button type="button" class="post-option-button">
+                                    <i class="fas fa-user-tag text-primary"></i>
+                                    <span>Tag People</span>
+                                </button>
+                                
+                                <button type="button" class="post-option-button">
+                                    <i class="fas fa-map-marker-alt text-danger"></i>
+                                    <span>Location</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" name="create_post" class="btn btn-post">
+                                <i class="fas fa-paper-plane me-2"></i> Share Post
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const groupCover = document.querySelector('.group-cover');
+            groupCover.style.backgroundColor = groupCover.dataset.bannerColor;
+          });
+
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Tab switching functionality
+            const postsTab = document.getElementById('posts-tab');
+            const aboutTab = document.getElementById('about-tab');
+            const membersTab = document.getElementById('members-tab');
+            
+            const postsSection = document.getElementById('posts-section');
+            const aboutSection = document.getElementById('about-section');
+            const membersSection = document.getElementById('members-section');
+            
+            // Set up tab click handlers
+            postsTab.addEventListener('click', function(e) {
+                e.preventDefault();
+                setActiveTab('posts');
+            });
+            
+            aboutTab.addEventListener('click', function(e) {
+                e.preventDefault();
+                setActiveTab('about');
+            });
+            
+            membersTab.addEventListener('click', function(e) {
+                e.preventDefault();
+                setActiveTab('members');
+            });
+            
+            function setActiveTab(tabName) {
+                // Update tab appearance
+                postsTab.classList.remove('active');
+                aboutTab.classList.remove('active');
+                membersTab.classList.remove('active');
+                
+                // Hide all sections
+                postsSection.classList.add('d-none');
+                aboutSection.classList.add('d-none');
+                membersSection.classList.add('d-none');
+                
+                // Show selected section and update tab
+                if (tabName === 'posts') {
+                    postsTab.classList.add('active');
+                    postsSection.classList.remove('d-none');
+                } else if (tabName === 'about') {
+                    aboutTab.classList.add('active');
+                    aboutSection.classList.remove('d-none');
+                } else if (tabName === 'members') {
+                    membersTab.classList.add('active');
+                    membersSection.classList.remove('d-none');
+                }
+            }
+            
+            // Image preview functionality
+            const imageInput = document.getElementById('id_images');
+            const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+            const previewImagesWrapper = document.getElementById('previewImagesWrapper');
+            
+            imageInput.addEventListener('change', function() {
+                previewImagesWrapper.innerHTML = ''; // Clear previous previews
+                
+                if (this.files && this.files.length > 0) {
+                    imagePreviewContainer.classList.remove('d-none');
+                    
+                    for (let i = 0; i < this.files.length; i++) {
+                        const reader = new FileReader();
+                        const file = this.files[i];
+                        
+                        reader.onload = function(e) {
+                            const col = document.createElement('div');
+                            col.className = 'col-6 col-md-4';
+                            
+                            const imgContainer = document.createElement('div');
+                            imgContainer.className = 'position-relative';
+                            
+                            const img = document.createElement('img');
+                            img.src = e.target.result;
+                            img.className = 'img-fluid rounded mb-2';
+                            img.style.maxHeight = '100px';
+                            img.style.width = '100%';
+                            img.style.objectFit = 'cover';
+                            
+                            const removeBtn = document.createElement('button');
+                            removeBtn.className = 'btn btn-danger btn-sm position-absolute top-0 end-0';
+                            removeBtn.innerHTML = '&times;';
+                            removeBtn.onclick = function() {
+                                col.remove();
+                                if (previewImagesWrapper.children.length === 0) {
+                                    imagePreviewContainer.classList.add('d-none');
+                                }
+                            };
+                            
+                            imgContainer.appendChild(img);
+                            imgContainer.appendChild(removeBtn);
+                            col.appendChild(imgContainer);
+                            previewImagesWrapper.appendChild(col);
+                        }
+                        
+                        reader.readAsDataURL(file);
+                    }
+                } else {
+                    imagePreviewContainer.classList.add('d-none');
+                }
+            });
+        });
+    </script>
+<style>
+    :root {
+        --primary-color: red;
+        --primary-hover: #4527a0;
+        --secondary-color: red;
+        --secondary-hover: red;
+        --bg-color: #0f161b;
+        --light-bg:#0f161b;
+        --text-color: #f5f5f5;
+        --secondary-text: #aaaaaa;
+        --border-color: #333333;
+        --shadow: 0 4px 12px rgba(0,0,0,0.3);
+        --transition: all 0.3s ease;
+        --radius: 8px;
+        --radius-sm: 4px;
+    }
+    
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        line-height: 1.5;
+    }
+    
+    /* Group Cover - Redesigned */
+    .group-cover {
+        height: 280px;
+        background-size: cover;
+        background-position: center;
+        position: relative;
+        border-radius: 0 0 var(--radius) var(--radius);
+        margin-bottom: 0;
+        display: flex;
+        align-items: flex-end;
+        overflow: hidden;
+    }
+    
+    .cover-gradient {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.7) 100%);
+        z-index: 1;
+    }
+    
+    .group-header-content {
+        padding: 30px 0;
+        position: relative;
+        z-index: 2;
+        width: 100%;
+    }
+    
+    .group-title-container {
+        margin-bottom: 10px;
+    }
+    
+    .group-name {
+        font-size: 36px;
+        font-weight: 700;
+        color: white;
+        margin-bottom: 4px;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    }
+    
+    .group-stats {
+        display: flex;
+        gap: 20px;
+        color: rgba(255,255,255,0.9);
+        font-size: 16px;
+    }
+    
+    .stat-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .stat-item i {
+        opacity: 0.8;
+    }
+    
+    /* Badge styles */
+    .private-badge, .public-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: 500;
+    }
+    
+    .private-badge {
+        background-color: rgba(244, 67, 54, 0.2);
+        color: #ff7961;
+    }
+    
+    .public-badge {
+        background-color: rgba(33, 150, 243, 0.2);
+        color: #64b5f6;
+    }
+    
+    /* Profile Container */
+    .profile-container {
+        background-color: var(--light-bg);
+        border-radius: var(--radius);
+        margin-top: -50px;
+        margin-bottom: 20px;
+        position: relative;
+        z-index: 3;
+        box-shadow: var(--shadow);
+        overflow: hidden;
+    }
+    
+    .group-avatar {
+        width: 120px;
+        height: 120px;
+        margin: 20px;
+        object-fit: cover;
+        border: 4px solid var(--light-bg);
+        box-shadow: var(--shadow);
+    }
+    
+    .profile-content {
+        padding: 20px 20px 20px 0;
+    }
+    
+    .group-description {
+        color: var(--text-color);
+        margin-bottom: 16px;
+        font-size: 16px;
+        line-height: 1.6;
+    }
+    
+    /* Action Buttons */
+    .action-buttons {
+        display: flex;
+        gap: 10px;
+        margin-top: 16px;
+    }
+    
+    .btn-join, .btn-leave-group, .btn-admin, .btn-post {
+        padding: 8px 20px;
+        border-radius: var(--radius-sm);
+        font-weight: 500;
+        transition: var(--transition);
+        border: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .btn-join {
+        background-color: var(--primary-color);
+        color: white;
+    }
+    
+    .btn-join:hover {
+        background-color: var(--primary-hover);
+        color: white;
+    }
+    
+    .btn-leave-group {
+        background-color: rgba(244, 67, 54, 0.1);
+        color: #f44336;
+        width: 100%;
+    }
+    
+    .btn-leave-group:hover {
+        background-color: rgba(244, 67, 54, 0.2);
+    }
+    
+    .btn-admin {
+        background-color: rgba(255, 152, 0, 0.1);
+        color: #ff9800;
+        width: 100%;
+    }
+    
+    .btn-admin:hover {
+        background-color: rgba(255, 152, 0, 0.2);
+    }
+    
+    .btn-post {
+        background-color: var(--secondary-color);
+        color: white;
+    }
+    
+    .btn-post:hover {
+        background-color: var(--secondary-hover);
+    }
+    
+    /* Badge styles */
+    .member-badge, .pending-badge, .admin-badge, .creator-badge, .moderator-badge {
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 500;
+    }
+    
+    .member-badge {
+        background-color: rgba(33, 150, 243, 0.1);
+        color: #64b5f6;
+    }
+    
+    .pending-badge {
+        background-color: rgba(255, 152, 0, 0.1);
+        color: #ffb74d;
+    }
+    
+    .admin-badge {
+        background-color: rgba(156, 39, 176, 0.1);
+        color: #ba68c8;
+    }
+    
+    .creator-badge {
+        background-color: rgba(233, 30, 99, 0.1);
+        color: #f06292;
+    }
+    
+    .moderator-badge {
+        background-color: rgba(0, 150, 136, 0.1);
+        color: #4db6ac;
+    }
+    
+    /* Small Badge variants */
+    .admin-badge-sm, .creator-badge-sm, .moderator-badge-sm {
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 500;
+    }
+    
+    .admin-badge-sm {
+        background-color: rgba(156, 39, 176, 0.1);
+        color: #ba68c8;
+    }
+    
+    .creator-badge-sm {
+        background-color: rgba(233, 30, 99, 0.1);
+        color: #f06292;
+    }
+    
+    .moderator-badge-sm {
+        background-color: rgba(0, 150, 136, 0.1);
+        color: #4db6ac;
+    }
+    
+    /* Navigation */
+    .nav-custom {
+        background-color: var(--light-bg);
+        border-radius: var(--radius);
+        padding: 4px;
+        overflow-x: auto;
+        white-space: nowrap;
+        margin-bottom: 20px;
+        box-shadow: var(--shadow);
+    }
+    
+    .nav-custom .nav-item {
+        margin: 0;
+    }
+    
+    .nav-custom .nav-link {
+        color: var(--secondary-text);
+        padding: 12px 20px;
+        border-radius: var(--radius-sm);
+        font-weight: 500;
+        transition: var(--transition);
+    }
+    
+    .nav-custom .nav-link:hover {
+        color: var(--text-color);
+    }
+    
+    .nav-custom .nav-link.active {
+        background-color: var(--primary-color);
+        color: white;
+    }
+    
+    .admin-link:hover {
+        color: var(--secondary-color) !important;
+    }
+    
+    /* Content Cards */
+    .content-card {
+        background-color: var(--light-bg);
+        border-radius: var(--radius);
+        margin-bottom: 20px;
+        box-shadow: var(--shadow);
+        overflow: hidden;
+    }
+    
+    .card-title-bar {
+        padding: 15px 20px;
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    .card-title {
+        margin-bottom: 0;
+        font-weight: 600;
+        font-size: 18px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    /* Create Post Section */
+    .create-post-wrapper {
+        padding: 16px;
+        cursor: pointer;
+    }
+    
+    .user-avatar {
+        width: 40px;
+        height: 40px;
+        object-fit: cover;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .create-post-input {
+        background-color: rgba(255, 255, 255, 0.05);
+        padding: 10px 16px;
+        border-radius: 20px;
+        font-size: 15px;
+        cursor: text;
+    }
+    
+    .post-actions {
+        display: flex;
+        margin-top: 12px;
+        border-top: 1px solid var(--border-color);
+        padding-top: 12px;
+    }
+    
+    .post-action-btn {
+        flex: 1;
+        background: none;
+        border: none;
+        color: var(--secondary-text);
+        padding: 8px 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        font-size: 14px;
+        transition: var(--transition);
+        cursor: pointer;
+    }
+    
+    .post-action-btn:hover {
+        color: var(--text-color);
+        background-color: rgba(255, 255, 255, 0.05);
+        border-radius: var(--radius-sm);
+    }
+    
+    /* Empty Posts Section */
+    .empty-posts {
+        text-align: center;
+        padding: 40px 20px;
+    }
+    
+    .empty-posts i {
+        font-size: 48px;
+        color: var(--secondary-text);
+        margin-bottom: 16px;
+    }
+    
+    /* About Section */
+    .about-description {
+        margin-bottom: 20px;
+        line-height: 1.7;
+    }
+    
+    .section-title {
+        font-weight: 600;
+        color: var(--text-color);
+        margin-bottom: 16px;
+        font-size: 16px;
+    }
+    
+    .icon-circle {
+        width: 40px;
+        height: 40px;
+        background-color: rgba(255, 255, 255, 0.05);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 16px;
+    }
+    
+    .icon-circle-sm {
+        width: 30px;
+        height: 30px;
+        background-color: rgba(255, 255, 255, 0.05);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 12px;
+    }
+    
+    .group-details {
+        margin-bottom: 30px;
+    }
+    
+    /* Group Rules */
+    .group-rule {
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    .group-rule:last-child {
+        border-bottom: none;
+    }
+    
+    .rule-title {
+        font-weight: 600;
+        margin-bottom: 4px;
+        font-size: 15px;
+    }
+    
+    .rule-description {
+        color: var(--secondary-text);
+        font-size: 14px;
+        margin-bottom: 0;
+    }
+    
+    .rule-description-sm {
+        color: var(--secondary-text);
+        font-size: 13px;
+        margin-bottom: 0;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    
+    /* Members Section */
+    .group-member {
+        display: flex;
+        align-items: center;
+        padding: 8px 16px;
+        text-decoration: none;
+        color: var(--text-color);
+        transition: var(--transition);
+    }
+    
+    .group-member:hover {
+        background-color: rgba(255, 255, 255, 0.05);
+        color: var(--text-color);
+    }
+    
+    .member-img {
+        width: 50px;
+        height: 50px;
+        margin-right: 12px;
+        object-fit: cover;
+    }
+    
+    .sidebar-member-img {
+        width: 36px;
+        height: 36px;
+        margin-right: 10px;
+        object-fit: cover;
+    }
+    
+    .member-name {
+        font-weight: 500;
+    }
+    
+    .member-info {
+        flex: 1;
+    }
+    
+    /* Sidebar */
+    .sidebar-section {
+        margin-bottom: 20px;
+    }
+    
+    .sidebar-description {
+        color: var(--secondary-text);
+        font-size: 14px;
+        margin-bottom: 16px;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    
+    .sidebar-subtitle {
+        font-size: 14px;
+        color: var(--secondary-text);
+        margin-bottom: 8px;
+        font-weight: 600;
+    }
+    
+    .sidebar-members {
+        padding: 8px 0;
+    }
+    
+    /* Post Modal */
+    .modal-content {
+        background-color: var(--light-bg);
+        color: var(--text-color);
+        border: none;
+        border-radius: var(--radius);
+    }
+    
+    .modal-header {
+        border-bottom: 1px solid var(--border-color);
+        padding: 16px 20px;
+    }
+    
+    .modal-title {
+        font-weight: 600;
+    }
+    
+    .btn-close {
+        filter: invert(1);
+    }
+    
+    .post-author-info {
+        padding: 8px 0;
+    }
+    
+    .post-author-img {
+        width: 48px;
+        height: 48px;
+        object-fit: cover;
+    }
+    
+    .post-author-name {
+        font-weight: 500;
+        font-size: 16px;
+    }
+    
+    .posting-to {
+        font-size: 13px;
+        color: var(--secondary-text);
+    }
+    
+    .post-textarea {
+        background-color: var(--light-bg);
+        border: 1px solid var(--border-color);
+        color: var(--text-color);
+        font-size: 16px;
+        resize: none;
+        padding: 12px;
+    }
+    
+    .post-textarea:focus {
+        background-color: var(--light-bg);
+        border-color: var(--primary-color);
+        color: var(--text-color);
+        box-shadow: none;
+    }
+    
+    .image-preview-title {
+        font-size: 14px;
+        margin-bottom: 8px;
+        color: var(--secondary-text);
+    }
+    
+    .post-options-header {
+        margin-bottom: 10px;
+    }
+    
+    .post-options-header h6 {
+        font-size: 14px;
+        color: var(--secondary-text);
+    }
+    
+    .post-options-buttons {
+        display: flex;
+        gap: 8px;
+        overflow-x: auto;
+    }
+    
+    .post-option-button {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        background-color: rgba(255, 255, 255, 0.05);
+        border: none;
+        border-radius: var(--radius-sm);
+        color: var(--text-color);
+        font-size: 14px;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+    
+    .post-option-button:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    /* Responsive Styles */
+    @media (max-width: 767px) {
+        .group-cover {
+            height: 220px;
+        }
+        
+        .group-name {
+            font-size: 28px;
+        }
+        
+        .group-avatar {
+            width: 90px;
+            height: 90px;
+            margin: 16px;
+        }
+        
+        .profile-content {
+            padding: 16px;
+        }
+        
+        .nav-custom .nav-link {
+            padding: 10px 16px;
+        }
+    }
+    
+    /* Sticky Sidebar */
+    .sticky {
+        position: sticky;
+        top: 100px;
+    }
+    
+    /* Rules container */
+    .rules-container {
+        max-height: 250px;
+        overflow-y: auto;
+    }
+    
+    /* Border Styles */
+    .border-top {
+        border-top: 1px solid var(--border-color);
+    }
+</style>
+{% endblock %}
+        

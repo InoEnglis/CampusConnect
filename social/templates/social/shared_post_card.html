@@ -1,0 +1,35 @@
+<div class="card mb-3 shared-post-card bg-dark">
+    <!-- User who shared the post -->
+    <div class="card-header bg-dark text-light d-flex align-items-center justify-content-between">
+        <!-- Left Section: Profile Picture and Username -->
+        <div class="d-flex align-items-center">
+            <!-- Profile Picture -->
+            <img src="{{ shared_post.shared_by.profile.picture.url }}" 
+                 alt="Profile Picture" 
+                 class="rounded-circle me-2" 
+                 style="width: 40px; height: 40px; object-fit: cover; border: 2px solid rgba(255, 255, 255, 0.2);">
+            
+            <!-- Username and shared info -->
+            <div>
+                <strong class="text-light">{{ shared_post.shared_by.username }}</strong> <i>shared a post</i>
+            </div>
+        </div>
+
+        <!-- Right Section: Date and Time -->
+        <small class="text-end" style="color: rgba(255, 255, 255, 0.33);">
+            {{ shared_post.shared_on|date:"F d, Y H:i" }}
+        </small>
+    </div>
+
+    <!-- Optional comment added during sharing -->
+    {% if shared_post.shared_comment %}
+        <div class="card-body bg-dark">
+            <p><em>{{ shared_post.shared_comment }}</em></p>
+        </div>
+    {% endif %}
+
+    <!-- Render the original post here -->
+    <div class="card-body bg-dark">
+        {% include "social/post_card.html" with post=shared_post.original_post %}
+    </div>
+</div>

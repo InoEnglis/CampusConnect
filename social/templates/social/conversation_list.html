@@ -1,0 +1,599 @@
+{% extends 'landing/base.html' %}
+{% block content %}
+{% load hashtag_filters %}
+{% load conversation_extras %}
+<div class="container mx-auto px-0 lg:px-8">
+    <!-- Mobile Toggle Button -->
+    <button 
+        id="sidebar-toggle" 
+        class="lg:hidden fixed top-1/2 left-0 z-50 p-3 bg-gray-800 text-violet-500 rounded-r-lg transform -translate-y-1/2 shadow-lg hover:bg-gray-700 transition-colors"
+        aria-label="Toggle sidebar"
+    >
+        <i class="fas fa-chevron-right"></i> 
+    </button>
+
+    <div class="flex w-full">
+        <!-- Sidebar -->
+        <div 
+            id="sidebar" 
+            class="w-[90%] lg:w-[30%] p-4 shadow-md rounded-l-lg text-white h-[100vh] overflow-y-auto transform -translate-x-full lg:translate-x-0 transition-transform duration-300 fixed lg:static z-40" 
+            style="background-color: #0f161b;"
+            aria-labelledby="sidebar-title"
+        >
+            <!-- User Profile Section -->
+            <div class="flex items-center gap-4 mb-6">
+                <div class="w-12 h-12 rounded-full bg-gray-600 flex items-center justify-center">
+                    <img 
+                        src="{{ request.user.profile.picture.url }}" 
+                        alt="Profile Picture" 
+                        class="w-full h-full object-cover rounded-full"
+                    >
+                </div>
+                <div>
+                    <p class="text-lg font-semibold">{{ request.user.username }}</p>
+                </div>
+                <a 
+                    href="{% url 'post-list' %}" 
+                    class="rounded-full hover:bg-gray-800 p-2 text-center bg-gray-500"
+                    aria-label="Go to home"
+                >
+                    <i class="fa-solid fa-house"></i>
+                    <span class="sr-only">Home</span>
+                </a>    
+            </div>
+
+            <!-- Search Bar -->
+            <div class="flex flex-col gap-4 mb-6">
+                <input 
+                    type="text" 
+                    class="bg-gray-700 text-white p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500" 
+                    placeholder="Search conversations..." 
+                    aria-label="Search conversations"
+                />
+            </div>
+
+            <!-- Conversation List -->
+            <div class="flex flex-col gap-4">
+                <!-- Other Conversations -->
+                {% for conversation in conversations %}
+                <div 
+                    class="block cursor-pointer hover:bg-gray-700 transition-colors rounded-md" 
+                    onclick="selectChatRoom('{{ conversation.name }}')"
+                    role="button"
+                    tabindex="0"
+                    aria-label="Join {{ conversation.name }}"
+                >
+                    <div class="p-4 rounded-md text-gray-100">
+                        
+                        <!-- Conversation Name -->
+                        <p class="text-sm font-medium text-gray-300 truncate">
+                            {% get_conversation_name conversation %}
+                        </p>
+            
+                        <!-- Latest Message with Highlighting if Unread -->
+                        <p class="text-xs mt-1 truncate {% if conversation.latest_message_read_status == False %}text-blue-500{% else %}text-gray-500{% endif %}">
+                            {{ conversation.latest_message_content }}
+                        </p>
+            
+                        <!-- Profile Picture -->
+                        <div class="mt-2">
+                            {% if conversation.receiver_profile_pic %}
+                            <img src="{{ conversation.receiver_profile_pic }}" alt="{{ conversation.receiver_name }}" class="w-10 h-10 rounded-full">
+                            {% else %}
+                            <p>No Profile Picture Available</p>
+                            {% endif %}
+                        </div>
+            
+                        <!-- Online/Offline Status -->
+                        <div class="flex items-center mt-2">
+                            <span class="text-xs text-gray-400 mr-2">Status:</span>
+                            {% if conversation.online_status %}
+                                <span class="w-2.5 h-2.5 rounded-full bg-green-500 border border-[#1a252f]"></span>
+                                <p class="ml-2 text-xs text-green-500">Online</p>
+                            {% else %}
+                                <span class="w-2.5 h-2.5 rounded-full bg-red-500 border border-[#1a252f]"></span>
+                                <p class="ml-2 text-xs text-red-500">Offline</p>
+                            {% endif %}
+                        </div>
+            
+                    </div>
+                </div>
+            {% endfor %}
+            </div>
+        </div>
+
+        <!-- Main Chat Area -->
+        <div class="w-full lg:w-[70%] bg-gray-800 shadow-md rounded-lg text-gray-800 h-[100vh] relative">
+
+            
+            <!-- Chat Header -->
+            <div 
+                id="chat-header" 
+                class="flex items-center gap-3 text-white p-4 rounded-tr-lg sticky top-0" 
+                style="background-color: #0f161b;">
+                
+                <!-- Receiver Profile Picture -->
+                <img 
+                    id="receiver-profile-pic" 
+                    src="{{ receiver_profile_pic }}" 
+                    alt="Receiver's Profile Picture" 
+                    class="w-10 h-10 rounded-full">
+                
+                <!-- Receiver Name and Status -->
+                <h2 id="receiver-name" class="text-lg font-semibold flex items-center">
+                    {{ receiver_name }}
+                    
+                    <!-- Display Status -->
+                    <span class="ml-2 w-2.5 h-2.5 rounded-full 
+                        {% if receiver_status == 'Online' %} bg-green-500 {% else %} bg-red-500 {% endif %} 
+                        border border-[#1a252f]"></span>
+                    
+                    <!-- Display Online/Offline Text -->
+                    <span class="ml-2 text-xs 
+                        {% if receiver_status == 'Online' %} text-green-500 {% else %} text-red-500 {% endif %}">
+                        {{ receiver_status }}
+                    </span>
+                </h2>
+                
+            </div>
+
+            
+
+            <!-- Connection State Banner -->
+            <div 
+                id="connection-banner" 
+                class="text-center text-sm text-white py-2 hidden"
+                role="status"
+                aria-live="polite"
+            ></div>
+
+            <!-- Chat Messages -->
+            <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-4 h-[calc(100%-150px)]" aria-live="polite">
+                
+            </div>
+            {% if message.sender == request.user %}
+            <button onclick="editMessage({{ message.id }})">Edit</button>
+            <button onclick="deleteMessage({{ message.id }})">Unsend</button>
+            {% endif %}
+            
+
+
+            
+            <!-- Reply Banner -->
+            <div id="reply-banner" class="absolute bottom-16 left-0 w-full bg-gray-200 p-3 border-t shadow-md hidden">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center">
+                        <i class="fas fa-reply mr-2 text-gray-600"></i>
+                        <span id="reply-text" class="text-sm text-yellow-700 truncate max-w-xs">Reply message</span>
+                    </div>
+                    <button id="cancel-reply" class="text-violet-500 hover:text-red-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div id="replies-container" class="replies-container">
+                <!-- Replies will be dynamically added here -->
+            </div>
+            
+
+            <!-- Input Box -->
+            <div class="absolute bottom-0 left-0 w-full bg-white p-2 border-t shadow-md flex items-center gap-2">
+                <input 
+                    id="message-input" 
+                    type="text" 
+                    class="flex-grow p-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500" 
+                    placeholder="Type your message..." 
+                    aria-label="Type your message"
+                    autocomplete="off"
+                />
+                <button 
+                    id="send-button" 
+                    class="p-2 text-white bg-violet-600 rounded hover:bg-violet-700 focus:outline-none focus:ring-2 focus:ring-violet-500 w-16"
+                    aria-label="Send message"
+                >
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+                
+                
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<style>
+
+    .message-container {
+        margin-bottom: 10px;
+        padding: 10px;
+        border: 1px solid #ddd;
+    }
+    
+    .parent-message {
+        font-size: 14px;
+        margin-bottom: 5px;
+        color: #eb3434;
+    }
+    
+    .reply-preview {
+        margin-left: 20px;
+        font-size: 12px;
+        color: #936e6e;
+    }
+    
+    .content {
+        font-size: 16px;
+    }
+    
+    /* Style for message content to indicate it's clickable for replies */
+    .message-content {
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+
+    .message-content:hover {
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    /* Style for message replies */
+    .message-reply {
+        font-size: 0.9em;
+        color: #555;
+        background-color: #f9f9f9;
+        padding: 5px;
+        border-left: 3px solid #ccc;
+        margin-bottom: 4px;
+        border-radius: 4px;
+    }
+
+    .unread-message {
+        background-color: #f5f5f5;  /* Light grey background for unread messages */
+        border-left: 4px solid #ff6b6b;  /* Red left border for unread messages */
+    }
+    
+    .message {
+        padding: 8px;
+        margin-bottom: 10px;
+        background-color: #eaeaea;
+        border-radius: 8px;
+        transition: background-color 0.3s ease;
+    }
+    
+    .message.read {
+        background-color: #ffffff;  /* White background for read messages */
+    }
+    
+</style>
+
+<script>
+let chatSocket;
+let replyToMessageId = null;
+let replyToMessageContent = null;
+let currentRoomName = null;
+let messageMap = {};
+
+// Function to update the connection banner
+function updateConnectionBanner(state) {
+    const banner = document.getElementById('connection-banner');
+    banner.classList.remove('hidden');
+    if (state === 'connecting') {
+        banner.innerText = 'Connecting...';
+        banner.className = 'text-center text-sm text-white py-2 bg-yellow-600';
+    } else if (state === 'connected') {
+        banner.innerText = 'Connected';
+        banner.className = 'text-center text-sm text-white py-2 bg-green-600';
+        setTimeout(() => banner.classList.add('hidden'), 1000);
+    } else if (state === 'disconnected') {
+        banner.innerText = 'Disconnected';
+        banner.className = 'text-center text-sm text-white py-2 bg-red-600';
+    }
+}
+
+// Function to load previous messages in a chat room
+async function loadPreviousMessages(roomName) {
+    try {
+        const response = await fetch(`/social/messages/${roomName}/`);
+        if (!response.ok) throw new Error('Failed to load messages');
+        
+        const data = await response.json();
+        const chatMessages = document.getElementById('chat-messages');
+        chatMessages.innerHTML = '';
+
+        // Clear the existing message map
+        messageMap = {};
+
+        document.getElementById('receiver-name').innerText = data.receiver_name || 'User';
+        document.getElementById('receiver-profile-pic').src = data.receiver_profile_pic || '/media/uploads/profile_pictures/default_profile.png';
+
+        // Store messages in messageMap and localStorage
+        const sortedMessages = [...data.messages].sort((a, b) => a.id - b.id);
+        
+        sortedMessages.forEach(message => {
+            // Normalize message properties to be consistent
+            if (message.reply_to_id) {
+                message.reply_to = message.reply_to_id; // Add reply_to for consistency
+            }
+            messageMap[message.id] = message;
+        });
+
+        // Persist messageMap in localStorage (for page reloads)
+        localStorage.setItem('messageMap', JSON.stringify(messageMap));
+
+        // Render messages with reply handling
+        sortedMessages.forEach(message => {
+            appendMessage(message, false);  // false = skip setting up click handlers for now
+        });
+
+        // Setup click handlers after rendering messages
+        setupMessageClickHandlers();
+
+        // Scroll to the latest message
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+
+    } catch (error) {
+        console.error('Error loading messages:', error);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const storedMessageMap = localStorage.getItem('messageMap');
+    if (storedMessageMap) {
+        messageMap = JSON.parse(storedMessageMap);
+        const chatMessages = document.getElementById('chat-messages');
+
+        // If messageMap exists in localStorage, render messages
+        Object.values(messageMap).forEach(message => {
+            appendMessage(message, false);  // false = skip setting up click handlers for now
+        });
+
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    } else {
+        // If no messageMap is found in localStorage, load from API
+        loadPreviousMessages(currentRoomName);  // You would need to define `currentRoomName`
+    }
+});
+
+function appendMessage(message, setupHandler = true) {
+    const chatMessages = document.getElementById('chat-messages');
+    const messageElement = document.createElement('div');
+    const messageId = message.id || message.message_id;
+
+    const isCurrentUser = message.sender === '{{ request.user.username }}';
+    messageElement.className = `flex ${isCurrentUser ? 'justify-end' : 'justify-start'} mb-4`;
+    messageElement.id = `message-${messageId}`;
+
+    // Handle reply HTML generation
+    let replyHtml = '';
+    if (message.reply_to || message.reply_to_id) {
+        const replyId = message.reply_to || message.reply_to_id;
+        const repliedMessage = messageMap[replyId];
+        
+        // Use reply_to_content if available, or get from messageMap
+        const replyContent = message.reply_to_content || 
+                             (repliedMessage ? repliedMessage.content : 'Original message not available');
+        
+        const displayContent = replyContent.length > 30 ? replyContent.substring(0, 30) + '...' : replyContent;
+        const replySender = repliedMessage ? repliedMessage.sender : 'User';
+    
+        console.log(`[PING] reply_to: ${replyId} | found: ${!!repliedMessage} | sender: ${replySender} | preview: ${displayContent}`);
+    
+        replyHtml = `
+            <div class="message-reply p-2 rounded mb-2 border-l-4 border-violet-500">
+                <div class="flex items-center text-xs text-gray-500">
+                    <i class="fas fa-reply mr-1"></i>
+                    <span class="font-semibold">${replySender}:</span>
+                </div>
+                <div class="text-xl text-red-600">${displayContent}</div>
+            </div>
+        `;
+    }
+    
+    // Create message HTML with reply if present
+    messageElement.innerHTML = `
+        <div class="max-w-xs p-3 rounded-lg ${isCurrentUser ? 'bg-violet-500 text-white' : 'bg-yellow-200'}">
+            ${replyHtml}
+            <div class="message-content" data-message-id="${messageId}" data-message-content="${message.content.replace(/"/g, '&quot;')}">
+                <p class="text-sm">${message.content}</p>
+            </div>
+            <p class="text-xs mt-2 ${isCurrentUser ? 'text-violet-200' : 'text-gray-500'}">${message.timestamp || ''}</p>
+        </div>
+    `;
+
+    chatMessages.appendChild(messageElement);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+
+    if (setupHandler) {
+        const contentEl = messageElement.querySelector('.message-content');
+        contentEl.addEventListener('click', function() {
+            setReplyTo(this.dataset.messageId, this.dataset.messageContent);
+        });
+    }
+}
+
+// Function to set up reply data and UI
+function setReplyTo(messageId, messageContent) {
+    replyToMessageId = messageId;
+    replyToMessageContent = messageContent;
+
+    // Show reply banner
+    const replyBanner = document.getElementById('reply-banner');
+    const replyText = document.getElementById('reply-text');
+
+    // Set reply content and show banner
+    replyText.textContent = messageContent.length > 50 
+        ? messageContent.substring(0, 50) + '...' 
+        : messageContent;
+    replyBanner.classList.remove('hidden');
+    replyBanner.style.display = 'block';
+
+    // Focus on input field
+    document.getElementById('message-input').focus();
+}
+
+// Function to cancel reply
+function cancelReply() {
+    replyToMessageId = null;
+    replyToMessageContent = null;
+
+    // Hide reply banner
+    const replyBanner = document.getElementById('reply-banner');
+    replyBanner.classList.add('hidden');
+    replyBanner.style.display = 'none';
+}
+
+// Function to select the chat room and connect WebSocket
+function selectChatRoom(roomName) {
+    if (chatSocket) chatSocket.close();
+    updateConnectionBanner('connecting');
+    currentRoomName = roomName;
+    loadPreviousMessages(roomName);
+
+    // Clear any active reply
+    cancelReply();
+
+    // Connect to WebSocket
+    chatSocket = new WebSocket(`ws://${window.location.host}/ws/social/${roomName}/`);
+
+    chatSocket.onopen = () => {
+        updateConnectionBanner('connected');
+    };
+
+    chatSocket.onmessage = (e) => {
+        const data = JSON.parse(e.data);
+        console.log("Received message:", data);
+        
+        // Normalize message properties to be consistent
+        if (data.message_id && !data.id) {
+            data.id = data.message_id;
+        }
+        if (data.reply_to_id && !data.reply_to) {
+            data.reply_to = data.reply_to_id;
+        }
+        
+        // Add message to messageMap first (important for real-time reply handling)
+        messageMap[data.id || data.message_id] = data;
+        
+        // Update localStorage every time messageMap changes
+        localStorage.setItem('messageMap', JSON.stringify(messageMap));
+        
+        // Then append it to the UI
+        appendMessage(data);
+    };
+
+    chatSocket.onclose = () => {
+        updateConnectionBanner('disconnected');
+    };
+}
+
+// Send message function
+function sendMessage() {
+    const messageInput = document.getElementById('message-input');
+    const message = messageInput.value.trim();
+
+    if (message && chatSocket && chatSocket.readyState === WebSocket.OPEN) {
+        const messageData = {
+            message: message,
+            sender: '{{ request.user.username }}',
+            temp_id: Date.now().toString() // Add temporary ID for tracking
+        };
+
+        // Add reply data if we're replying to a message
+        if (replyToMessageId !== null) {
+            messageData.reply_to = replyToMessageId;
+            messageData.reply_to_content = replyToMessageContent;
+        }
+
+        // Send the message
+        chatSocket.send(JSON.stringify(messageData));
+
+        // Clear input and reply state
+        messageInput.value = '';
+        cancelReply();
+    }
+}
+
+// Initialize event listeners when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    // Setup cancel reply button
+    document.getElementById('cancel-reply').addEventListener('click', cancelReply);
+
+    // Setup send button click handler
+    document.getElementById('send-button').addEventListener('click', sendMessage);
+
+    // Setup enter key press to send message
+    document.getElementById('message-input').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
+        }
+    });
+
+    // Select first room if available
+    const firstRoom = document.querySelector('[onclick^="selectChatRoom"]');
+    if (firstRoom) {
+        firstRoom.click();
+    }
+
+    // Setup mobile sidebar toggle
+    const sidebarToggle = document.getElementById('sidebar-toggle');
+    const sidebar = document.getElementById('sidebar');
+
+    if (sidebarToggle && sidebar) {
+        sidebarToggle.addEventListener('click', function() {
+            const isOpen = sidebar.classList.contains('translate-x-0');
+            if (isOpen) {
+                sidebar.classList.remove('translate-x-0');
+                sidebar.classList.add('-translate-x-full');
+                sidebarToggle.innerHTML = '<i class="fas fa-chevron-right"></i>';
+            } else {
+                sidebar.classList.remove('-translate-x-full');
+                sidebar.classList.add('translate-x-0');
+                sidebarToggle.innerHTML = '<i class="fas fa-chevron-left"></i>';
+            }
+        });
+    }
+});
+</script>
+
+
+<script>
+    function renderMessage(m) {
+        if (document.getElementById(`msg-${m.id}`)) return;  // Avoid rendering same message twice
+    
+        const wrap = document.createElement('div');
+        wrap.className = 'message';
+        wrap.id = `msg-${m.id}`;
+    
+        // Create a container for the main message
+        const messageContainer = document.createElement('div');
+        messageContainer.className = 'message-container';
+    
+        // Render the main message
+        const contentDiv = document.createElement('div');
+        contentDiv.className = 'content';
+        contentDiv.innerHTML = `<strong>${m.sender}</strong>: ${m.content}`;
+        messageContainer.appendChild(contentDiv);
+    
+        // If the message is a reply, style it accordingly and show the parent message
+        if (m.reply_to_id) {
+            const parentMessage = document.createElement('div');
+            parentMessage.className = 'parent-message';
+            parentMessage.innerHTML = `<strong>Parent:</strong> ${m.reply_to_content}`;
+            messageContainer.prepend(parentMessage); // Prepend so it appears above the reply
+        }
+    
+        // Append the message container to the main message wrap
+        wrap.appendChild(messageContainer);
+    
+        // Append the message to the general container
+        document.getElementById('replies-container').appendChild(wrap);
+    }
+    
+</script>
+<script>
+    
+</script>
+
+    
+{% endblock %}

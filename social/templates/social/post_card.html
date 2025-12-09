@@ -1,0 +1,909 @@
+<!-- post_card.html -->
+{% load hashtag_filters %}
+<div class="post-card" id="post-{{ post.id }}" data-post-id="{{ post.id }}">
+    <div class="post-card-content">
+        <!-- Post Header with Author Info and Options -->
+        <div class="post-header">
+            <!-- Author Information -->
+            <div class="author-info">
+                <div class="author-avatar">
+                    <img src="{{ post.author.profile.picture.url }}" alt="{{ post.author.username }}'s Profile Picture">
+                </div>
+                <div class="author-details">
+                    <a href="{% url 'profile' post.author.profile.pk %}" class="author-name">@{{ post.author }}</a>
+                    <div class="post-meta">
+                        <span>{{ post.created_on|timesince }} ago</span>
+                        {% if post.group %}
+                            <span class="dot-separator"></span>
+                            <span>posted in <strong>{{ post.group.name }}</strong></span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Post Options Menu (conditionally hidden if it's a report page) -->
+            {% if not is_report_page %}
+            <div class="post-options">
+                <button class="options-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-ellipsis-h"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
+                    {% if post.author == user %}
+                        <li>
+                            <a class="dropdown-item" href="{% url 'post-edit' post.id %}">
+                                <i class="fas fa-edit"></i> Edit
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="{% url 'post-delete' post.id %}">
+                                <i class="fas fa-trash"></i> Delete
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                    {% endif %}
+                    <li>
+                        <a class="dropdown-item" href="{% url 'report-post' post.id %}">
+                            <i class="fas fa-flag"></i> Report
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Post Body Content -->
+        <div class="post-body" style="color:rgb(236, 236, 236)">
+            <p class="px-2 text-white">{{ post.body|link_hashtags }}</p>
+        </div>
+        
+        <!-- Post Media Content -->
+        {% if post.images.count > 0 %}
+        <div class="post-media" data-post-id="{{ post.id }}">
+            {% if post.images.count == 1 %}
+                <div class="single-image-layout gallery-trigger" data-index="0">
+                    <img src="{{ post.images.first.image.url }}" alt="Post image" class="post-image">
+                </div>
+            {% elif post.images.count == 2 %}
+                <div class="two-images-layout">
+                    <div class="two-images-container">
+                        {% for image in post.images.all %}
+                        <div class="two-image-wrapper gallery-trigger" data-index="{{ forloop.counter0 }}">
+                            <img src="{{ image.image.url }}" alt="Post image" class="post-image">
+                            <div class="image-overlay"></div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% elif post.images.count == 3 %}
+                <div class="three-images-layout">
+                    <div class="main-image gallery-trigger" data-index="0">
+                        <img src="{{ post.images.all.0.image.url }}" alt="Main image" class="post-image">
+                    </div>
+                    <div class="secondary-images">
+                        <div class="image-container gallery-trigger" data-index="1">
+                            <img src="{{ post.images.all.1.image.url }}" alt="Post image" class="post-image">
+                        </div>
+                        <div class="image-container gallery-trigger" data-index="2">
+                            <img src="{{ post.images.all.2.image.url }}" alt="Post image" class="post-image">
+                        </div>
+                    </div>
+                </div>
+            {% elif post.images.count > 3 %}
+                <div class="three-images-layout">
+                    <div class="main-image gallery-trigger" data-index="0">
+                        <img src="{{ post.images.all.0.image.url }}" alt="Main image" class="post-image">
+                    </div>
+                    <div class="secondary-images">
+                        <div class="image-container gallery-trigger" data-index="1">
+                            <img src="{{ post.images.all.1.image.url }}" alt="Post image" class="post-image">
+                        </div>
+                        <div class="image-container overlay-container gallery-trigger" data-index="2">
+                            <img src="{{ post.images.all.2.image.url }}" alt="Post image" class="post-image">
+                            <div class="image-overlay">
+                                <span>+{{ post.images.count|add:"-3" }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+            
+            <!-- Hidden container to store all image URLs for the gallery -->
+            <div class="gallery-data" style="display: none;">
+                {% for image in post.images.all %}
+                    <span data-url="{{ image.image.url }}"></span>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if post.video %}
+            <div class="video-container">
+                <video controls>
+                    <source src="{{ post.video.url }}" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+        {% endif %}
+
+        <!-- Post Actions (conditionally hidden if it's a report page) -->
+        {% if not is_report_page %}
+        <div class="post-actions">
+            <!-- Like Button -->
+            <button class="action-btn like-button {% if user in post.likes.all %}liked{% endif %}" data-post-id="{{ post.id }}">
+                <i class="fas fa-heart"></i>
+                <span class="like-count">{{ post.likes.count }}</span>
+            </button>
+
+            <!-- Comment Button -->
+            <a href="{% url 'post-detail' post.pk %}" class="action-btn comment-button">
+                <i class="fas fa-comment"></i>
+                <span>{{ post.comments.count }}</span>
+            </a>
+
+            <!-- Share Button -->
+            <button class="action-btn share-button" data-post-id="{{ post.id }}">
+                <i class="fas fa-share"></i>
+            </button>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+
+<style>
+    /* Post Card Styling */
+    .post-card {
+        background-color: #15202b;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        overflow: hidden;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        border-radius: 4px;
+    }
+    
+    .post-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+    }
+    
+    .post-card-content {
+        padding: 0px;
+    }
+    
+    /* Post Header */
+    .post-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 16px;
+        padding: 16px 20px; 
+        border-radius: 16px 16px 0 0
+    }
+    
+    .author-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    
+    .author-avatar img {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid #1d9bf0;
+    }
+    
+    .author-details {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .author-name {
+        color: #1d9bf0;
+        font-weight: 600;
+        text-decoration: none;
+        font-size: 1rem;
+        transition: color 0.2s ease;
+    }
+    
+    .author-name:hover {
+        color: #1a8cd8;
+        text-decoration: underline;
+    }
+    
+    .post-meta {
+        font-size: 0.85rem;
+        color: #8899a6;
+        margin-top: 2px;
+        display: flex;
+        align-items: center;
+    }
+    
+    .dot-separator {
+        display: inline-block;
+        width: 4px;
+        height: 4px;
+        background-color: #8899a6;
+        border-radius: 50%;
+        margin: 0 6px;
+    }
+    
+    /* Post Options */
+    .post-options {
+        position: relative;
+    }
+    
+    .options-toggle {
+        background: none;
+        border: none;
+        color: #8899a6;
+        font-size: 18px;
+        padding: 6px 10px;
+        border-radius: 50%;
+        cursor: pointer;
+        transition: background-color 0.2s ease, color 0.2s ease;
+    }
+    
+    .options-toggle:hover {
+        background-color: rgba(29, 155, 240, 0.1);
+        color: #1d9bf0;
+    }
+    
+    .dropdown-menu {
+        background-color: #192734;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        overflow: hidden;
+        min-width: 180px;
+        padding: 0;
+    }
+    
+    .dropdown-item {
+        color: #fff;
+        padding: 12px 16px;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .dropdown-item:hover {
+        background-color: rgba(29, 155, 240, 0.1);
+    }
+    
+    .dropdown-item i {
+        width: 16px;
+        text-align: center;
+    }
+    
+    .dropdown-divider {
+        border-color: rgba(255, 255, 255, 0.1);
+        margin: 0;
+    }
+    
+    /* Post Body */
+    .post-body {
+        font-size: 1rem;
+        line-height: 1.5;
+        color: #fff;
+        margin-bottom: 16px;
+        word-break: break-word;
+    }
+    
+    /* Post Media Layouts */
+    .post-media {
+        margin-bottom: 16px;
+        overflow: hidden;
+        border-radius: 12px;
+        
+    }
+    
+    .post-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+    
+    .gallery-trigger {
+        cursor: pointer;
+    }
+    
+    .gallery-trigger:hover .post-image {
+        transform: scale(1.03);
+    }
+    
+    /* Image Layouts */
+    .single-image-layout {
+        max-height: 500px;
+        overflow: hidden;
+    }
+    
+    /* Two Images Layout - Redesigned */
+.two-images-layout {
+    margin: 0;
+    width: 100%;
+}
+
+.two-images-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+    height: 350px; /* Fixed height for consistency */
+}
+
+.two-image-wrapper {
+    position: relative;
+    height: 100%;
+    overflow: hidden;
+    transition: transform 0.3s ease;
+}
+
+.two-image-wrapper:hover {
+    transform: scale(0.98);
+}
+
+.two-image-wrapper .post-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.two-image-wrapper:hover .post-image {
+    transform: scale(1.05);
+}
+
+.two-image-wrapper .image-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.3) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.two-image-wrapper:hover .image-overlay {
+    opacity: 1;
+}
+    
+    .three-images-layout {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 4px;
+        height: 300px;
+    }
+    
+    .main-image {
+        grid-row: span 2;
+        height: 300px;
+    }
+    
+    .secondary-images {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+    
+    .image-container {
+        height: 148px;
+        overflow: hidden;
+        position: relative;
+    }
+    
+    .overlay-container {
+        position: relative;
+    }
+    
+    .image-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-weight: bold;
+        font-size: 24px;
+        cursor: pointer;
+    }
+    
+    /* Video Container */
+    .video-container {
+        border-radius: 12px;
+        overflow: hidden;
+    }
+    
+    .video-container video {
+        width: 100%;
+        height: auto;
+        max-height: 500px;
+        background-color: #000;
+    }
+    
+    /* Post Actions */
+    .post-actions {
+        display: flex;
+        gap: 8px;
+    }
+    
+    .action-btn {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 16px;
+        border-radius: 20px;
+        background-color: transparent;
+        border: none;
+        color: #8899a6;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: background-color 0.2s ease, color 0.2s ease;
+        text-decoration: none;
+    }
+    
+    .action-btn:hover {
+        background-color: rgba(29, 155, 240, 0.1);
+        color: #1d9bf0;
+    }
+    
+    .like-button.liked {
+        color: #f91880;
+    }
+    
+    .like-button.liked:hover {
+        background-color: rgba(249, 24, 128, 0.1);
+        color: #f91880;
+    }
+</style>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        setupLikeButtons();
+        setupShareButtons();
+        setupGalleryTriggers();
+    });
+    
+    /** Like button functionality */
+    function setupLikeButtons() {
+        document.querySelectorAll(".like-button").forEach(button => {
+            button.addEventListener("click", function () {
+                if (button.disabled) return;
+                button.disabled = true;
+    
+                const postId = this.dataset.postId;
+    
+                fetch(`/social/like/${postId}/`, {
+                    method: "POST",
+                    headers: {
+                        "X-CSRFToken": getCookie("csrftoken"),
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const likeCount = this.querySelector(".like-count");
+                    this.classList.toggle("liked", data.liked);
+                    likeCount.innerText = data.like_count;
+                })
+                .catch(console.error)
+                .finally(() => button.disabled = false);
+            });
+        });
+    }
+    
+    /** Share button functionality */
+    function setupShareButtons() {
+        document.querySelectorAll(".share-button").forEach(button => {
+            button.addEventListener("click", function () {
+                const postId = this.dataset.postId;
+                fetch(`/social/share/${postId}/`, {
+                    method: "POST",
+                    headers: {
+                        "X-CSRFToken": getCookie("csrftoken"),
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) showShareModal(data.shared_post_url);
+                    else console.error("Share failed:", data.error);
+                })
+                .catch(console.error);
+            });
+        });
+    }
+    
+    function showShareModal(url) {
+        const modal = document.createElement('div');
+        modal.className = 'share-modal';
+        modal.innerHTML = `
+            <div class="share-modal-content">
+                <div class="share-modal-header">
+                    <h4>Share Post</h4>
+                    <button class="close-modal">&times;</button>
+                </div>
+                <div class="share-modal-body">
+                    <p>Share this link with your friends:</p>
+                    <div class="share-link-container">
+                        <input type="text" value="${url}" readonly class="share-link">
+                        <button class="copy-link">Copy</button>
+                    </div>
+                    <div class="share-options">
+                        <button class="share-option"><i class="fab fa-twitter"></i> Twitter</button>
+                        <button class="share-option"><i class="fab fa-facebook"></i> Facebook</button>
+                        <button class="share-option"><i class="fab fa-linkedin"></i> LinkedIn</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    
+        modal.querySelector('.copy-link').addEventListener('click', function () {
+            const input = modal.querySelector('.share-link');
+            input.select();
+            document.execCommand('copy');
+            this.innerText = 'Copied!';
+            setTimeout(() => this.innerText = 'Copy', 2000);
+        });
+    
+        modal.querySelector('.close-modal').addEventListener('click', () => modal.remove());
+        modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+    }
+    
+    /* Gallery image viewer */
+    function setupGalleryTriggers() {
+        document.querySelectorAll(".gallery-trigger").forEach(trigger => {
+            trigger.addEventListener("click", function (e) {
+                e.stopPropagation();
+                const postId = this.closest('.post-media').dataset.postId;
+                const startIndex = parseInt(this.dataset.index);
+                const imageElements = document.querySelectorAll(`#post-${postId} .gallery-data span`);
+                const images = Array.from(imageElements).map(el => el.dataset.url);
+                openGallery(images, startIndex);
+            });
+        });
+    }
+    
+    function openGallery(images, startIndex = 0) {
+        document.querySelectorAll('.gallery-modal').forEach(modal => modal.remove());
+        document.body.style.overflow = '';
+    
+        const modal = document.createElement('div');
+        modal.className = 'gallery-modal';
+        let currentIndex = startIndex;
+    
+        modal.innerHTML = `
+            <div class="gallery-modal-content">
+                <button class="close-gallery">&times;</button>
+                <button class="prev-image"><i class="fas fa-chevron-left"></i></button>
+                <div class="gallery-image-container">
+                    <img src="${images[currentIndex]}" class="gallery-image" alt="Gallery image">
+                </div>
+                <button class="next-image"><i class="fas fa-chevron-right"></i></button>
+                <div class="gallery-counter">${currentIndex + 1}/${images.length}</div>
+            </div>
+        `;
+    
+        document.body.appendChild(modal);
+        document.body.style.overflow = 'hidden';
+    
+        const close = () => {
+            modal.remove();
+            document.body.style.overflow = '';
+            document.removeEventListener('keydown', onKey);
+        };
+    
+        const galleryImg = modal.querySelector('.gallery-image');
+        const counter = modal.querySelector('.gallery-counter');
+    
+        const loadImage = index => {
+            const img = new Image();
+            showLoader();
+            img.onload = () => {
+                galleryImg.src = images[index];
+                counter.textContent = `${index + 1}/${images.length}`;
+                hideLoader();
+            };
+            img.onerror = () => {
+                galleryImg.src = 'data:image/svg+xml,...'; // Fallback SVG
+                hideLoader();
+            };
+            img.src = images[index];
+        };
+    
+        const showLoader = () => {
+            const loader = document.createElement('div');
+            loader.className = 'gallery-loader';
+            modal.querySelector('.gallery-image-container').appendChild(loader);
+        };
+    
+        const hideLoader = () => {
+            const loader = modal.querySelector('.gallery-loader');
+            if (loader) loader.remove();
+        };
+    
+        const onKey = e => {
+            if (e.key === 'ArrowLeft') nav((currentIndex - 1 + images.length) % images.length);
+            if (e.key === 'ArrowRight') nav((currentIndex + 1) % images.length);
+            if (e.key === 'Escape') close();
+        };
+    
+        const nav = index => {
+            currentIndex = index;
+            loadImage(currentIndex);
+        };
+    
+        modal.querySelector('.close-gallery').addEventListener('click', close);
+        modal.querySelector('.prev-image').addEventListener('click', () => nav((currentIndex - 1 + images.length) % images.length));
+        modal.querySelector('.next-image').addEventListener('click', () => nav((currentIndex + 1) % images.length));
+        modal.addEventListener('click', e => { if (e.target === modal) close(); });
+        modal.querySelector('.gallery-modal-content').addEventListener('click', e => e.stopPropagation());
+        document.addEventListener('keydown', onKey);
+    
+        // Swipe Support
+        let startX = 0, endX = 0;
+        modal.addEventListener('touchstart', e => startX = e.changedTouches[0].screenX);
+        modal.addEventListener('touchend', e => {
+            endX = e.changedTouches[0].screenX;
+            if (endX < startX - 50) nav((currentIndex + 1) % images.length);
+            if (endX > startX + 50) nav((currentIndex - 1 + images.length) % images.length);
+        });
+    }
+    
+    /** CSRF helper */
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let cookie of cookies) {
+                cookie = cookie.trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    
+</script>
+
+<!-- Additional Modal Styles -->
+<style>
+    /* Share Modal */
+    .share-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.7);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 0;
+    }
+    
+    .share-modal-content {
+        background-color: #192734;
+        border-radius: 16px;
+        width: 90%;
+        max-width: 500px;
+        overflow: hidden;
+        animation: modalFadeIn 0.3s ease;
+    }
+    
+    .share-modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px 20px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .share-modal-header h4 {
+        margin: 0;
+        color: #fff;
+        font-size: 1.2rem;
+    }
+    
+    .close-modal {
+        background: none;
+        border: none;
+        color: #8899a6;
+        font-size: 24px;
+        cursor: pointer;
+        padding: 0;
+        line-height: 1;
+    }
+    
+    .share-modal-body {
+        padding: 20px;
+    }
+    
+    .share-link-container {
+        display: flex;
+        margin: 16px 0;
+    }
+    
+    .share-link {
+        flex: 1;
+        padding: 10px 12px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        background-color: #15202b;
+        color: #fff;
+        border-radius: 8px 0 0 8px;
+    }
+    
+    .copy-link {
+        padding: 10px 16px;
+        background-color: #1d9bf0;
+        color: #fff;
+        border: none;
+        border-radius: 0 8px 8px 0;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+    }
+    
+    .copy-link:hover {
+        background-color: #1a8cd8;
+    }
+    
+    .share-options {
+        display: flex;
+        gap: 10px;
+        margin-top: 16px;
+    }
+    
+    .share-option {
+        flex: 1;
+        padding: 10px;
+        border: none;
+        border-radius: 8px;
+        background-color: #15202b;
+        color: #fff;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: background-color 0.2s ease;
+    }
+    
+    .share-option:hover {
+        background-color: rgba(29, 155, 240, 0.1);
+    }
+    
+    /* Gallery Modal */
+    .gallery-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.9);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1060;
+    }
+    
+    .gallery-modal-content {
+        position: relative;
+        width: 90%;
+        height: 90%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .gallery-image-container {
+        width:100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+    }
+    
+    .gallery-image {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+        transition: opacity 0.3s ease;
+    }
+    
+    .close-gallery {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background: rgba(0, 0, 0, 0.5);
+        color: #fff;
+        border: none;
+        font-size: 24px;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 101; 
+        transition: background-color 0.2s ease;
+    }
+    
+    .close-gallery:hover {
+        background-color: rgba(255, 255, 255, 0.2);
+    }
+    
+    .prev-image, .next-image {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);  
+        background: rgba(0, 0, 0, 0.5);
+        color: #fff;
+        border: none;
+        font-size: 20px;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+    }
+    
+    .prev-image:hover, .next-image:hover {
+        background-color: rgba(255, 255, 255, 0.2);
+    }
+    
+    .prev-image {
+        left: 20px;
+    }
+    
+    .next-image {
+        right: 20px;
+    }
+    
+    .gallery-counter {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0, 0, 0, 0.5);
+        color: #fff;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 14px;
+    }
+    
+    /* Gallery Loader */
+    .gallery-loader {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 40px;
+        height: 40px;
+        border: 4px solid rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        border-top-color: #1d9bf0;
+        animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+        0% { transform: translate(-50%, -50%) rotate(0deg); }
+        100% { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+    
+    @keyframes modalFadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>

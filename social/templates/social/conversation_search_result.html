@@ -1,0 +1,90 @@
+{% extends 'landing/base.html' %}
+
+{% block content %}
+<div class="container" style="margin-top: 30vh;">
+    <h2 class="mb-4" style="color: rgba(232, 230, 226, 0.462);">Search Results for "{{ query }}"</h2>
+
+    {% if results %}
+        <div class="row">
+            {% for conversation in results %}
+                <div class="col-lg-4 col-md-6 col-sm-12 mb-4">
+                    {% include 'social/message_card.html' with conversation=conversation %}
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="text-muted">No conversations found matching "{{ query }}"</p>
+    {% endif %}
+</div>
+{% endblock %}
+
+<style>
+ 
+.container {
+    max-width: 1200px; 
+    margin: 0 auto; 
+}
+
+h2.text-light {
+    margin-bottom: 30px;
+}
+
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px; 
+}
+
+.col-lg-4 {
+    flex: 0 0 33.33%; 
+}
+
+.col-md-6 {
+    flex: 0 0 50%; 
+}
+
+.col-sm-12 {
+    flex: 0 0 100%;
+}
+
+.card.bg-dark {
+    background-color: #1c2b36; 
+    border-radius: 15px;
+    color: white;
+    padding: 1.25rem;
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+.card.bg-dark:hover {
+    transform: translateY(-8px); 
+    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.3); 
+}
+
+
+.card-body {
+    display: flex;
+    flex-direction: column;
+}
+
+
+.card-body .me-3 {
+    margin-right: 1rem; 
+}
+
+
+.col-lg-4, .col-md-6, .col-sm-12 {
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+
+@media (max-width: 768px) {
+    .col-lg-4, .col-md-6 {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+}
+
+
+</style>

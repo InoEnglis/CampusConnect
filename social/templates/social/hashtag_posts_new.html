@@ -1,0 +1,1015 @@
+{% extends 'landing/base.html' %}
+{% load hashtag_filters %}
+
+{% block content %}
+    <div class="container mx-auto px-4 py-8 flex flex-col lg:flex-row gap-8">
+        <!-- Sidebar (left) -->
+        <div class="w-full lg:w-1/3 order-1 lg:order-1">
+            <div class="bg-[#15202b] rounded-lg shadow-md p-6 sticky top-6 border border-[rgba(255,255,255,0.1)]">
+                <h3 class="text-xl font-bold text-white mb-4">Top 10 Hashtags</h3>
+                <ul class="space-y-3">
+                    {% for hashtag in top_hashtags %}
+                        <li>
+                            <a href="{% url 'hashtag-posts' hashtag.name %}" class="flex items-center justify-between p-2 rounded-lg hover:bg-[rgba(29,155,240,0.1)] transition-colors">
+                                <span class="font-medium text-[#1d9bf0]">#{{ hashtag.name }}</span>
+                                <span class="text-sm bg-[#192734] text-[#8899a6] px-2 py-1 rounded-full">
+                                    {{ hashtag.post_count }} post{{ hashtag.post_count|pluralize }}
+                                </span>
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main Content (right) -->
+        <div class="w-full lg:w-2/3 order-2 lg:order-2">
+            <div class="bg-[#15202b] rounded-lg shadow-md p-6 mb-6 border border-[rgba(255,255,255,0.1)]">
+                <h1 class="text-2xl font-bold text-white mb-2">Posts with the hashtag #{{ hashtag_name }}</h1>
+                <p class="text-[#8899a6] mb-6">Total Posts: {{ post_count }}</p>
+
+                {% if posts %}
+                    <div id="posts-container" class="space-y-6">
+                        {% for post in posts %}
+                            <div class="post-card" id="post-{{ post.id }}" data-post-id="{{ post.id }}">
+                                <div class="post-card-content">
+                                    <!-- Post Header with Author Info and Options -->
+                                    <div class="post-header">
+                                        <!-- Author Information -->
+                                        <div class="author-info">
+                                            <div class="author-avatar">
+                                                {% if post.author.profile.picture %}
+                                                    <img src="{{ post.author.profile.picture.url }}" alt="{{ post.author.username }}'s Profile Picture" style="border-radius:10px;">
+                                                {% else %}
+                                                    <div class="w-10 h-10 rounded-full bg-gray-600 flex items-center justify-center text-white">
+                                                        {{ post.author.username|first|upper }}
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                            <div class="author-details">
+                                                <a href="{% url 'profile' post.author.profile.pk %}" class="author-name">@{{ post.author }}</a>
+                                                <div class="post-meta">
+                                                    <span>{{ post.created_on|timesince }} ago</span>
+                                                    {% if post.group %}
+                                                        <span class="dot-separator"></span>
+                                                        <span>posted in <strong>{{ post.group.name }}</strong></span>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Post Options Menu -->
+                                        {% if user.is_authenticated %}
+                                        <div class="post-options">
+                                            <button class="options-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                <i class="fas fa-ellipsis-h text-[#8899a6]"></i>
+                                            </button>
+                                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
+                                                {% if post.author == user %}
+                                                    <li>
+                                                        <a class="dropdown-item" href="{% url 'post-edit' post.id %}">
+                                                            <i class="fas fa-edit"></i> Edit
+                                                        </a>
+                                                    </li>
+                                                    <li>
+                                                        <a class="dropdown-item" href="{% url 'post-delete' post.id %}">
+                                                            <i class="fas fa-trash"></i> Delete
+                                                        </a>
+                                                    </li>
+                                                    <li><hr class="dropdown-divider"></li>
+                                                {% endif %}
+                                                <li>
+                                                    <a class="dropdown-item" href="{% url 'report-post' post.id %}">
+                                                        <i class="fas fa-flag"></i> Report
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+
+                                    <!-- Post Body Content -->
+                                    <div class="post-body" style="color:white">
+                                        {{ post.body|link_hashtags }}
+                                    </div>
+
+                                    <!-- Post Media Content -->
+                                    {% if post.images.count > 0 %}
+                                    <div class="post-media" data-post-id="{{ post.id }}">
+                                        {% if post.images.count == 1 %}
+                                            <div class="single-image-layout gallery-trigger" data-index="0">
+                                                <img src="{{ post.images.first.image.url }}" alt="Post image" class="post-image">
+                                            </div>
+                                        {% elif post.images.count == 2 %}
+                                            <div class="two-images-layout">
+                                                {% for image in post.images.all %}
+                                                    <div class="image-container gallery-trigger" data-index="{{ forloop.counter0 }}">
+                                                        <img src="{{ image.image.url }}" alt="Post image" class="post-image">
+                                                    </div>
+                                                {% endfor %}
+                                            </div>
+                                        {% elif post.images.count == 3 %}
+                                            <div class="three-images-layout">
+                                                <div class="main-image gallery-trigger" data-index="0">
+                                                    <img src="{{ post.images.all.0.image.url }}" alt="Main image" class="post-image">
+                                                </div>
+                                                <div class="secondary-images">
+                                                    <div class="image-container gallery-trigger" data-index="1">
+                                                        <img src="{{ post.images.all.1.image.url }}" alt="Post image" class="post-image">
+                                                    </div>
+                                                    <div class="image-container gallery-trigger" data-index="2">
+                                                        <img src="{{ post.images.all.2.image.url }}" alt="Post image" class="post-image">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        {% elif post.images.count > 3 %}
+                                            <div class="three-images-layout">
+                                                <div class="main-image gallery-trigger" data-index="0">
+                                                    <img src="{{ post.images.all.0.image.url }}" alt="Main image" class="post-image">
+                                                </div>
+                                                <div class="secondary-images">
+                                                    <div class="image-container gallery-trigger" data-index="1">
+                                                        <img src="{{ post.images.all.1.image.url }}" alt="Post image" class="post-image">
+                                                    </div>
+                                                    <div class="image-container overlay-container gallery-trigger" data-index="2">
+                                                        <img src="{{ post.images.all.2.image.url }}" alt="Post image" class="post-image">
+                                                        <div class="image-overlay">
+                                                            <span>+{{ post.images.count|add:"-3" }}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        {% endif %}
+                                        
+                                        <!-- Hidden container to store all image URLs for the gallery -->
+                                        <div class="gallery-data" style="display: none;">
+                                            {% for image in post.images.all %}
+                                                <span data-url="{{ image.image.url }}"></span>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    {% endif %}
+
+                                    {% if post.video %}
+                                        <div class="video-container">
+                                            <video controls>
+                                                <source src="{{ post.video.url }}" type="video/mp4">
+                                                Your browser does not support the video tag.
+                                            </video>
+                                        </div>
+                                    {% endif %}
+
+                                    <!-- Post Actions -->
+                                    <div class="post-actions">
+                                        <!-- Like Button -->
+                                        <button class="action-btn like-button {% if user in post.likes.all %}liked{% endif %}" data-post-id="{{ post.id }}">
+                                            <i class="fas fa-heart"></i>
+                                            <span class="like-count">{{ post.likes.count }}</span>
+                                        </button>
+
+                                        <!-- Comment Button -->
+                                        <a href="{% url 'post-detail' post.pk %}" class="action-btn comment-button">
+                                            <i class="fas fa-comment"></i>
+                                            <span>{{ post.comments.count }}</span>
+                                        </a>
+
+                                        <!-- Share Button -->
+                                        <button class="action-btn share-button" data-post-id="{{ post.id }}">
+                                            <i class="fas fa-share"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    {% if posts.has_next %}
+                        <button id="load-more-btn" class="mt-6 w-full bg-[#1d9bf0] hover:bg-[#1a8cd8] text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                            Load More
+                        </button>
+                    {% endif %}
+                {% else %}
+                    <div class="text-center py-12">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-[#8899a6]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <h3 class="mt-4 text-lg font-medium text-white">No posts found with this hashtag</h3>
+                        <p class="mt-1 text-[#8899a6]">Be the first to post with #{{ hashtag_name }}</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <style>
+        /* Post Card Styling */
+        .post-card {
+            background-color: #15202b;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .post-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+        }
+        
+        .post-card-content {
+            padding: 20px;
+        }
+        
+        /* Post Header */
+        .post-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+        
+        .author-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .author-avatar img {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #1d9bf0;
+        }
+        
+        .author-details {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .author-name {
+            color: #1d9bf0;
+            font-weight: 600;
+            text-decoration: none;
+            font-size: 1rem;
+            transition: color 0.2s ease;
+        }
+        
+        .author-name:hover {
+            color: #1a8cd8;
+            text-decoration: underline;
+        }
+        
+        .post-meta {
+            font-size: 0.85rem;
+            color: #8899a6;
+            margin-top: 2px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .dot-separator {
+            display: inline-block;
+            width: 4px;
+            height: 4px;
+            background-color: #8899a6;
+            border-radius: 50%;
+            margin: 0 6px;
+        }
+        
+        /* Post Options */
+        .post-options {
+            position: relative;
+        }
+        
+        .options-toggle {
+            background: none;
+            border: none;
+            color: #8899a6;
+            font-size: 18px;
+            padding: 6px 10px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+        
+        .options-toggle:hover {
+            background-color: rgba(29, 155, 240, 0.1);
+            color: #1d9bf0;
+        }
+        
+        .dropdown-menu {
+            background-color: #192734;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            overflow: hidden;
+            min-width: 180px;
+            padding: 0;
+        }
+        
+        .dropdown-item {
+            color: #fff;
+            padding: 12px 16px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .dropdown-item:hover {
+            background-color: rgba(29, 155, 240, 0.1);
+        }
+        
+        .dropdown-item i {
+            width: 16px;
+            text-align: center;
+        }
+        
+        .dropdown-divider {
+            border-color: rgba(255, 255, 255, 0.1);
+            margin: 0;
+        }
+        
+        /* Post Body */
+        .post-body {
+            font-size: 1rem;
+            line-height: 1.5;
+            color: #fff;
+            margin-bottom: 16px;
+            word-break: break-word;
+        }
+        
+        /* Post Media Layouts */
+        .post-media {
+            margin-bottom: 16px;
+            overflow: hidden;
+            border-radius: 12px;
+        }
+        
+        .post-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+        
+        .gallery-trigger {
+            cursor: pointer;
+        }
+        
+        .gallery-trigger:hover .post-image {
+            transform: scale(1.03);
+        }
+        
+        /* Image Layouts */
+        .single-image-layout {
+            max-height: 500px;
+            overflow: hidden;
+        }
+        
+        .two-images-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4px;
+            height: 300px;
+        }
+        
+        .three-images-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4px;
+            height: 300px;
+        }
+        
+        .main-image {
+            grid-row: span 2;
+            height: 300px;
+        }
+        
+        .secondary-images {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        
+        .image-container {
+            height: 148px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .overlay-container {
+            position: relative;
+        }
+        
+        .image-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: bold;
+            font-size: 24px;
+            cursor: pointer;
+        }
+        
+        /* Video Container */
+        .video-container {
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        
+        .video-container video {
+            width: 100%;
+            height: auto;
+            max-height: 500px;
+            background-color: #000;
+        }
+        
+        /* Post Actions */
+        .post-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .action-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            border-radius: 20px;
+            background-color: transparent;
+            border: none;
+            color: #8899a6;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease, color 0.2s ease;
+            text-decoration: none;
+        }
+        
+        .action-btn:hover {
+            background-color: rgba(29, 155, 240, 0.1);
+            color: #1d9bf0;
+        }
+        
+        .like-button.liked {
+            color: #f91880;
+        }
+        
+        .like-button.liked:hover {
+            background-color: rgba(249, 24, 128, 0.1);
+            color: #f91880;
+        }
+
+        /* Share Modal */
+        .share-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 0;
+        }
+        
+        .share-modal-content {
+            background-color: #192734;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 500px;
+            overflow: hidden;
+            animation: modalFadeIn 0.3s ease;
+        }
+        
+        .share-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .share-modal-header h4 {
+            margin: 0;
+            color: #fff;
+            font-size: 1.2rem;
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            color: #8899a6;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            line-height: 1;
+        }
+        
+        .share-modal-body {
+            padding: 20px;
+        }
+        
+        .share-link-container {
+            display: flex;
+            margin: 16px 0;
+        }
+        
+        .share-link {
+            flex: 1;
+            padding: 10px 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background-color: #15202b;
+            color: #fff;
+            border-radius: 8px 0 0 8px;
+        }
+        
+        .copy-link {
+            padding: 10px 16px;
+            background-color: #1d9bf0;
+            color: #fff;
+            border: none;
+            border-radius: 0 8px 8px 0;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        
+        .copy-link:hover {
+            background-color: #1a8cd8;
+        }
+        
+        .share-options {
+            display: flex;
+            gap: 10px;
+            margin-top: 16px;
+        }
+        
+        .share-option {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            background-color: #15202b;
+            color: #fff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: background-color 0.2s ease;
+        }
+        
+        .share-option:hover {
+            background-color: rgba(29, 155, 240, 0.1);
+        }
+        
+        /* Gallery Modal */
+        .gallery-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1060;
+        }
+        
+        .gallery-modal-content {
+            position: relative;
+            width: 90%;
+            height: 90%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .gallery-image-container {
+            width: calc(100% - 100px);
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        
+        .gallery-image {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            transition: opacity 0.3s ease;
+        }
+        
+        .close-gallery {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            color: #fff;
+            border: none;
+            font-size: 24px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 101; 
+            transition: background-color 0.2s ease;
+        }
+        
+        .close-gallery:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .prev-image, .next-image {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);  
+            background: rgba(0, 0, 0, 0.5);
+            color: #fff;
+            border: none;
+            font-size: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        
+        .prev-image {
+            left: 20px;
+        }
+        
+        .next-image {
+            right: 20px;
+        }
+        
+        .gallery-counter {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.5);
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+        
+        /* Gallery Loader */
+        .gallery-loader {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            border-top-color: #1d9bf0;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+        
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+{% endblock %}
+{% block scripts %}
+    {{ block.super }}
+    <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const loadMoreBtn = document.getElementById('load-more-btn');
+                
+                if (loadMoreBtn) {
+                    loadMoreBtn.addEventListener('click', function () {
+                        const nextPage = this.dataset.nextPage;
+            
+                        if (nextPage) {
+                            fetch(`?page=${nextPage}`)
+                                .then(response => response.text())
+                                .then(html => {
+                                    const parser = new DOMParser();
+                                    const doc = parser.parseFromString(html, 'text/html');
+                                    const newPosts = doc.querySelector('#posts-container')?.innerHTML || '';
+                                    const newLoadMoreBtn = doc.getElementById('load-more-btn');
+            
+                                    document.getElementById('posts-container').insertAdjacentHTML('beforeend', newPosts);
+            
+                                    if (newLoadMoreBtn) {
+                                        this.outerHTML = newLoadMoreBtn.outerHTML;
+                                    } else {
+                                        this.remove();
+                                    }
+            
+                                    // Initialize any new post interactions
+                                    if (typeof initializePostInteractions === 'function') {
+                                        initializePostInteractions();
+                                    }
+                                });
+                        }
+                    });
+                }
+            });
+       
+   
+
+        // Initialize post interactions (like, share, gallery, etc.)
+        function initializePostInteractions() {
+            // Like Button Functionality
+            document.querySelectorAll(".like-button").forEach(button => {
+                button.addEventListener("click", function() {
+                    if (button.disabled) return;
+                    button.disabled = true;
+
+                    const postId = this.dataset.postId;
+
+                    fetch(`/social/like/${postId}/`, {
+                        method: "POST",
+                        headers: {
+                            "X-CSRFToken": getCookie("csrftoken"),
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        const likeCount = this.querySelector(".like-count");
+                        if (data.liked) {
+                            this.classList.add("liked");
+                            likeCount.innerText = data.like_count;
+                        } else {
+                            this.classList.remove("liked");
+                            likeCount.innerText = data.like_count;
+                        }
+                    })
+                    .catch(error => console.error("Error:", error))
+                    .finally(() => button.disabled = false);
+                });
+            });
+
+            // Share Button Functionality
+            document.querySelectorAll(".share-button").forEach(button => {
+                button.addEventListener("click", function() {
+                    const postId = this.dataset.postId;
+                    fetch(`/social/share/${postId}/`, {
+                        method: "POST",
+                        headers: {
+                            "X-CSRFToken": getCookie("csrftoken"),
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Create a modal for sharing
+                            const modal = document.createElement('div');
+                            modal.className = 'share-modal';
+                            modal.innerHTML = `
+                                <div class="share-modal-content">
+                                    <div class="share-modal-header">
+                                        <h4>Share Post</h4>
+                                        <button class="close-modal">&times;</button>
+                                    </div>
+                                    <div class="share-modal-body">
+                                        <p>Share this link with your friends:</p>
+                                        <div class="share-link-container">
+                                            <input type="text" value="${data.shared_post_url}" readonly class="share-link">
+                                            <button class="copy-link">Copy</button>
+                                        </div>
+                                        <div class="share-options">
+                                            <button class="share-option"><i class="fab fa-twitter"></i> Twitter</button>
+                                            <button class="share-option"><i class="fab fa-facebook"></i> Facebook</button>
+                                            <button class="share-option"><i class="fab fa-linkedin"></i> LinkedIn</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                            document.body.appendChild(modal);
+                            
+                            // Copy link functionality
+                            modal.querySelector('.copy-link').addEventListener('click', function() {
+                                const input = modal.querySelector('.share-link');
+                                input.select();
+                                document.execCommand('copy');
+                                this.innerText = 'Copied!';
+                                setTimeout(() => {
+                                    this.innerText = 'Copy';
+                                }, 2000);
+                            });
+                            
+                            // Close modal
+                            modal.querySelector('.close-modal').addEventListener('click', function() {
+                                document.body.removeChild(modal);
+                            });
+                            
+                            // Close when clicking outside
+                            modal.addEventListener('click', function(e) {
+                                if (e.target === modal) {
+                                    document.body.removeChild(modal);
+                                }
+                            });
+                        } else {
+                            console.error("Share failed:", data.error);
+                        }
+                    })
+                    .catch(error => console.error("Error:", error));
+                });
+            });
+
+            // Gallery functionality for all images
+            document.querySelectorAll(".gallery-trigger").forEach(trigger => {
+                trigger.addEventListener("click", function(e) {
+                    e.stopPropagation(); // Prevent event bubbling
+                    const postId = this.closest('.post-media').dataset.postId;
+                    const startIndex = parseInt(this.dataset.index);
+                    
+                    // Get all image URLs for this post
+                    const imageElements = document.querySelectorAll(`#post-${postId} .gallery-data span`);
+                    const images = Array.from(imageElements).map(el => el.dataset.url);
+                    
+                    // Create gallery modal
+                    openGallery(images, startIndex);
+                });
+            });
+        }
+
+        // Helper function to open gallery
+        function openGallery(images, startIndex) {
+            document.querySelectorAll('.gallery-modal').forEach(modal => modal.remove());
+            document.body.style.overflow = ''; 
+            // Create the gallery modal element
+            const galleryModal = document.createElement('div');
+            galleryModal.className = 'gallery-modal';
+            let currentIndex = startIndex || 0;
+            
+            // Set up the gallery HTML structure
+            galleryModal.innerHTML = `
+                <div class="gallery-modal-content">
+                    <button class="close-gallery">&times;</button>
+                    <button class="prev-image"><i class="fas fa-chevron-left"></i></button>
+                    <div class="gallery-image-container">
+                        <img src="${images[currentIndex]}" class="gallery-image" alt="Gallery image">
+                    </div>
+                    <button class="next-image"><i class="fas fa-chevron-right"></i></button>
+                    <div class="gallery-counter">${currentIndex + 1}/${images.length}</div>
+                </div>
+            `;
+            
+            // Add the gallery to the document
+            document.body.appendChild(galleryModal);
+            document.body.style.overflow = 'hidden'; // Prevent scrolling
+            
+            // Function to close the gallery and clean up
+            function closeGallery() {
+                if (galleryModal && galleryModal.parentNode) {
+                    document.body.removeChild(galleryModal);
+                    document.body.style.overflow = ''; 
+                    document.removeEventListener('keydown', handleKeyDown);
+                }
+            }
+            
+            // Set up element references
+            const closeBtn = galleryModal.querySelector('.close-gallery');
+            const prevBtn = galleryModal.querySelector('.prev-image');
+            const nextBtn = galleryModal.querySelector('.next-image');
+            const galleryImg = galleryModal.querySelector('.gallery-image');
+            const counter = galleryModal.querySelector('.gallery-counter');
+            
+            // Add loading indicator
+            function showLoading() {
+                const loader = document.createElement('div');
+                loader.className = 'gallery-loader';
+                galleryModal.querySelector('.gallery-image-container').appendChild(loader);
+            }
+            
+            function hideLoading() {
+                const loader = galleryModal.querySelector('.gallery-loader');
+                if (loader) loader.remove();
+            }
+            
+            // Navigate to specific image
+            function navigateToImage(index) {
+                showLoading();
+                currentIndex = index;
+                
+                const img = new Image();
+                img.onload = function() {
+                    galleryImg.src = images[currentIndex];
+                    counter.textContent = `${currentIndex + 1}/${images.length}`;
+                    hideLoading();
+                };
+                img.onerror = function() {
+                    hideLoading();
+                    galleryImg.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23333'/%3E%3Ctext x='50' y='50' font-family='Arial' font-size='14' text-anchor='middle' fill='%23fff'%3EImage Error%3C/text%3E%3C/svg%3E";
+                };
+                img.src = images[currentIndex];
+            }
+            
+            // Keyboard navigation handler
+            function handleKeyDown(e) {
+                if (e.key === 'ArrowLeft') {
+                    navigateToImage((currentIndex - 1 + images.length) % images.length);
+                } else if (e.key === 'ArrowRight') {
+                    navigateToImage((currentIndex + 1) % images.length);
+                } else if (e.key === 'Escape') {
+                    closeGallery();
+                }
+            }
+            
+            // Event listeners
+            closeBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                closeGallery();
+            });
+            
+            prevBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                navigateToImage((currentIndex - 1 + images.length) % images.length);
+            });
+            
+            nextBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                navigateToImage((currentIndex + 1) % images.length);
+            });
+            
+            // Background click to close
+            galleryModal.addEventListener('click', function(e) {
+                if (e.target === galleryModal) {
+                    closeGallery();
+                }
+            });
+            
+            // Prevent clicks on modal content from closing the modal
+            const modalContent = galleryModal.querySelector('.gallery-modal-content');
+            modalContent.addEventListener('click', function(e) {
+                e.stopPropagation();
+            });
+            
+            // Add keyboard navigation
+            document.addEventListener('keydown', handleKeyDown);
+            
+            // Swipe support for touch devices
+            let touchStartX = 0;
+            let touchEndX = 0;
+            
+            galleryModal.addEventListener('touchstart', function(e) {
+                touchStartX = e.changedTouches[0].screenX;
+            });
+            
+            galleryModal.addEventListener('touchend', function(e) {
+                touchEndX = e.changedTouches[0].screenX;
+                handleGesture();
+            });
+            
+            function handleGesture() {
+                if (touchEndX < touchStartX - 50) {
+                    navigateToImage((currentIndex + 1) % images.length);
+                } else if (touchEndX > touchStartX + 50) {
+                    navigateToImage((currentIndex - 1 + images.length) % images.length);
+                }
+            }
+        }
+
+        // Helper function to retrieve the CSRF token
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // Initialize interactions when page loads
+        document.addEventListener("DOMContentLoaded", function() {
+            initializePostInteractions();
+        });
+    </script>
+{% endblock %}

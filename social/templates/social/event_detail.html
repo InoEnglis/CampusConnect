@@ -1,0 +1,458 @@
+{% extends 'landing/base.html' %}
+
+{% block content %}
+<div class="bg-gray-50 min-h-screen">
+  <!-- Header -->
+<div class="my-10"></div>
+  <!-- Main Content -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Event Header -->
+    <div class="bg-white rounded-xl shadow-md overflow-hidden mb-8">
+      <div class="relative h-64 w-full bg-gradient-to-r from-red-500 to-red-600">
+        {% if event.images.all %}
+          <img src="{{ event.images.first.image.url }}" alt="{{ event.name }}" class="w-full h-full object-cover opacity-30">
+        {% endif %}
+        <div class="absolute inset-0 flex items-center justify-center">
+          <div class="text-center px-6 py-4">
+            <span class="inline-block bg-white text-indigo-800 text-xs font-semibold px-3 py-1 rounded-full mb-3">
+              {{ event.category|default:"Event" }}
+            </span>
+            <h1 class="text-3xl md:text-4xl font-bold text-white mb-2">{{ event.name }}</h1>
+            <div class="flex flex-wrap justify-center items-center gap-4 text-white">
+              <div class="flex items-center">
+                <i class="fas fa-calendar-day mr-2"></i>
+                <span>{{ event.date|date:"F j, Y" }}</span>
+              </div>
+              <div class="flex items-center">
+                <i class="fas fa-clock mr-2"></i>
+                <span>{{ event.date|time:"g:i a" }}</span>
+              </div>
+              {% if event.location_type == 'inside' %}
+              <div class="flex items-center">
+                <i class="fas fa-university mr-2"></i>
+                <span>{{ event.building }} (Room {{ event.room_number }})</span>
+              </div>
+              {% else %}
+              <div class="flex items-center">
+                <i class="fas fa-map-marker-alt mr-2"></i>
+                <span>{{ event.specific_location }}</span>
+              </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <!-- Main Content Column -->
+      <div class="lg:col-span-2">
+        <!-- Description Section -->
+        <section class="bg-white rounded-xl shadow-md overflow-hidden mb-8">
+          <div class="px-6 py-5 border-b border-gray-200">
+            <h2 class="text-xl font-semibold text-gray-900 flex items-center">
+              <i class="fas fa-align-left text-indigo-600 mr-2"></i>
+              Event Description
+            </h2>
+          </div>
+          <div class="px-6 py-4">
+            <div class="prose max-w-none text-gray-700">
+              {{ event.description|linebreaks }}
+            </div>
+          </div>
+        </section>
+
+        <!-- Location Section -->
+        <section class="bg-white rounded-xl shadow-md overflow-hidden mb-8">
+          <div class="px-6 py-5 border-b border-gray-200">
+            <h2 class="text-xl font-semibold text-gray-900 flex items-center">
+              <i class="fas fa-map-marker-alt text-indigo-600 mr-2"></i>
+              Location Details
+            </h2>
+          </div>
+          <div class="px-6 py-4">
+            {% if event.location_type == 'inside' %}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <h3 class="text-lg font-medium text-gray-900 mb-3">University Location</h3>
+                <div class="space-y-2">
+                  <div class="flex items-start">
+                    <div class="flex-shrink-0 h-5 w-5 text-indigo-500">
+                      <i class="fas fa-building"></i>
+                    </div>
+                    <div class="ml-3">
+                      <p class="text-sm text-gray-500">Building</p>
+                      <p class="text-sm font-medium text-gray-900">{{ event.building }}</p>
+                    </div>
+                  </div>
+                  <div class="flex items-start">
+                    <div class="flex-shrink-0 h-5 w-5 text-indigo-500">
+                      <i class="fas fa-door-open"></i>
+                    </div>
+                    <div class="ml-3">
+                      <p class="text-sm text-gray-500">Room Number</p>
+                      <p class="text-sm font-medium text-gray-900">{{ event.room_number }}</p>
+                    </div>
+                  </div>
+                  <div class="flex items-start">
+                    <div class="flex-shrink-0 h-5 w-5 text-indigo-500">
+                      <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <div class="ml-3">
+                      <p class="text-sm text-gray-500">Department</p>
+                      <p class="text-sm font-medium text-gray-900">{{ event.department }}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="h-64 bg-gray-100 rounded-lg overflow-hidden">
+                <div id="universityMap" class="h-full w-full"></div>
+              </div>
+            </div>
+            {% elif event.location_type == 'outside' %}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <h3 class="text-lg font-medium text-gray-900 mb-3">External Location</h3>
+                <div class="space-y-2">
+                  <div class="flex items-start">
+                    <div class="flex-shrink-0 h-5 w-5 text-indigo-500">
+                      <i class="fas fa-map-pin"></i>
+                    </div>
+                    <div class="ml-3">
+                      <p class="text-sm text-gray-500">Address</p>
+                      <p class="text-sm font-medium text-gray-900">{{ event.specific_location }}</p>
+                    </div>
+                  </div>
+                  <div class="flex items-start">
+                    <div class="flex-shrink-0 h-5 w-5 text-indigo-500">
+                      <i class="fas fa-city"></i>
+                    </div>
+                    <div class="ml-3">
+                      <p class="text-sm text-gray-500">Municipality</p>
+                      <p class="text-sm font-medium text-gray-900">{{ event.municipality }}</p>
+                    </div>
+                  </div>
+                  <div class="flex items-start">
+                    <div class="flex-shrink-0 h-5 w-5 text-indigo-500">
+                      <i class="fas fa-flag"></i>
+                    </div>
+                    <div class="ml-3">
+                      <p class="text-sm text-gray-500">Province</p>
+                      <p class="text-sm font-medium text-gray-900">{{ event.province }}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="h-64 bg-gray-100 rounded-lg overflow-hidden">
+                <div id="externalMap" class="h-full w-full"></div>
+              </div>
+            </div>
+            {% else %}
+            <div class="text-center py-6">
+              <i class="fas fa-map-marked-alt text-4xl text-gray-400 mb-3"></i>
+              <p class="text-gray-500">Location details not provided for this event.</p>
+            </div>
+            {% endif %}
+          </div>
+        </section>
+
+        <!-- Media Section -->
+        {% if event.images.all or event.video or event.video_file %}
+        <section class="bg-white rounded-xl shadow-md overflow-hidden mb-8">
+          <div class="px-6 py-5 border-b border-gray-200">
+            <h2 class="text-xl font-semibold text-gray-900 flex items-center">
+              <i class="fas fa-images text-indigo-600 mr-2"></i>
+              Event Media
+            </h2>
+          </div>
+          <div class="px-6 py-4">
+            <!-- Image Gallery -->
+            {% if event.images.all %}
+            <div class="mb-6">
+              <h3 class="text-lg font-medium text-gray-900 mb-4">Photos</h3>
+              <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                {% for image in event.images.all %}
+                <a href="{{ image.image.url }}" data-fancybox="gallery" class="block rounded-lg overflow-hidden group">
+                  <img src="{{ image.image.url }}" alt="Event image {{ forloop.counter }}" 
+                       class="w-full h-40 object-cover transform group-hover:scale-105 transition duration-300">
+                </a>
+                {% endfor %}
+              </div>
+            </div>
+            {% endif %}
+
+            <!-- Video Embed -->
+            {% if event.video %}
+            <div class="mb-6">
+              <h3 class="text-lg font-medium text-gray-900 mb-4">Video Preview</h3>
+              <div class="aspect-w-16 aspect-h-9 rounded-lg overflow-hidden bg-black">
+                <iframe src="{{ event.video }}" class="w-full h-64" frameborder="0" allowfullscreen></iframe>
+              </div>
+            </div>
+            {% endif %}
+
+            <!-- Video File Download -->
+            {% if event.video_file %}
+            <div>
+              <h3 class="text-lg font-medium text-gray-900 mb-4">Downloadable Content</h3>
+              <a href="{{ event.video_file.url }}" download class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700">
+                <i class="fas fa-download mr-2"></i>
+                Download Video
+              </a>
+            </div>
+            {% endif %}
+          </div>
+        </section>
+        {% endif %}
+      </div>
+
+      <!-- Sidebar Column -->
+      <div class="lg:col-span-1">
+        <!-- Organizer Section
+        <section class="bg-white rounded-xl shadow-md overflow-hidden mb-8">
+          <div class="px-6 py-5 border-b border-gray-200">
+            <h2 class="text-xl font-semibold text-gray-900 flex items-center">
+              <i class="fas fa-user-friends text-indigo-600 mr-2"></i>
+              Event Organizer
+            </h2>
+          </div>
+          <div class="px-6 py-4">
+            <div class="flex items-center space-x-4">
+              <div class="flex-shrink-0">
+                <div class="h-12 w-12 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600">
+                  <i class="fas fa-user"></i>
+                </div>
+              </div>
+              <div>
+               
+                <p class="text-sm text-gray-500">{{ event.organizer.email }}</p>
+              </div>
+            </div>
+            <div class="mt-4">
+              <button class="w-full flex items-center justify-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                <i class="fas fa-envelope mr-2"></i>
+                Contact Organizer
+              </button>
+            </div>
+          </div>
+        </section> -->
+
+        <!-- Event Actions -->
+        <section class="bg-white rounded-xl shadow-md overflow-hidden mb-8">
+          <div class="px-6 py-5 border-b border-gray-200">
+            <h2 class="text-xl font-semibold text-gray-900 flex items-center">
+              <i class="fas fa-calendar-check text-indigo-600 mr-2"></i>
+              Event Registration
+            </h2>
+          </div>
+          <div class="px-6 py-4">
+            <div class="space-y-4">
+              <!-- link for registration -->
+              <!-- Confirmation Modal -->
+<div id="confirmationModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 hidden">
+  <div class="bg-white p-6 rounded-lg shadow-lg w-96">
+    <h3 class="text-lg font-semibold mb-4">You are about to leave the website</h3>
+    <p class="mb-4">Are you sure you want to continue to the external site?</p>
+    <div class="flex justify-end space-x-4">
+      <button onclick="redirectToEvent()" class="px-4 py-2 bg-indigo-600 text-white rounded-md">Yes, Take Me There</button>
+      <button onclick="closeModal()" class="px-4 py-2 border border-gray-300 rounded-md text-gray-600">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Register Button -->
+{% if event.registration_link %}
+<button onclick="openModal('{{ event.registration_link }}')" class="w-full flex items-center justify-center px-4 py-3 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700">
+  <i class="fas fa-ticket-alt mr-2"></i>
+  Register for Event
+</button>
+{% else %}
+<button class="w-full flex items-center justify-center px-4 py-3 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-gray-400 cursor-not-allowed" disabled>
+  <i class="fas fa-ticket-alt mr-2"></i>
+  Registration Link Not Available
+</button>
+{% endif %}
+
+
+              
+              <!-- Set Reminder Button -->
+<button class="w-full flex items-center justify-center px-4 py-3 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50" id="set-reminder-button">
+  <i class="fas fa-bell mr-2"></i>
+  Set Reminder
+</button>
+
+<!-- Modal for Setting Reminder -->
+<div id="reminder-modal" class="hidden fixed inset-0 bg-gray-500 bg-opacity-75 flex justify-center items-center z-50">
+  <div class="bg-white p-6 rounded-lg shadow-lg w-96">
+      <h2 class="text-lg font-semibold">Set Event Reminder</h2>
+      
+      <!-- Reminder Form -->
+      <form method="POST" action="{% url 'set_event_reminder' event_id=event.id %}">
+        {% csrf_token %}
+        <div class="mb-4">
+            <label for="id_email" class="block text-sm font-medium text-gray-700">Email Address</label>
+            <input type="email" name="email" id="id_email" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" required>
+        </div>
+    
+        <div class="mt-4">
+            <button type="submit" class="w-full px-4 py-2 border border-gray-300 bg-blue-500 text-white rounded-md hover:bg-blue-600">Save Reminder</button>
+        </div>
+    </form>
+    
+    
+      <!-- Close Button -->
+      <button id="close-modal" class="mt-4 w-full px-4 py-2 border border-gray-300 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300">Close</button>
+  </div>
+</div>
+
+            </div>
+          </div>
+        </section>
+
+        <!-- Share Section -->
+        <!-- <section class="bg-white rounded-xl shadow-md overflow-hidden">
+          <div class="px-6 py-5 border-b border-gray-200">
+            <h2 class="text-xl font-semibold text-gray-900 flex items-center">
+              <i class="fas fa-share-alt text-indigo-600 mr-2"></i>
+              Share This Event
+            </h2>
+          </div>
+          <div class="px-6 py-4">
+            <div class="flex justify-center space-x-4">
+              <a href="#" class="text-gray-400 hover:text-blue-500">
+                <span class="sr-only">Facebook</span>
+                <i class="fab fa-facebook-f text-xl"></i>
+              </a>
+              <a href="#" class="text-gray-400 hover:text-blue-400">
+                <span class="sr-only">Twitter</span>
+                <i class="fab fa-twitter text-xl"></i>
+              </a>
+              <a href="#" class="text-gray-400 hover:text-red-500">
+                <span class="sr-only">Email</span>
+                <i class="fas fa-envelope text-xl"></i>
+              </a>
+              <a href="#" class="text-gray-400 hover:text-green-500">
+                <span class="sr-only">WhatsApp</span>
+                <i class="fab fa-whatsapp text-xl"></i>
+              </a>
+            </div>
+          </div>
+        </section> -->
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Fancybox for image gallery -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@4.0/dist/fancybox.css" />
+<script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@4.0/dist/fancybox.umd.js"></script>
+
+<!-- Map JS -->
+
+
+<style>
+  .prose {
+    line-height: 1.6;
+  }
+  .prose p {
+    margin-bottom: 1rem;
+  }
+</style>
+
+<script>
+  // Initialize maps
+  function initMap() {
+    {% if event.location_type == 'inside' %}
+    // University map
+    const universityLocation = { lat: YOUR_UNIVERSITY_LAT, lng: YOUR_UNIVERSITY_LNG };
+    const universityMap = new google.maps.Map(document.getElementById("universityMap"), {
+      zoom: 16,
+      center: universityLocation,
+      styles: [
+        {
+          "featureType": "poi",
+          "stylers": [
+            { "visibility": "off" }
+          ]
+        }
+      ]
+    });
+    new google.maps.Marker({
+      position: universityLocation,
+      map: universityMap,
+      title: "{{ event.building }}",
+      icon: {
+        url: "https://maps.google.com/mapfiles/ms/icons/blue-dot.png"
+      }
+    });
+    {% elif event.location_type == 'outside' %}
+    // External location map
+    const externalLocation = { lat: {{ event.latitude }}, lng: {{ event.longitude }} };
+    const externalMap = new google.maps.Map(document.getElementById("externalMap"), {
+      zoom: 14,
+      center: externalLocation,
+      styles: [
+        {
+          "featureType": "poi",
+          "stylers": [
+            { "visibility": "simplified" }
+          ]
+        }
+      ]
+    });
+    new google.maps.Marker({
+      position: externalLocation,
+      map: externalMap,
+      title: "Event Location",
+      icon: {
+        url: "https://maps.google.com/mapfiles/ms/icons/red-dot.png"
+      }
+    });
+    {% endif %}
+  }
+  
+  // Initialize Fancybox
+  document.addEventListener('DOMContentLoaded', function() {
+    Fancybox.bind("[data-fancybox]", {
+      // Your custom options
+    });
+  });
+
+
+  let registrationUrl = '';
+
+  function openModal(url) {
+    registrationUrl = url; // Store the URL in the global variable
+    document.getElementById('confirmationModal').classList.remove('hidden'); // Show the modal
+  }
+
+  function closeModal() {
+    document.getElementById('confirmationModal').classList.add('hidden'); // Hide the modal
+  }
+
+  function redirectToEvent() {
+    window.location.href = registrationUrl; // Redirect to the stored URL
+  }
+  
+</script>
+
+
+
+<script>
+  // Get the elements
+  const setReminderButton = document.getElementById('set-reminder-button');
+  const reminderModal = document.getElementById('reminder-modal');
+  const closeModalButton = document.getElementById('close-modal');
+
+  // Show the modal when the "Set Reminder" button is clicked
+  setReminderButton.addEventListener('click', function () {
+      reminderModal.classList.remove('hidden');
+  });
+
+  // Close the modal when the "Close" button is clicked
+  closeModalButton.addEventListener('click', function () {
+      reminderModal.classList.add('hidden');
+  });
+</script>
+
+{% endblock %}

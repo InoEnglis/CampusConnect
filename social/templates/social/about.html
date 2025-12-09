@@ -1,0 +1,299 @@
+{% extends 'landing/base.html' %}
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Header -->
+            <div class="text-center mb-5">
+                <h1 class="display-4 text-red-500 fw-bold mb-3">Kasubay Campus Connect</h1>
+            </div>
+
+            <!-- Navigation Tabs -->
+            <ul class="nav nav-tabs justify-content-center mb-4" id="legalTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="about-tab" data-bs-toggle="tab" data-bs-target="#about" type="button" role="tab">
+                        About Us
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="privacy-tab" data-bs-toggle="tab" data-bs-target="#privacy" type="button" role="tab">
+                        Privacy Policy
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="agreement-tab" data-bs-toggle="tab" data-bs-target="#agreement" type="button" role="tab">
+                        User Agreement
+                    </button>
+                </li>
+            </ul>
+
+            <!-- Tab Content -->
+            <div class="tab-content bg-[#0f161b] rounded-lg p-4 shadow-lg" id="legalTabsContent">
+                <!-- About Section -->
+                <div class="tab-pane fade show active" id="about" role="tabpanel">
+                    <h2 class="text-red-500 mb-4">About Kasubay Campus Connect</h2>
+                    <div class="mb-4">
+                        <h3 class="h5 text-white mb-3">Our Mission</h3>
+                        <p class="text-gray-300">
+                            Kasubay Campus Connect is dedicated to fostering meaningful connections among students, faculty, 
+                            and alumni across campuses. We provide a secure platform for sharing knowledge, resources, 
+                            and experiences that enhance campus life.
+                        </p>
+                    </div>
+
+                    <div class="mb-4">
+                        <h3 class="h5 text-white mb-3">What We Offer</h3>
+                        <ul class="text-gray-300 ps-4">
+                            <li class="mb-2">Student-led communities for every interest and department</li>
+                            <li class="mb-2">Secure private groups for classes and organizations</li>
+                            <li class="mb-2">Campus event coordination and promotion</li>
+                            <li class="mb-2">Resource sharing and academic collaboration tools</li>
+                            <li class="mb-2">Alumni networking opportunities</li>
+                        </ul>
+                    </div>
+
+                    <div class="mb-4">
+                        <h3 class="h5 text-white mb-3">Our Values</h3>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="p-3 bg-gray-800 rounded-lg h-100">
+                                    <h4 class="h6 text-red-400 mb-2">Inclusivity</h4>
+                                    <p class="text-gray-300 small mb-0">We welcome students from all backgrounds and foster diverse, respectful communities.</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="p-3 bg-gray-800 rounded-lg h-100">
+                                    <h4 class="h6 text-red-400 mb-2">Integrity</h4>
+                                    <p class="text-gray-300 small mb-0">We maintain transparency in our operations and protect user privacy.</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="p-3 bg-gray-800 rounded-lg h-100">
+                                    <h4 class="h6 text-red-400 mb-2">Innovation</h4>
+                                    <p class="text-gray-300 small mb-0">We continuously improve our platform to meet evolving campus needs.</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="p-3 bg-gray-800 rounded-lg h-100">
+                                    <h4 class="h6 text-red-400 mb-2">Community</h4>
+                                    <p class="text-gray-300 small mb-0">We believe in the power of connection to enhance the educational experience.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Privacy Policy Section -->
+                <div class="tab-pane fade" id="privacy" role="tabpanel">
+                    <h2 class="text-red-500 mb-4">Privacy Policy</h2>
+                    <p class="text-gray-300 mb-4">Last Updated: January 2024</p>
+
+                    <div class="mb-4">
+                        <h3 class="h5 text-white mb-3">1. Information We Collect</h3>
+                        <p class="text-gray-300">
+                            We collect information you provide when creating an account, joining communities, or interacting with others:
+                        </p>
+                        <ul class="text-gray-300 ps-4">
+                            <li class="mb-2">Personal identification (name, email, institution)</li>
+                            <li class="mb-2">Academic information (major, year)</li>
+                            <li class="mb-2">Content you post or share</li>
+                            <li class="mb-2">Messages and communications</li>
+                            <li class="mb-2">Technical data (IP address, device information)</li>
+                        </ul>
+                    </div>
+
+                    <div class="mb-4">
+                        <h3 class="h5 text-white mb-3">2. How We Use Your Information</h3>
+                        <p class="text-gray-300">
+                            Your data helps us:
+                        </p>
+                        <ul class="text-gray-300 ps-4">
+                            <li class="mb-2">Provide and improve our services</li>
+                            <li class="mb-2">Verify academic status</li>
+                            <li class="mb-2">Personalize your experience</li>
+                            <li class="mb-2">Facilitate campus-specific features</li>
+                            <li class="mb-2">Ensure community safety and compliance</li>
+                        </ul>
+                    </div>
+
+                    <div class="mb-4">
+                        <h3 class="h5 text-white mb-3">3. Data Protection</h3>
+                        <p class="text-gray-300">
+                            We implement industry-standard measures to protect your information:
+                        </p>
+                        <ul class="text-gray-300 ps-4">
+                            <li class="mb-2">End-to-end encryption for private messages</li>
+                            <li class="mb-2">Regular security audits</li>
+                            <li class="mb-2">Limited data retention policies</li>
+                            <li class="mb-2">Strict access controls</li>
+                        </ul>
+                    </div>
+
+                    <div class="mb-4">
+                        <h3 class="h5 text-white mb-3">4. Your Rights</h3>
+                        <p class="text-gray-300">
+                            You have the right to:
+                        </p>
+                        <ul class="text-gray-300 ps-4">
+                            <li class="mb-2">Access and request your data</li>
+                            <li class="mb-2">Correct inaccuracies</li>
+                            <li class="mb-2">Request deletion of your account</li>
+                            <li class="mb-2">Opt-out of data processing</li>
+                        </ul>
+                        <p class="text-gray-300 mt-3">
+                            Contact our Data Protection Officer at <span class="text-red-400">privacy@earaz.ca@gmail.com</span> for any requests.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- User Agreement Section -->
+                <div class="tab-pane fade" id="agreement" role="tabpanel">
+                    <h2 class="text-red-500 mb-4">User Agreement</h2>
+                    <p class="text-gray-300 mb-4">Effective: January 2024</p>
+
+                    <div class="mb-4">
+                        <h3 class="h5 text-white mb-3">1. Account Requirements</h3>
+                        <ul class="text-gray-300 ps-4">
+                            <li class="mb-2">You must be currently enrolled or employed at a recognized educational institution</li>
+                            <li class="mb-2">Provide accurate academic information</li>
+                            <li class="mb-2">Maintain one account per individual</li>
+                            <li class="mb-2">You are responsible for all activity under your account</li>
+                        </ul>
+                    </div>
+
+                    <div class="mb-4">
+                        <h3 class="h5 text-white mb-3">2. Acceptable Use</h3>
+                        <p class="text-gray-300">
+                            You agree not to:
+                        </p>
+                        <ul class="text-gray-300 ps-4">
+                            <li class="mb-2">Harass, bully, or discriminate against others</li>
+                            <li class="mb-2">Share unauthorized academic materials</li>
+                            <li class="mb-2">Post illegal or harmful content</li>
+                            <li class="mb-2">Impersonate others or institutions</li>
+                            <li class="mb-2">Violate intellectual property rights</li>
+                        </ul>
+                    </div>
+
+                    <div class="mb-4">
+                        <h3 class="h5 text-white mb-3">3. Community Guidelines</h3>
+                        <p class="text-gray-300">
+                            All users must adhere to:
+                        </p>
+                        <ul class="text-gray-300 ps-4">
+                            <li class="mb-2">Respectful academic discourse</li>
+                            <li class="mb-2">Institution-specific conduct policies</li>
+                            <li class="mb-2">Appropriate content standards</li>
+                            <li class="mb-2">Community moderator directions</li>
+                        </ul>
+                    </div>
+
+                    <div class="mb-4">
+                        <h3 class="h5 text-white mb-3">4. Consequences for Violations</h3>
+                        <p class="text-gray-300">
+                            Violations may result in:
+                        </p>
+                        <ul class="text-gray-300 ps-4">
+                            <li class="mb-2">Content removal</li>
+                            <li class="mb-2">Temporary suspension</li>
+                            <li class="mb-2">Permanent account termination</li>
+                            <li class="mb-2">Reporting to your institution</li>
+                        </ul>
+                    </div>
+
+                    <div class="mb-4">
+                        <h3 class="h5 text-white mb-3">5. Limitation of Liability</h3>
+                        <p class="text-gray-300">
+                            Kasubay Campus Connect is not liable for:
+                        </p>
+                        <ul class="text-gray-300 ps-4">
+                            <li class="mb-2">User-generated content</li>
+                            <li class="mb-2">Academic consequences of platform use</li>
+                            <li class="mb-2">Technical issues beyond our control</li>
+                            <li class="mb-2">Third-party services</li>
+                        </ul>
+                    </div>
+
+                    <div class="alert alert-dark bg-gray-800 border-gray-700 mt-4">
+                        <p class="text-gray-300 mb-0">
+                            By using Kasubay Campus Connect, you agree to these terms. We may update this agreement periodically, 
+                            and continued use constitutes acceptance of changes.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer Note -->
+            <div class="text-center mt-4">
+                <p class="text-gray-400 small">
+                    For questions about these policies, contact <span class="text-red-400">legal@earaz.ca@gmail.com</span>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Tab Styles */
+    .nav-tabs {
+        border-bottom: 1px solid #374151;
+    }
+
+    .nav-tabs .nav-link {
+        color: #9ca3af;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        position: relative;
+        font-weight: 500;
+    }
+
+    .nav-tabs .nav-link:hover {
+        color: #ef4444;
+        border: none;
+    }
+
+    .nav-tabs .nav-link.active {
+        color: #ef4444;
+        background-color: transparent;
+        border: none;
+        border-bottom: 2px solid #ef4444;
+    }
+
+    /* Content Styles */
+    .tab-content {
+        min-height: 500px;
+    }
+
+    /* Alert Styles */
+    .alert-dark {
+        background-color: #1f2937;
+        border-color: #374151;
+        color: #d1d5db;
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 768px) {
+        .nav-tabs .nav-link {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+        }
+        
+        .tab-content {
+            padding: 1.5rem;
+        }
+    }
+</style>
+
+<script>
+    // Activate Bootstrap tabs
+    document.addEventListener('DOMContentLoaded', function() {
+        const tabEls = document.querySelectorAll('button[data-bs-toggle="tab"]');
+        tabEls.forEach(tabEl => {
+            tabEl.addEventListener('click', function(event) {
+                const tabTrigger = new bootstrap.Tab(this);
+                tabTrigger.show();
+            });
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,11 @@
+{% extends 'landing/base.html' %}
+{% block content %}
+    <div class="container mt-5">
+        <h3>Create New Rule for {{ group.name }}</h3>
+        <form method="POST">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-success">Create Rule</button>
+        </form>
+    </div>
+{% endblock %}

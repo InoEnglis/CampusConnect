@@ -1,0 +1,72 @@
+{% extends 'landing/base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <!-- Back to Post Button -->
+    <div class="row mb-4">
+        <div class="col-md-5 col-sm-6">
+            <a href="{% url 'post-list' %}" class="btn btn-outline-primary">
+                <i class="fas fa-arrow-left"></i> Back to new feed
+            </a>
+        </div>
+    </div>
+
+    <!-- Title Section -->
+    <div class="row justify-content-center mb-3">
+        <div class="col-md-6 text-center">
+            <h3 class="font-weight-bold text-primary">Update Your Post</h3>
+        </div>
+    </div>
+
+    <!-- Form Section -->
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-sm-12">
+            <div class="card shadow-lg border-0">
+                <div class="card-body p-4">
+                    <form method="POST" enctype="multipart/form-data">  
+                        {% csrf_token %}
+
+                        <!-- Text Area -->
+                        <div class="mb-4">
+                            <label for="id_body" class="form-label font-weight-bold">Post Content</label>
+                            <textarea name="body" id="id_body" class="form-control" rows="6">{{ form.body.value }}</textarea>
+                        </div>
+
+                        <!-- Image Upload -->
+                        <div class="mb-4">
+                            <label for="id_image" class="form-label font-weight-bold">Upload Image</label>
+                            <input type="file" name="image" class="form-control" id="id_image">
+                            {% if object.image %}
+                                <div class="mt-3 text-center">
+                                    <p class="text-muted small mb-2">Current Image:</p>
+                                    <img src="{{ object.image.url }}" alt="Post Image" class="img-fluid rounded shadow-sm" style="max-height: 300px;">
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success btn-lg rounded-pill">
+                                <i class="fas fa-check"></i> Update Post
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>  
+</div>
+
+<!-- Additional Styling -->
+<style>
+    .card {
+        border-radius: 15px;
+        background-color: #f8f9fa;
+    }
+
+    .form-control {
+        border-radius: 10px;
+    }
+
+</style>
+{% endblock %}
