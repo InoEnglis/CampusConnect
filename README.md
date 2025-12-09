@@ -1,7 +1,9 @@
 -----------------------------------------Campus Connect---------------------------------------
+
 Just some random social media website that's created using python(django), CSS, HTML, some bootstrap, Tailwind and Allauth_UI.
 
-Requirements
+Requirements:
+
 To completely run the project, you'll need:
 
 1. Python 3.11
@@ -10,9 +12,10 @@ To completely run the project, you'll need:
 
 3. Redis (for WebSockets and Celery tasks)
 
-PostgreSQL (optional you can use the default databse of django which is sqlite--Avoid using it in production)
+4. PostgreSQL (optional you can use the default databse of django which is sqlite--Avoid using it in production)
 
 -------Installation----------
+
 Clone the repository
 
 1. git clone https://github.com/YourUsername/CampusConnect.git
@@ -20,33 +23,45 @@ Clone the repository
 2. cd to the project
    
 3. Create a virtual environment
+   
    python -m venv venv
+   
    Activate the virtual environment
+   
 Windows:
+
 venv\Scripts\activate
 
 Mac/Linux:
+
 source venv/bin/activate
 
 4. Install dependencies
-5. 
+   
 pip install -r requirements.txt
 
 6. Create a .env file (or set them in your system) with:
 
 DJANGO_SECRET_KEY=your_secret_key
+
 DEBUG=True
+
 DATABASE_URL=postgres://user:password@localhost:5432/dbname
+
 REDIS_URL=redis://127.0.0.1:6379/0
 
 Apply migrations
+
   (python manage.py migrate)
 
 ------To run the project-------
+
 1. Create a superuser
+   
 python manage.py createsuperuser
 
-2. Run the development server
+3. Run the development server
+   
 type in your terminal: python manage.py runserver
 ----NOTE:----
 use daphne to use websocket features:
