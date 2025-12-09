@@ -63,7 +63,9 @@ python manage.py createsuperuser
 3. Run the development server
    
 type in your terminal: python manage.py runserver
+
 ----NOTE:----
+
 use daphne to use websocket features:
 
 type in your terminal:  daphne -p 8000 (project's name).asgi:application.
@@ -76,6 +78,7 @@ redis-server
 
 
 Features
+
 1. User authentication and profiles
    
 2. Create, edit, and delete posts
