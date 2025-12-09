@@ -1,6 +1,6 @@
 {% extends 'landing/base.html' %}
-
 {% block content %}
+
 <div class="min-h-screen bg-gray-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <a href="#" onclick="event.preventDefault(); history.back();" class="btn btn-outline-danger mb-3 mt-10">
@@ -23,7 +23,7 @@
         <form method="POST" class="space-y-8">
             {% csrf_token %}
 
-            <!-- Admins Section -->
+            <!-- Admins section -->
             <div class="bg-white shadow rounded-lg overflow-hidden">
                 <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
                     <h2 class="text-xl font-semibold text-gray-800 flex items-center">
@@ -57,7 +57,7 @@
                 </div>
             </div>
 
-            <!-- Moderators Section -->
+            <!-- Moderators section -->
             <div class="bg-white shadow rounded-lg overflow-hidden">
                 <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
                     <h2 class="text-xl font-semibold text-gray-800 flex items-center">
@@ -114,7 +114,7 @@
                 </div>
             </div>
 
-            <!-- Members Section -->
+            <!-- Members section -->
             <div class="bg-white shadow rounded-lg overflow-hidden">
                 <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
                     <h2 class="text-xl font-semibold text-gray-800 flex items-center">
@@ -171,7 +171,7 @@
                 </div>
             </div>
 
-            <!-- Banned Users Section -->
+            <!-- Banned Users list -->
             <div class="bg-white shadow rounded-lg overflow-hidden">
                 <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
                     <h2 class="text-xl font-semibold text-gray-800 flex items-center">
@@ -198,7 +198,7 @@
                 </div>
             </div>
 
-            <!-- Muted Users Section -->
+            <!-- Muted Users list -->
             <div class="bg-white shadow rounded-lg overflow-hidden">
                 <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
                     <h2 class="text-xl font-semibold text-gray-800 flex items-center">

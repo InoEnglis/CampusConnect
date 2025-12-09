@@ -1,11 +1,16 @@
 {% extends 'landing/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'landing/css/style.css' %}">
+{% endblock extra_css %}
 
 {% block content %}
 <div class="container">
     <div class="row justify-content-center align-items-center min-vh-100">
         <div class="col-md-8 col-sm-12 text-center">
             <!-- Main Heading -->
-            <h1 class="display-4 fw-bold mb-4" style="color: #fd7e14;">Connect with your friends!</h1>
+            <h1 class="display-4 fw-bold mb-4 color-yellow">Connect with your friednds!</h1>
             <p class="lead text-light mb-4">Follow people who interest you and join conversations with them.</p>
 
             <!-- Action Buttons -->
@@ -19,55 +24,3 @@
 </div>
 {% endblock content %}
 
-<!-- Custom CSS -->
-<style>
-   
-
-    .container {
-        padding-top: 80px;  
-    }
-
-    .display-4 {
-        font-size: 2.5rem; 
-        font-weight: 700;  
-    }
-
-    .lead {
-        font-size: 1.2rem; 
-    }
-
-    .change:hover {
-        font-size: 1.1rem;  
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    .change:hover {
-        transform: translateY(-5px); 
-        box-shadow: 0 10px 20px rgba(174, 106, 199, 0.1); 
-    }
-
-    .change:active {
-        transform: translateY(2px);
-        box-shadow: 0 5px 10px rgba(156, 34, 172, 0.156); 
-    }
-
-    .row {
-        background-color: var(--base-200);  
-        border-radius: 8px;  
-        padding: 40px;
-    }
-
-    .shadow-lg {
-        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);  
-    }
-
-    .btn-outline-primary {
-        border-color: var(--primary);
-        color: var(--primary);
-    }
-
-    .btn-outline-primary:hover {
-        background-color: var(--primary);
-        color: white;
-    }
-</style>

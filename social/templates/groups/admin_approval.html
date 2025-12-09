@@ -63,9 +63,9 @@
         </ul>
     </div>
 
-    <!-- Main Content -->
+    <!-- Main content -->
     <div class="flex-1 p-8 ml-64">
-        <!-- Pending Requests Section (shown by default) -->
+        <!-- Pending Requests -->
         <div id="pendingRequests">
             <div class="flex justify-between items-center mb-8">
                 <div>
@@ -74,7 +74,7 @@
                 </div>
             </div>
 
-            <!-- Pending Requests List -->
+            <!-- Pending requests list -->
             <div class="bg-white rounded-xl shadow-lg overflow-hidden">
                 <div class="bg-gray-50 px-6 py-4 border-b flex justify-between items-center">
                     <h5 class="text-lg font-semibold text-gray-800">
@@ -154,7 +154,7 @@
             </div>
         </div>
 
-        <!-- Group Rules Section (hidden by default) -->
+        <!-- Group rules section) -->
         <div id="groupRules" class="hidden">
             <div class="flex justify-between items-center mb-8">
                 <div>
@@ -162,7 +162,7 @@
                 </div>
             </div>
 
-            <!-- Rule Creation Card -->
+            <!-- rule creation -->
             {% if request.user == group.creator or request.user in group.admins.all %}
             <div class="bg-white rounded-xl shadow-lg overflow-hidden mb-8">
                 <div class="bg-gray-50 px-6 py-4 border-b">
@@ -205,11 +205,11 @@
             </div>
             {% endif %}
 
-            <!-- Existing Rules List -->
+            <!-- rules list (exisiting/if there's any) -->
            
         </div>
 
-        <!-- Manage Users Section (loaded dynamically) -->
+        <!-- Manage users section -->
         <div id="manageUsersContainer" class="hidden"></div>
     </div>
 </div>

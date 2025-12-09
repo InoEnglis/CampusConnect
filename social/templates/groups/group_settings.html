@@ -1,5 +1,9 @@
 {% extends 'landing/base.html' %}
 {% block content %}
+{% load static %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'social/css/group/group_settings.css' %}">
+{% endblock extra_css %}
 <div class="container-fluid mt-4 px-4">
     <div class="row justify-content-center">
         <div class="col-xl-10 col-12">
@@ -145,72 +149,10 @@
         </div>
     </div>
 </div>
+{% block extra_js %}
+<script src="{% static 'social/js/group/group_settings.js' %}"></script>
+{% endblock extra_js %}
 
-<!-- Scripts -->
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const previews = document.querySelectorAll('.color-preview');
-        previews.forEach(preview => {
-            const color = preview.getAttribute('data-banner-color');
-            if (color) {
-                preview.style.backgroundColor = color;
-            }
-        });
 
-        const bannerInput = document.getElementById('id_banner_color');
-        if (bannerInput) {
-            bannerInput.addEventListener('input', function () {
-                const colorBox = document.querySelector('.color-picker .color-preview');
-                if (colorBox) {
-                    colorBox.style.backgroundColor = this.value;
-                }
-            });
-        }
-    });
-</script>
 
-<!-- Styles -->
-<style>
-    .card {
-        border-radius: 10px;
-        overflow: hidden;
-    }
-
-    .form-control, .form-select {
-        border-radius: 8px;
-        padding: 0.5rem 1rem;
-    }
-
-    .form-switch .form-check-input {
-        width: 2.5em;
-        height: 1.5em;
-    }
-
-    .color-preview {
-        transition: background-color 0.3s ease;
-    }
-
-    .color-picker input {
-        cursor: pointer;
-    }
-
-    .btn {
-        border-radius: 8px;
-        padding: 0.5rem 1.25rem;
-    }
-
-    .modal-content {
-        border-radius: 12px;
-    }
-
-    textarea.form-control {
-        min-height: 120px;
-    }
-
-    @media (max-width: 768px) {
-        .card-header h2, .card-header h3 {
-            font-size: 1.1rem;
-        }
-    }
-</style>
 {% endblock %}

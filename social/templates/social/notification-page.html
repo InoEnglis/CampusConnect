@@ -2,14 +2,17 @@
 
 {% block content %}
 {% load static %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'social/css/notification/notif.css' %}">
+{% endblock extra_css %}
+
 <div class="container mt-8 px-4">
     <h2 class="text-3xl font-semibold text-white mb-6">Your Notifications</h2>
     <ul class="list-group space-y-4">
         {% for notification in notifications %}
         <li class="list-group-item bg-gray-800 text-white rounded-lg p-4 flex justify-between items-center shadow-md hover:shadow-xl transition-shadow duration-300">
             <div class="flex items-start space-x-4">
-                <!-- Profile Picture -->
-                <!-- Profile Picture -->
+            
 {% if notification.sender.profile.picture %}
 <img src="{{ notification.sender.profile.picture.url }}" 
      alt="{{ notification.sender.username }}'s profile" 
@@ -20,84 +23,33 @@
      class="w-12 h-12 rounded-full object-cover">
 {% endif %}
 
-                
-            
-                <!-- Notification Content -->
-                <div class="flex flex-col">
-                    <!-- Notification Message as Link -->
-                    <a href="{{ notification.link }}" class="notification-link text-lg font-medium hover:text-blue-500 transition-colors duration-300">
-                        <strong>{{ notification.message }}</strong>
-                    </a>
-                    <small class="text-sm text-gray-400 mt-1">Received on: {{ notification.timestamp|date:"Y-m-d H:i" }}</small>
-                </div>
-            </div>
-            
-            <div class="flex items-center space-x-3">
-                <!-- Displaying notification type icons -->
-                {% if notification.notification_type == 'comment' %}
-                    <span class="text-gray-400">💬</span> <!-- Comment icon -->
-                {% elif notification.notification_type == 'like' %}
-                    <span class="text-gray-400">👍</span> <!-- Like icon -->
-                {% elif notification.notification_type == 'reply' %}
-                    <span class="text-gray-400">🔄</span> <!-- Reply icon -->
-                {% endif %}
-                
-                <!-- New Notification Badge -->
-                {% if not notification.read %}
-                    <span class="badge bg-red-600 text-white text-xs px-3 py-1 rounded-full">New</span>
-                {% endif %}
-            </div>
-        </li>
-        {% endfor %}
-    </ul>
+ <!-- Notification -->
+ <div class="flex flex-col">
+    <a href="{{ notification.link }}" class="notification-link text-lg font-medium hover:text-blue-500 transition-colors duration-300">
+        <strong>{{ notification.message }}</strong>
+    </a>
+    <small class="text-sm text-gray-400 mt-1">Received on: {{ notification.timestamp|date:"Y-m-d H:i" }}</small>
+</div>
 </div>
 
-<style>
-/* Notification Link Styling */
-.notification-link {
-    font-weight: 600;
-    color: #2c3e50;
-    transition: color 0.3s ease;
-}
+<div class="flex items-center space-x-3">
+<!-- Displaying notification type icons (needs icons for each item.) -->
+{% if notification.notification_type == 'comment' %}
+    <span class="text-gray-400"></span>
+{% elif notification.notification_type == 'like' %}
+    <span class="text-gray-400"></span> 
+{% elif notification.notification_type == 'reply' %}
+    <span class="text-gray-400"></span>
+{% endif %}
 
-.notification-link:hover {
-    color: #3498db;
-    text-decoration: underline;
-}
+<!-- New Notification Badge -->
+{% if not notification.read %}
+    <span class="badge bg-red-600 text-white text-xs px-3 py-1 rounded-full">New</span>
+{% endif %}
+</div>
+</li>
+{% endfor %}
+</ul>
+</div>
 
-/* Badge Styling */
-ul.list-group-item .badge {
-    font-size: 0.875rem;
-    padding: 0.5rem 0.8rem;
-    border-radius: 20px;
-}
-
-/* Hover Effects for Notifications */
-ul.list-group-item:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-}
-
-/* Profile Picture Styling */
-ul.list-group-item img {
-    border: 2px solid #ffffff;
-    border-radius: 50%;
-}
-
-/* Icon and Badge Alignment */
-ul.list-group-item .flex {
-    display: flex;
-    align-items: center;
-}
-
-ul.list-group-item .space-x-4 > * {
-    margin-right: 1rem;
-}
-
-@media screen and (max-width: 768px) {
-    .container {
-        padding-left: 10px;
-        padding-right: 10px;
-    }
-}
-</style>
 {% endblock %}

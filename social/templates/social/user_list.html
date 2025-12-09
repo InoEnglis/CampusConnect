@@ -2,7 +2,6 @@
     <ul class="space-y-4 mt-5">
         {% for user in users %}
             <li class="flex items-center gap-4 p-3 bg-gray-800 rounded-lg shadow hover:bg-gray-700 transition duration-200" style="font-size: 10px;">
-                <!-- Profile Picture or Fallback -->
                 {% if user.profile.picture %}
                     <img src="{{ user.profile.picture.url }}" 
                          alt="{{ user.username }}'s profile picture" 
@@ -12,8 +11,6 @@
                         {{ user.username|slice:":1"|upper }}
                     </div>
                 {% endif %}
-                
-                <!-- Username and Link -->
                 <a href="{% url 'profile' user.id %}" 
                    class="text-white text-lg font-medium hover:underline focus:outline-none focus:ring-2 focus:ring-blue-400">
                     {{ user.username }}

@@ -1,151 +1,542 @@
-<div class="event-list-container relative group">
-    <!-- Left/Previous Button (now always visible) -->
-    <button class="absolute left-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-black/70 hover:bg-black/90 rounded-full shadow-lg flex items-center justify-center text-white transition-all duration-200 ease-out focus:outline-none opacity-100 backdrop-blur-sm" id="scrollLeftBtn" aria-label="Scroll left">
-        <i class="fas fa-chevron-left"></i>
-    </button>
-    
-    <!-- Carousel with adjusted height and smooth scrolling -->
-    <div class="horizontal-event-list flex overflow-x-auto gap-4 pb-4 scroll-smooth px-4 h-[22rem] hide-scrollbar" id="eventList">
-        <!-- Add New Event Card -->
-        <div class="add-event-item flex-shrink-0 w-56 snap-start relative group h-full">
-            <div class="event-card h-full rounded-xl overflow-hidden bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center transition-all duration-300 hover:shadow-lg hover:-translate-y-1 transform-gpu">
-                <div class="text-center p-6">
-                    <div class="add-event-btn w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4 transition-all hover:bg-opacity-30 hover:scale-110">
-                        <a href="{% url 'create_event' %}" class="w-full h-full flex items-center justify-center">
-                            <i class="fas fa-plus text-gray-800 text-2xl"></i>
-                        </a>
-                    </div>
-                    <h5 class="event-title text-xl font-bold text-white mb-1">Create Event</h5>
-                    <p class="event-date text-sm text-white text-opacity-90">Share your activity</p>
+<div class="events-showcase">
+    <div class="events-track">
+        <div class="events-track-inner" id="eventList">
+            <!-- Add Event Card -->
+            <a href="{% url 'create_event' %}" class="event-tile add-event">
+                <div class="tile-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 5v14m-7-7h14"/>
+                    </svg>
                 </div>
-            </div>
-        </div>
-
-        {% for event in events %}
-            <a href="{% url 'event_detail' event.id %}" class="event-item flex-shrink-0 w-56 snap-start relative group h-full transition-transform duration-300 hover:scale-[1.02]">
-                <div class="event-card h-full rounded-xl overflow-hidden relative transition-all duration-300 hover:shadow-lg">
-                    <img src="{{ event.images.first.image.url }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" alt="{{ event.name }}">
-                    <div class="event-details absolute inset-0 flex flex-col justify-end p-5 bg-gradient-to-t from-black/90 via-black/50 to-transparent">
-                        <h5 class="event-title text-xl font-bold text-white mb-2">{{ event.name }}</h5>
-                        <div class="flex items-center text-gray-300 text-sm mb-2">
-                            <i class="far fa-calendar-alt mr-2 w-4 text-center"></i>
-                            <span>{{ event.date|date:"M d, Y" }} • {{ event.time|time:"g:i A" }}</span>
-                        </div>
-                        <div class="flex items-start text-gray-300 text-sm">
-                            <i class="fas fa-map-marker-alt mr-2 w-4 text-center mt-0.5"></i>
-                            <span>
-                                {% if event.location_type == 'inside' %}
-                                    University Of Antique
-                                    {% if event.department %} • {{ event.department }}{% endif %}
-                                    {% if event.building %} • {{ event.building }}{% endif %}
-                                    {% if event.room_number %} • Room {{ event.room_number }}{% endif %}
-                                {% else %}
-                                    {{ event.specific_location }}
-                                    {% if event.barangay %}, {{ event.barangay }}{% endif %}
-                                    {% if event.municipality %}, {{ event.municipality }}{% endif %}
-                                {% endif %}
-                            </span>
-                        </div>
-                    </div>
+                <div class="tile-content">
+                    <h4>Create Event</h4>
+                    <p>Start something new</p>
                 </div>
             </a>
-        {% empty %}
-            <p class="text-gray-500">No upcoming events</p>
-        {% endfor %}
 
-        <!-- See More Card -->
-        <div class="see-more-item flex-shrink-0 w-56 snap-start relative group h-full">
-            <div class="event-card h-full rounded-xl overflow-hidden bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
-                <a href="{% url 'event_list' %}" class="text-center p-6 block">
-                    <div class="see-more-btn w-16 h-16 bg-white bg-opacity-10 rounded-full flex items-center justify-center mx-auto mb-4 transition-all hover:bg-opacity-20 hover:scale-110">
-                        <i class="fas fa-chevron-right text-white text-2xl"></i>
+            {% for event in events %}
+                <a href="{% url 'event_detail' event.id %}" class="event-tile">
+                    <div class="tile-image">
+                        <img src="{{ event.images.first.image.url }}" alt="{{ event.name }}" loading="lazy">
+                        <div class="image-overlay"></div>
                     </div>
-                    <h5 class="event-title text-xl font-bold text-white mb-1">See More</h5>
-                    <p class="event-date text-sm text-white text-opacity-90">Explore all events</p>
+                    <div class="tile-content">
+                        <h4>{{ event.name }}</h4>
+                        <div class="tile-meta">
+                            <span class="meta-item">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                </svg>
+                                {{ event.date|date:"M d" }}
+                            </span>
+                            <span class="meta-item">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <path d="M12 6v6l4 2"/>
+                                </svg>
+                                {{ event.time|time:"g:i A" }} 
+                            </span>
+                        </div>
+                        <p class="location">
+                            {% if event.location_type == 'inside' %}
+                                UA Campus
+                            {% else %}
+                                {{ event.municipality|default:event.barangay|default:"Location" }}
+                            {% endif %}
+                        </p>
+                    </div>
                 </a>
-            </div>
+            {% empty %}
+                <!-- Empty State -->
+                <div class="event-tile empty-state">
+                    <div class="tile-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                    </div>
+                    <div class="tile-content">
+                        <h4>No Events Yet</h4>
+                        <p>Be the first to create one</p>
+                        <a href="{% url 'create_event' %}" class="action-button">Create Event</a>
+                    </div>
+                </div>
+            {% endfor %}
+
+            {% if events %}
+                <!-- View All Card -->
+                <a href="{% url 'event_list' %}" class="event-tile view-all">
+                    <div class="tile-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 5l7 7-7 7"/>
+                        </svg>
+                    </div>
+                    <div class="tile-content">
+                        <h4>View All</h4>
+                        <p>See more events</p>
+                    </div>
+                </a>
+            {% endif %}
         </div>
     </div>
-    
-    <!-- Right/Next Button (now always visible) -->
-    <button class="absolute right-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-black/70 hover:bg-black/90 rounded-full shadow-lg flex items-center justify-center text-white transition-all duration-200 ease-out focus:outline-none opacity-100 backdrop-blur-sm" id="scrollRightBtn" aria-label="Scroll right">
-        <i class="fas fa-chevron-right"></i>
+
+    <!-- Navigation Buttons -->
+    <button class="nav-btn prev" onclick="scrollEvents(-1)" aria-label="Previous">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M15 18l-6-6 6-6"/>
+        </svg>
     </button>
-    
-    <!-- Scroll gradient indicators -->
-    <div class="absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-white dark:from-gray-900 to-transparent pointer-events-none hidden md:block"></div>
-    <div class="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-white dark:from-gray-900 to-transparent pointer-events-none hidden md:block"></div>
+    <button class="nav-btn next" onclick="scrollEvents(1)" aria-label="Next">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 18l6-6-6-6"/>
+        </svg>
+    </button>
 </div>
 
 <style>
-    .hide-scrollbar {
-        -ms-overflow-style: none;
-        scrollbar-width: none;
+    .events-showcase {
+        position: relative;
+        padding: 0;
     }
-    .hide-scrollbar::-webkit-scrollbar {
-        display: none;
+
+    .events-track {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        padding: 4px 0;
     }
-    
-    .event-card {
-        will-change: transform;
+
+    .events-track::-webkit-scrollbar {
+        height: 6px;
+        
     }
-    
-    #scrollLeftBtn, #scrollRightBtn {
-        transform: translateY(-50%) scale(1);
-        transition: opacity 200ms ease-out, background-color 200ms ease-out;
+
+    .events-track-inner {
+        display: flex;
+        gap: 12px;
+        
+        min-width: min-content;
+        padding: 0 16px 8px; 
     }
-    
-    #scrollLeftBtn:hover, #scrollRightBtn:hover {
+
+    .event-tile {
+        flex: 0 0 260px;
+        background: #ffffff;
+        border-radius: 12px;
+        overflow: hidden;
+        text-decoration: none;
+        color: #2c3e50;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid #e1e5e9;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .event-tile:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+        border-color: #3498db;
+    }
+
+    .tile-image {
+        height: 150px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .tile-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+
+    .event-tile:hover .tile-image img {
+        transform: scale(1.05);
+    }
+
+    .image-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.1));
+    }
+
+    .tile-content {
+        padding: 16px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .event-tile h4 {
+        font-size: 17px;
+        font-weight: 600;
+        margin: 0 0 10px 0;
+        color: #2c3e50;
+        line-height: 1.4;
+    }
+
+    .event-tile p {
+        font-size: 14px;
+        color: #7f8c8d;
+        margin: 0;
+        line-height: 1.5;
+    }
+
+    .tile-meta {
+        display: flex;
+        gap: 12px;
+        margin: 10px 0;
+        font-size: 13px;
+        flex-wrap: wrap;
+    }
+
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        color: #546e7a;
+        white-space: nowrap;
+    }
+
+    .meta-item svg {
+        width: 14px;
+        height: 14px;
+        stroke: #95a5a6;
+    }
+
+    .location {
+        margin-top: auto;
+        padding-top: 10px;
+        border-top: 1px solid #f1f2f6;
+        font-size: 13px;
+        color: #666;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .location::before {
+        content: "location:";
+        color: rgb(51, 51, 87);
+        font-size: 12px;
+    }
+
+
+    .add-event, .empty-state, .view-all {
+        background: #f8fafc;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+    }
+
+    .tile-icon {
+        margin-top: 24px;
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 12px;
+    }
+
+    .tile-icon svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    .add-event .tile-icon {
+        background: #e3f2fd;
+        color: #1976d2;
+    }
+
+    .empty-state .tile-icon {
+        background: #f5f5f5;
+        color: #666;
+    }
+
+    .view-all .tile-icon {
+        background: #f3e5f5;
+        color: #7b1fa2;
+    }
+
+    .action-button {
+        display: inline-block;
+        margin-top: 16px;
+        padding: 10px 20px;
+        background: #1976d2;
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        border: none;
+        cursor: pointer;
+    }
+
+    .action-button:hover {
+        background: #1565c0;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(25, 118, 210, 0.2);
+    }
+
+ 
+    .nav-btn {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 32px;
+        height: 32px;
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 50%;
+        cursor: pointer;
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        opacity: 0.9;
+    }
+
+    .nav-btn:hover {
+        background: #f8f9fa;
+        border-color: #3498db;
         transform: translateY(-50%) scale(1.1);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        opacity: 1;
+    }
+
+    .nav-btn svg {
+        width: 16px;
+        height: 16px;
+        stroke: #555;
+    }
+
+    .nav-btn:hover svg {
+        stroke: #3498db;
+    }
+
+    .nav-btn.prev {
+        left: 8px;
+    }
+
+    .nav-btn.next {
+        right: 8px;
+    }
+
+    /* Mobile Optimizations */
+    @media (max-width: 768px) {
+        .events-track-inner {
+            gap: 8px;
+            padding: 0 12px 6px;
+        }
+
+        .event-tile {
+            flex: 0 0 220px; /* Reduced from 260px */
+            border-radius: 10px;
+        }
+
+        .tile-image {
+            height: 120px; /* Reduced from 150px */
+        }
+
+        .tile-content {
+            padding: 12px;
+        }
+
+        .event-tile h4 {
+            font-size: 15px;
+            margin-bottom: 8px;
+        }
+
+        .event-tile p {
+            font-size: 13px;
+        }
+
+        .tile-meta {
+            gap: 8px;
+            margin: 8px 0;
+            font-size: 12px;
+        }
+
+        .meta-item svg {
+            width: 12px;
+            height: 12px;
+        }
+
+        .location {
+            font-size: 12px;
+            padding-top: 8px;
+        }
+
+        .location::before {
+            font-size: 11px;
+        }
+
+        .tile-icon {
+            margin-top: 20px;
+            width: 40px;
+            height: 40px;
+            margin-bottom: 10px;
+        }
+
+        .tile-icon svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .action-button {
+            padding: 8px 16px;
+            font-size: 13px;
+        }
+
+        .nav-btn {
+            display: none; 
+        }
+    }
+
+    /* Small Mobile */
+    @media (max-width: 480px) {
+        .events-track-inner {
+            gap: 6px;
+            padding: 0 10px 5px;
+        }
+
+        .event-tile {
+            flex: 0 0 200px; /* Further reduced for small screens */
+        }
+
+        .tile-image {
+            height: 110px;
+        }
+
+        .tile-content {
+            padding: 10px;
+        }
+
+        .event-tile h4 {
+            font-size: 14px;
+        }
+
+        .tile-meta {
+            flex-direction: column;
+            gap: 4px;
+        }
+    }
+
+    /* Dark Mode */
+    @media (prefers-color-scheme: dark) {
+        .events-showcase {
+            color-scheme: dark;
+        }
+
+        .event-tile {
+            background: #1a1a2e;
+            border-color: #2d2d44;
+            color: #e0e0e0;
+        }
+
+        .event-tile:hover {
+            border-color: #3498db;
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        .event-tile h4 {
+            color: #ffffff;
+        }
+
+        .event-tile p {
+            color: #b0b0b0;
+        }
+
+        .meta-item {
+            color: #a0aec0;
+        }
+
+        .meta-item svg {
+            stroke: #718096;
+        }
+
+        .location {
+            color: #a0aec0;
+            border-color: #2d3748;
+        }
+
+        .add-event, .empty-state, .view-all {
+            background: #252542;
+        }
+
+        .tile-icon {
+            background: #2d3748;
+        }
+
+        .nav-btn {
+            background: #2d3748;
+            border-color: #4a5568;
+        }
+
+        .nav-btn svg {
+            stroke: #cbd5e0;
+        }
+
+        .nav-btn:hover {
+            background: #4a5568;
+        }
     }
 </style>
 
 <script>
+function scrollEvents(direction) {
+    const track = document.querySelector('.events-track');
+    const scrollAmount = window.innerWidth < 768 ? 228 : 272; // Adjusted for mobile
+    
+    track.scrollBy({
+        left: direction * scrollAmount,
+        behavior: 'smooth'
+    });
+}
+
+// Update navigation buttons based on scroll position
 document.addEventListener('DOMContentLoaded', function() {
-    const eventList = document.getElementById('eventList');
-    const scrollLeftBtn = document.getElementById('scrollLeftBtn');
-    const scrollRightBtn = document.getElementById('scrollRightBtn');
+    const track = document.querySelector('.events-track');
+    const prevBtn = document.querySelector('.nav-btn.prev');
+    const nextBtn = document.querySelector('.nav-btn.next');
     
-    // Amount to scroll (based on card width + gap)
-    const scrollAmount = 240; // 224px card + 16px gap
-    
-    // Scroll left button click handler
-    scrollLeftBtn.addEventListener('click', function() {
-        eventList.scrollBy({
-            left: -scrollAmount,
-            behavior: 'smooth'
-        });
-    });
-    
-    // Scroll right button click handler
-    scrollRightBtn.addEventListener('click', function() {
-        eventList.scrollBy({
-            left: scrollAmount,
-            behavior: 'smooth'
-        });
-    });
-    
-    // Update button visibility on scroll
-    function updateButtonVisibility() {
-        const showLeft = eventList.scrollLeft > 20;
-        const showRight = eventList.scrollLeft < (eventList.scrollWidth - eventList.clientWidth - 20);
+    function updateNavButtons() {
+        if (!track || !prevBtn || !nextBtn) return;
         
-        scrollLeftBtn.style.opacity = showLeft ? '1' : '0.5';
-        scrollLeftBtn.style.pointerEvents = showLeft ? 'auto' : 'none';
-        scrollLeftBtn.style.cursor = showLeft ? 'pointer' : 'default';
+        // Hide buttons on mobile
+        if (window.innerWidth < 768) {
+            prevBtn.style.display = 'none';
+            nextBtn.style.display = 'none';
+            return;
+        }
         
-        scrollRightBtn.style.opacity = showRight ? '1' : '0.5';
-        scrollRightBtn.style.pointerEvents = showRight ? 'auto' : 'none';
-        scrollRightBtn.style.cursor = showRight ? 'pointer' : 'default';
+        const showPrev = track.scrollLeft > 20;
+        const showNext = track.scrollLeft < (track.scrollWidth - track.clientWidth - 20);
+        
+        prevBtn.style.display = showPrev ? 'flex' : 'none';
+        nextBtn.style.display = showNext ? 'flex' : 'none';
     }
     
-    // Initialize button visibility
-    updateButtonVisibility();
-    
-    // Update on scroll
-    eventList.addEventListener('scroll', updateButtonVisibility);
-    
-    // Update on window resize
-    window.addEventListener('resize', updateButtonVisibility);
+    if (track) {
+        track.addEventListener('scroll', updateNavButtons);
+        window.addEventListener('resize', updateNavButtons);
+        updateNavButtons();
+    }
+});
+
+// Add keyboard navigation
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowLeft') {
+        scrollEvents(-1);
+    } else if (e.key === 'ArrowRight') {
+        scrollEvents(1);
+    }
 });
 </script>

@@ -6,10 +6,10 @@ from channels.db import database_sync_to_async
 from django.contrib.auth.models import User  
 from datetime import datetime
 from django.urls import reverse
+from .models import UserStatus
 
 
 # comment realtime websocket
-
 class CommentConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.post_id = self.scope['url_route']['kwargs']['post_id']
@@ -32,7 +32,7 @@ class CommentConsumer(AsyncWebsocketConsumer):
         text_data_json = json.loads(text_data)
         comment_text = text_data_json['comment']
         username = text_data_json['author']
-        parent_id = text_data_json.get('parent_id')  # Get parent ID if it's a reply
+        parent_id = text_data_json.get('parent_id')  
 
         try:
             author = await database_sync_to_async(User.objects.get)(username=username)
@@ -76,7 +76,7 @@ class CommentConsumer(AsyncWebsocketConsumer):
             'comment': comment.comment,
             'author': comment.author.username,
             'created_on': comment.created_on.strftime("%Y-%m-%d %H:%M:%S"),
-            'parent_id': comment.parent.id if comment.parent else None,  # Include parent ID for replies
+            'parent_id': comment.parent.id if comment.parent else None,  
         }
 
         # Send notification for the comment
@@ -92,7 +92,6 @@ class CommentConsumer(AsyncWebsocketConsumer):
         )
 
     async def new_comment(self, event):
-        # Send the comment data to the WebSocket
         await self.send(text_data=event['message'])
 
 
@@ -123,7 +122,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             await self.close()
             return
 
-        # Join the WebSocket group
+        # Join the chatgroup group
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
         await self.accept()
 
@@ -144,7 +143,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             print(f"User '{sender_username}' not found.")
             return
 
-        # Create the message object, including reply if applicable
+        # Create the message 
         if reply_to_id:
             try:
                 parent_message = await database_sync_to_async(Message.objects.get)(id=reply_to_id)
@@ -152,7 +151,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 message = await database_sync_to_async(Message.objects.create)( 
                     conversation=self.conversation, sender=sender, content=message_content, reply_to=parent_message
                 )
-                reply_to_content = parent_message.content  # Get the content of the original message
+                reply_to_content = parent_message.content  
             except Message.DoesNotExist:
                 print(f"Parent message with ID {reply_to_id} does not exist.")
                 return
@@ -160,7 +159,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             message = await database_sync_to_async(Message.objects.create)( 
                 conversation=self.conversation, sender=sender, content=message_content
             )
-            reply_to_content = None  # No reply content if it's a new message
+            reply_to_content = None 
 
         await database_sync_to_async(self.create_unread_message_status)(message)
 
@@ -173,7 +172,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 'content': message_content,
                 'timestamp': message.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
                 'reply_to': reply_to_id,
-                'reply_to_content': reply_to_content,  # Include the original message's content
+                'reply_to_content': reply_to_content,  
                 'message_id': message.id,
                 'temp_id': temp_id,  
             }
@@ -184,7 +183,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         content = event['content']
         timestamp = event['timestamp']
         reply_to = event.get('reply_to')
-        reply_to_content = event.get('reply_to_content')  # Get the reply_to_content from the event
+        reply_to_content = event.get('reply_to_content')  
         message_id = event['message_id']
 
         print(f"Sending mMessage: {sender} - {content} (ID: {message_id})")
@@ -199,13 +198,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
             'message_id': message_id,
         }))
 
-        # Mark the message as read for the current user
         await database_sync_to_async(self.mark_message_as_read)(message_id)
 
-    # Method to create unread message status for all participants except the sender
+    #  create unread message status for all participants except the sender
     def create_unread_message_status(self, message):
         for participant in message.conversation.participants.all():
-            if participant != message.sender:  # Don't mark sender's own messages as unread
+            if participant != message.sender: 
                 MessageStatus.objects.create(
                     message=message,
                     user=participant,
@@ -216,29 +214,18 @@ class ChatConsumer(AsyncWebsocketConsumer):
     def mark_message_as_read(self, message_id):
         try:
             message = Message.objects.get(id=message_id)
-            # Mark the message as read for the current user
             message_status = MessageStatus.objects.get(message=message, user=self.scope['user'])
             message_status.is_read = True
             message_status.save()
         except MessageStatus.DoesNotExist:
             pass
 
-# consumers.py
-import json
-from channels.generic.websocket import AsyncWebsocketConsumer
-from channels.db import database_sync_to_async
-from .models import UserStatus
-from django.contrib.auth.models import User
-from channels.generic.websocket import AsyncWebsocketConsumer
-from channels.db import database_sync_to_async
-from datetime import datetime
-import json
 
 class UserStatusConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.user = self.scope['user']
         if self.user.is_authenticated:
-            await self.update_user_status(True)  # Set user as online when they connect
+            await self.update_user_status(True) 
 
         self.group_name = f"user_status_group"
         await self.channel_layer.group_add(self.group_name, self.channel_name)
@@ -246,7 +233,7 @@ class UserStatusConsumer(AsyncWebsocketConsumer):
 
     async def disconnect(self, close_code):
         if self.user.is_authenticated:
-            await self.update_user_status(False)  # Set user as offline when they disconnect
+            await self.update_user_status(False)  
 
         await self.channel_layer.group_discard(self.group_name, self.channel_name)
 
@@ -254,6 +241,6 @@ class UserStatusConsumer(AsyncWebsocketConsumer):
     def update_user_status(self, is_online):
         status, created = UserStatus.objects.get_or_create(user=self.user)
         status.is_online = is_online
-        status.last_activity = timezone.now()  # Update the last activity timestamp
+        status.last_activity = timezone.now()  
         status.save()
 

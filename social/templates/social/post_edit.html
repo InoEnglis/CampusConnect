@@ -2,7 +2,7 @@
 
 {% block content %}
 <div class="container mt-5">
-    <!-- Back to Post Button -->
+    <!-- Back to post button -->
     <div class="row mb-4">
         <div class="col-md-5 col-sm-6">
             <a href="{% url 'post-list' %}" class="btn btn-outline-primary">
@@ -11,7 +11,6 @@
         </div>
     </div>
 
-    <!-- Title Section -->
     <div class="row justify-content-center mb-3">
         <div class="col-md-6 text-center">
             <h3 class="font-weight-bold text-primary">Update Your Post</h3>
@@ -32,7 +31,7 @@
                             <textarea name="body" id="id_body" class="form-control" rows="6">{{ form.body.value }}</textarea>
                         </div>
 
-                        <!-- Image Upload -->
+                        <!-- Image upload -->
                         <div class="mb-4">
                             <label for="id_image" class="form-label font-weight-bold">Upload Image</label>
                             <input type="file" name="image" class="form-control" id="id_image">
@@ -44,7 +43,7 @@
                             {% endif %}
                         </div>
 
-                        <!-- Submit Button -->
+                        <!-- Submit button -->
                         <div class="d-grid gap-2">
                             <button type="submit" class="btn btn-success btn-lg rounded-pill">
                                 <i class="fas fa-check"></i> Update Post
@@ -57,7 +56,7 @@
     </div>  
 </div>
 
-<!-- Additional Styling -->
+
 <style>
     .card {
         border-radius: 15px;

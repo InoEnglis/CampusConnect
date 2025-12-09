@@ -1,6 +1,12 @@
 {% extends 'landing/base.html' %}
 
 {% block content %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'social/css/event.css' %}">
+{% endblock extra_css %}
+     
 <div class="bg-gray-50 min-h-screen">
   <!-- Header -->
 <div class="my-10"></div>
@@ -45,9 +51,7 @@
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-      <!-- Main Content Column -->
       <div class="lg:col-span-2">
-        <!-- Description Section -->
         <section class="bg-white rounded-xl shadow-md overflow-hidden mb-8">
           <div class="px-6 py-5 border-b border-gray-200">
             <h2 class="text-xl font-semibold text-gray-900 flex items-center">
@@ -62,7 +66,6 @@
           </div>
         </section>
 
-        <!-- Location Section -->
         <section class="bg-white rounded-xl shadow-md overflow-hidden mb-8">
           <div class="px-6 py-5 border-b border-gray-200">
             <h2 class="text-xl font-semibold text-gray-900 flex items-center">
@@ -166,7 +169,7 @@
             </h2>
           </div>
           <div class="px-6 py-4">
-            <!-- Image Gallery -->
+            <!-- Image Gallery not working-->
             {% if event.images.all %}
             <div class="mb-6">
               <h3 class="text-lg font-medium text-gray-900 mb-4">Photos</h3>
@@ -181,7 +184,7 @@
             </div>
             {% endif %}
 
-            <!-- Video Embed -->
+            <!-- Video Embed not working  -->
             {% if event.video %}
             <div class="mb-6">
               <h3 class="text-lg font-medium text-gray-900 mb-4">Video Preview</h3>
@@ -191,7 +194,7 @@
             </div>
             {% endif %}
 
-            <!-- Video File Download -->
+            <!-- Video File Download (not working)-->
             {% if event.video_file %}
             <div>
               <h3 class="text-lg font-medium text-gray-900 mb-4">Downloadable Content</h3>
@@ -247,21 +250,17 @@
           </div>
           <div class="px-6 py-4">
             <div class="space-y-4">
-              <!-- link for registration -->
-              <!-- Confirmation Modal -->
-<div id="confirmationModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 hidden">
-  <div class="bg-white p-6 rounded-lg shadow-lg w-96">
-    <h3 class="text-lg font-semibold mb-4">You are about to leave the website</h3>
-    <p class="mb-4">Are you sure you want to continue to the external site?</p>
-    <div class="flex justify-end space-x-4">
-      <button onclick="redirectToEvent()" class="px-4 py-2 bg-indigo-600 text-white rounded-md">Yes, Take Me There</button>
-      <button onclick="closeModal()" class="px-4 py-2 border border-gray-300 rounded-md text-gray-600">Cancel</button>
-    </div>
-  </div>
-</div>
-
-<!-- Register Button -->
-{% if event.registration_link %}
+              <div id="confirmationModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 hidden">
+                <div class="bg-white p-6 rounded-lg shadow-lg w-96">
+                  <h3 class="text-lg font-semibold mb-4">You are about to leave the website</h3>
+                  <p class="mb-4">Are you sure you want to continue to the external site?</p>
+                  <div class="flex justify-end space-x-4">
+                    <button onclick="redirectToEvent()" class="px-4 py-2 bg-indigo-600 text-white rounded-md">Yes, Take Me There</button>
+                    <button onclick="closeModal()" class="px-4 py-2 border border-gray-300 rounded-md text-gray-600">Cancel</button>
+                  </div>
+                </div>
+              </div>
+              {% if event.registration_link %}
 <button onclick="openModal('{{ event.registration_link }}')" class="w-full flex items-center justify-center px-4 py-3 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700">
   <i class="fas fa-ticket-alt mr-2"></i>
   Register for Event
@@ -308,6 +307,11 @@
             </div>
           </div>
         </section>
+              
+
+
+<!-- Register Button -->
+
 
         <!-- Share Section -->
         <!-- <section class="bg-white rounded-xl shadow-md overflow-hidden">
@@ -342,117 +346,9 @@
     </div>
   </main>
 </div>
-
-<!-- Fancybox for image gallery -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@4.0/dist/fancybox.css" />
-<script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@4.0/dist/fancybox.umd.js"></script>
-
-<!-- Map JS -->
-
-
-<style>
-  .prose {
-    line-height: 1.6;
-  }
-  .prose p {
-    margin-bottom: 1rem;
-  }
-</style>
-
-<script>
-  // Initialize maps
-  function initMap() {
-    {% if event.location_type == 'inside' %}
-    // University map
-    const universityLocation = { lat: YOUR_UNIVERSITY_LAT, lng: YOUR_UNIVERSITY_LNG };
-    const universityMap = new google.maps.Map(document.getElementById("universityMap"), {
-      zoom: 16,
-      center: universityLocation,
-      styles: [
-        {
-          "featureType": "poi",
-          "stylers": [
-            { "visibility": "off" }
-          ]
-        }
-      ]
-    });
-    new google.maps.Marker({
-      position: universityLocation,
-      map: universityMap,
-      title: "{{ event.building }}",
-      icon: {
-        url: "https://maps.google.com/mapfiles/ms/icons/blue-dot.png"
-      }
-    });
-    {% elif event.location_type == 'outside' %}
-    // External location map
-    const externalLocation = { lat: {{ event.latitude }}, lng: {{ event.longitude }} };
-    const externalMap = new google.maps.Map(document.getElementById("externalMap"), {
-      zoom: 14,
-      center: externalLocation,
-      styles: [
-        {
-          "featureType": "poi",
-          "stylers": [
-            { "visibility": "simplified" }
-          ]
-        }
-      ]
-    });
-    new google.maps.Marker({
-      position: externalLocation,
-      map: externalMap,
-      title: "Event Location",
-      icon: {
-        url: "https://maps.google.com/mapfiles/ms/icons/red-dot.png"
-      }
-    });
-    {% endif %}
-  }
-  
-  // Initialize Fancybox
-  document.addEventListener('DOMContentLoaded', function() {
-    Fancybox.bind("[data-fancybox]", {
-      // Your custom options
-    });
-  });
-
-
-  let registrationUrl = '';
-
-  function openModal(url) {
-    registrationUrl = url; // Store the URL in the global variable
-    document.getElementById('confirmationModal').classList.remove('hidden'); // Show the modal
-  }
-
-  function closeModal() {
-    document.getElementById('confirmationModal').classList.add('hidden'); // Hide the modal
-  }
-
-  function redirectToEvent() {
-    window.location.href = registrationUrl; // Redirect to the stored URL
-  }
-  
-</script>
-
-
-
-<script>
-  // Get the elements
-  const setReminderButton = document.getElementById('set-reminder-button');
-  const reminderModal = document.getElementById('reminder-modal');
-  const closeModalButton = document.getElementById('close-modal');
-
-  // Show the modal when the "Set Reminder" button is clicked
-  setReminderButton.addEventListener('click', function () {
-      reminderModal.classList.remove('hidden');
-  });
-
-  // Close the modal when the "Close" button is clicked
-  closeModalButton.addEventListener('click', function () {
-      reminderModal.classList.add('hidden');
-  });
-</script>
+{% block extra_js %}
+    <script src="{% static 'social/js/event/event.js' %}"></script>
+{% endblock extra_js %}
+ 
 
 {% endblock %}

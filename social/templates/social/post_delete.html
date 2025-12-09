@@ -2,7 +2,7 @@
 
 {% block content %}
 <div class="container my-5">
-    <!-- Back to News Feed Button -->
+    <!-- Back button -->
     <div class="row">
         <div class="col text-start">
             <a href="{% url 'post-detail' object.pk %}" class="btn btn-outline-primary btn-sm">
@@ -11,7 +11,7 @@
         </div>
     </div>
 
-    <!-- Delete Confirmation Card -->
+    <!-- Delete confirmation -->
     <div class="row justify-content-center mt-4">
         <div class="col-md-6 col-sm-12">
             <div class="card shadow-lg border-0">
@@ -20,7 +20,7 @@
                     <p class="card-text text-muted">
                         You are about to delete this post. This action cannot be undone.
                     </p>
-                    <!-- Delete Confirmation Form -->
+            
                     <form method="POST" enctype="multipart/form-data">
                         {% csrf_token %}
                         <div class="d-grid gap-2">
@@ -32,6 +32,7 @@
                             </a>
                         </div>
                     </form>
+                    
                 </div>
             </div>
         </div>

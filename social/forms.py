@@ -3,59 +3,11 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit, Layout, Field, Div
 from .models import EventReminder, Feedback, GroupJoinRequest, GroupRule, Post, Comment, Group, UserProfile
 from django.contrib.auth.models import User
-
-from django import forms
 from .models import Event, EventImage, EventFile
-
-from django import forms
-from .models import Event, EventImage, EventFile
-
-from django import forms
-from datetime import date, timedelta
-from .models import Event, EventImage, EventFile
-
-from django import forms
-from datetime import date, timedelta
-from .models import Event, EventImage, EventFile
-
-from django import forms
-from .models import Event, EventImage, EventFile
-from datetime import date, timedelta
-
-from django import forms
-from .models import Event, EventImage, EventFile
-from datetime import date, timedelta
-
-from .models import Event, EventImage, EventFile
-from datetime import date, timedelta
-
-
-from django import forms
-from datetime import date, timedelta
-from .models import Event
-
-from django import forms
-from .models import Event, EventImage, EventFile
-from datetime import datetime, date, timedelta
-from django import forms
-from .models import Event, EventImage, EventFile
-from datetime import timedelta, date
-from django.utils import timezone
-
 from datetime import timedelta
-from django import forms
 from django.utils import timezone
-from .models import Event, EventImage, EventFile
 
 
-from django import forms
-from .models import UserProfile
-
-from django import forms
-from .models import UserProfile
-
-from django import forms
-from django.utils import timezone
 
 class ProfileSetupForm(forms.ModelForm):
     class Meta:
@@ -293,7 +245,7 @@ class PostApprovalForm(forms.ModelForm):
     
     
     
-from django import forms
+
 from .models import Message
 
 class MessageForm(forms.ModelForm):
@@ -301,33 +253,10 @@ class MessageForm(forms.ModelForm):
         model = Message
         fields = ['file']
 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-
-
 class CSVUploadForm(forms.Form):
      csv_file = forms.FileField(required=True, label="CSV File", help_text="Upload a CSV file to import users.")
 
-from django import forms
+
 from .models import Report
 class ReportForm(forms.ModelForm):
     class Meta:

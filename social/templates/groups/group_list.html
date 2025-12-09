@@ -1,22 +1,200 @@
 {% extends 'landing/base.html' %}
 {% block content %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'social/css/group/group_list.css' %}">
+<style>
+    /* Improved Mobile Toggle Button */
+    .mobile-toggle-btn {
+        background: #1a202c;
+        border: 1px solid #374151;
+        border-radius: 12px;
+        padding: 16px;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        color: white;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        margin-bottom: 16px;
+    }
+    
+    .mobile-toggle-btn:hover {
+        background: #2d3748;
+        border-color: #4b5563;
+    }
+    
+    .mobile-toggle-btn i {
+        transition: transform 0.2s ease;
+    }
+    
+    .mobile-toggle-btn[aria-expanded="true"] i {
+        transform: rotate(180deg);
+    }
+    
+    /* Improved Offcanvas */
+    .offcanvas-start {
+        width: 300px;
+        background: #0f161b;
+    }
+    
+    .offcanvas-header {
+        border-bottom: 1px solid #374151;
+        padding: 20px;
+    }
+    
+    .offcanvas-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: white;
+    }
+    
+    .offcanvas-body {
+        padding: 0;
+    }
+    
+    /* Improved Community List Items */
+    .mobile-community-item {
+        display: flex;
+        align-items: center;
+        padding: 16px;
+        border-bottom: 1px solid #374151;
+        text-decoration: none;
+        color: white;
+        transition: background 0.2s ease;
+    }
+    
+    .mobile-community-item:hover {
+        background: #1a202c;
+    }
+    
+    .mobile-community-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        background: #374151;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 12px;
+        flex-shrink: 0;
+    }
+    
+    .mobile-community-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 10px;
+    }
+    
+    .mobile-community-info {
+        flex: 1;
+    }
+    
+    .mobile-community-name {
+        font-weight: 500;
+        margin: 0 0 4px 0;
+        font-size: 0.95rem;
+    }
+    
+    .mobile-community-members {
+        font-size: 0.85rem;
+        color: #9ca3af;
+    }
+    
+    /* Improved Discover Section in Offcanvas */
+    .mobile-discover-section {
+        padding: 20px;
+        border-top: 1px solid #374151;
+    }
+    
+    .mobile-discover-title {
+        font-size: 0.875rem;
+        color: #9ca3af;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 12px;
+        font-weight: 500;
+    }
+    
+    .mobile-discover-btn {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        padding: 12px;
+        background: #1a202c;
+        border: 1px solid #374151;
+        border-radius: 10px;
+        color: white;
+        margin-bottom: 8px;
+        transition: all 0.2s ease;
+    }
+    
+    .mobile-discover-btn:hover {
+        background: #2d3748;
+        border-color: #4b5563;
+    }
+    
+    .mobile-discover-btn i {
+        margin-right: 10px;
+        color: #9ca3af;
+    }
+    
+    /* Mobile Tabs Improvement */
+    .nav-pills .nav-link {
+        border-radius: 20px;
+        padding: 8px 16px;
+        margin-right: 8px;
+        margin-bottom: 8px;
+        font-size: 0.9rem;
+    }
+    
+    .nav-pills .nav-link.active {
+        background: #374151;
+        color: white;
+    }
+    
+    /* Mobile Card Improvements */
+    @media (max-width: 768px) {
+        .card {
+            border-radius: 12px;
+            margin-bottom: 12px;
+        }
+        
+        .card-body {
+            padding: 16px;
+        }
+        
+        .btn-sm {
+            padding: 6px 16px;
+            font-size: 0.85rem;
+        }
+    }
+</style>
+{% endblock extra_css %}
+
 <div class="container-fluid py-3 py-lg-4">
     <div class="mt-5"></div>
     <div class="row">
-        <!-- Mobile Sidebar Toggle -->
+        <!-- Improved Mobile Toggle Button -->
         <div class="col-12 d-lg-none mb-3">
-            <button class="btn btn-outline-secondary w-100 d-flex align-items-center justify-content-between" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileSidebar">
-                <span class="text-red-500 font-semibold text-lg">My Communities</span>
+            <button class="mobile-toggle-btn" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileSidebar" aria-expanded="false" aria-controls="mobileSidebar">
+                <span>
+                    <i class="fas fa-users me-2"></i>
+                    My Communities ({{ user_groups|length }})
+                </span>
                 <i class="fas fa-chevron-down"></i>
             </button>
         </div>
         
-        <!-- Left Sidebar - Desktop -->
+        <!-- Left Sidebar - Desktop (unchanged) -->
         <div class="col-lg-3 d-none d-lg-block">
             <div class="sticky-top" style="top: 20px;">
                 <div class="card mb-4 shadow-sm bg-[#0f161b] text-white">
                     <div class="card-header bg-[#0f161b] border-0 pb-0">
-                        <h2 class="h5 mb-3 text-red-500">My Communities</h2>
+                        <h2 class="h5 mb-3 text-gray-300">My Communities</h2>
                     </div>
                     <div class="card-body pt-0">
                         <div class="list-group list-group-flush">
@@ -41,18 +219,16 @@
                     </div>
                 </div>
 
-                <!-- Discover Section - Redesigned -->
+                <!-- Discover Section -->
                 <div class="card shadow-sm bg-[#0f161b] text-white">
                     <div class="card-header bg-[#0f161b] border-0 pb-0">
-                        <h2 class="h5 mb-3 text-red-500">Discover</h2>
+                        <h2 class="h5 mb-3 text-gray-300">Discover</h2>
                     </div>
                     <div class="card-body pt-0 p-0">
-                        <!-- Scrollable Discover Sections -->
                         <div class="space-y-4 px-3">
-                            <!-- Trending Section -->
                             <div>
                                 <button class="w-full text-left p-3 bg-gray-800 rounded-lg hover:bg-gray-700 focus:outline-none focus:ring flex items-center text-white" onclick="toggleVisibility('trending')">
-                                    <i class="fas fa-fire text-red-500 mr-2"></i>
+                                    <i class="fas fa-fire text-gray-400 mr-2"></i>
                                     <span>Trending Now</span>
                                     <i class="fas fa-chevron-down ml-auto text-gray-400"></i>
                                 </button>
@@ -75,10 +251,9 @@
                                 </div>
                             </div>
 
-                            <!-- Top Communities Section -->
                             <div>
                                 <button class="w-full text-left p-3 bg-gray-800 rounded-lg hover:bg-gray-700 focus:outline-none focus:ring flex items-center text-white" onclick="toggleVisibility('top')">
-                                    <i class="fas fa-trophy text-red-500 mr-2"></i>
+                                    <i class="fas fa-trophy text-gray-400 mr-2"></i>
                                     <span>Top Communities</span>
                                     <i class="fas fa-chevron-down ml-auto text-gray-400"></i>
                                 </button>
@@ -101,10 +276,9 @@
                                 </div>
                             </div>
 
-                            <!-- Fresh Picks Section -->
                             <div>
                                 <button class="w-full text-left p-3 bg-gray-800 rounded-lg hover:bg-gray-700 focus:outline-none focus:ring flex items-center text-white" onclick="toggleVisibility('fresh')">
-                                    <i class="fas fa-sparkles text-red-500 mr-2"></i>
+                                    <i class="fas fa-sparkles text-gray-400 mr-2"></i>
                                     <span>Fresh Picks</span>
                                     <i class="fas fa-chevron-down ml-auto text-gray-400"></i>
                                 </button>
@@ -114,7 +288,7 @@
                                             {% if group.profile_image %}
                                                 <img src="{{ group.profile_image.url }}" alt="{{ group.name }}" class="rounded mr-3" width="32" height="32">
                                             {% else %}
-                                                <div class="bg-gray-700 rounded flex items-center justify-center mr-3" style="width: 32px; height: 32px;">
+                                                <div class="bg-gray-700 rounded flex items-center justify-content-center mr-3" style="width: 32px; height: 32px;">
                                                     <i class="fas fa-star text-gray-400"></i>
                                                 </div>
                                             {% endif %}
@@ -132,54 +306,42 @@
             </div>
         </div>
         
-        <!-- Mobile Sidebar - Offcanvas -->
+        <!-- Improved Mobile Sidebar -->
         <div class="offcanvas offcanvas-start d-lg-none" tabindex="-1" id="mobileSidebar">
-            <div class="offcanvas-header border-bottom bg-[#0f161b] text-white">
-                <h5 class="offcanvas-title text-red-500">My Communities</h5>
-                <button type="button" class="btn-close btn-close-white text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+            <div class="offcanvas-header">
+                <h5 class="offcanvas-title">My Communities</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
             </div>
-            <div class="offcanvas-body p-0 bg-[#0f161b]">
-                <div class="list-group list-group-flush">
-                    {% for group in user_groups|slice:":5" %}
-                    <a href="{% url 'group_detail' group.id %}" class="list-group-item list-group-item-action border-0 px-3 py-2 bg-transparent text-white hover:bg-gray-800">
-                        <div class="d-flex align-items-center">
-                            {% if group.profile_image %}
-                                <img src="{{ group.profile_image.url }}" alt="{{ group.name }}" class="rounded me-3" width="40" height="40">
-                            {% else %}
-                                <div class="bg-gray-700 rounded d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
-                                    <i class="fas fa-users text-gray-400"></i>
-                                </div>
-                            {% endif %}
-                            <div>
-                                <h3 class="h6 mb-0 text-white">{{ group.name }}</h3>
-                                <small class="text-gray-400">{{ group.members.count }} members</small>
-                            </div>
-                        </div>
-                    </a>
-                    {% endfor %}
-                </div>
-                <div class="p-3">
-                    <h6 class="text-gray-400 text-uppercase small mb-3">Discover</h6>
-                    <div class="d-grid gap-2">
-                        <a href="#" class="btn bg-gray-800 text-white text-start hover:bg-gray-700">
-                            <i class="fas fa-compass me-2 text-red-500"></i> Recommended
-                        </a>
-                        <a href="#" class="btn bg-gray-800 text-white text-start hover:bg-gray-700">
-                            <i class="fas fa-star me-2 text-red-500"></i> Popular
-                        </a>
-                        <a href="#" class="btn bg-gray-800 text-white text-start hover:bg-gray-700">
-                            <i class="fas fa-bolt me-2 text-red-500"></i> New & Growing
-                        </a>
+            <div class="offcanvas-body p-0">
+                <!-- My Communities List -->
+                {% for group in user_groups %}
+                <a href="{% url 'group_detail' group.id %}" class="mobile-community-item">
+                    <div class="mobile-community-avatar">
+                        {% if group.profile_image %}
+                            <img src="{{ group.profile_image.url }}" alt="{{ group.name }}">
+                        {% else %}
+                            <i class="fas fa-users text-gray-400"></i>
+                        {% endif %}
                     </div>
+                    <div class="mobile-community-info">
+                        <div class="mobile-community-name">{{ group.name }}</div>
+                        <div class="mobile-community-members">{{ group.members.count }} members</div>
+                    </div>
+                </a>
+                {% empty %}
+                <div class="text-center py-4">
+                    <i class="fas fa-users fa-2x text-gray-400 mb-3"></i>
+                    <p class="text-gray-400 mb-0">You haven't joined any communities yet</p>
                 </div>
+                {% endfor %}
             </div>
         </div>
         
-        <!-- Main Content -->
+        <!-- Main Content (unchanged from your original) -->
         <div class="col-lg-9">
             <div class="flex flex-col md:flex-row justify-between items-center mb-6">
-                <h1 class="text-2xl font-semibold mb-4 md:mb-0 text-red-500">Discover Communities</h1>
-                <button class="flex items-center bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-5 rounded-md transition duration-300" type="button" data-bs-toggle="modal" data-bs-target="#addGroupModal">
+                <h1 class="text-2xl font-semibold mb-4 md:mb-0 text-white">Discover Communities</h1>
+                <button class="flex items-center bg-gray-700 hover:bg-gray-600 text-white font-medium py-2 px-5 rounded-md transition duration-300" type="button" data-bs-toggle="modal" data-bs-target="#addGroupModal">
                     <i class="fas fa-plus mr-2"></i> Create Community
                 </button>
             </div>
@@ -187,23 +349,23 @@
             <!-- Tabs Navigation -->
             <ul class="nav nav-pills mb-4" id="communityTabs" role="tablist">
                 <li class="nav-item me-2" role="presentation">
-                    <button class="nav-link active hover:text-red-500" id="all-tab" data-bs-toggle="pill" data-bs-target="#all" type="button" role="tab">
+                    <button class="nav-link active hover:text-gray-300" id="all-tab" data-bs-toggle="pill" data-bs-target="#all" type="button" role="tab">
                         <i class="fas fa-layer-group me-1 d-none d-md-inline"></i> All
                     </button>
                 </li>
                 <li class="nav-item me-2" role="presentation">
-                    <button class="nav-link hover:text-red-500" id="public-tab" data-bs-toggle="pill" data-bs-target="#public" type="button" role="tab">
+                    <button class="nav-link hover:text-gray-300" id="public-tab" data-bs-toggle="pill" data-bs-target="#public" type="button" role="tab">
                         <i class="fas fa-globe me-1 d-none d-md-inline"></i> Public
                     </button>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link hover:text-red-500" id="private-tab" data-bs-toggle="pill" data-bs-target="#private" type="button" role="tab">
+                    <button class="nav-link hover:text-gray-300" id="private-tab" data-bs-toggle="pill" data-bs-target="#private" type="button" role="tab">
                         <i class="fas fa-lock me-1 d-none d-md-inline"></i> Private
                     </button>
                 </li>
             </ul>
 
-            <!-- Tabs Content -->
+            <!-- Tabs Content (unchanged from your original) -->
             <div class="tab-content" id="communityTabsContent">
                 <!-- All Communities Tab -->
                 <div class="tab-pane fade show active" id="all" role="tabpanel">
@@ -225,9 +387,9 @@
                                             </div>
                                             <div class="flex-grow-1">
                                                 <h3 class="h5 mb-1">
-                                                    <a href="{% url 'group_detail' group.id %}" class="text-decoration-none text-gray-400 hover:text-gray-400 stretched-link">{{ group.name }}</a>
+                                                    <a href="{% url 'group_detail' group.id %}" class="text-decoration-none text-white hover:text-gray-300 stretched-link">{{ group.name }}</a>
                                                 </h3>
-                                                <span class="badge {% if group.is_private %}bg-red-500 bg-opacity-10 text-white-500{% else %}bg-green-500 bg-opacity-10 text-white-400{% endif %}">
+                                                <span class="badge {% if group.is_private %}bg-gray-700 text-gray-300{% else %}bg-gray-700 text-gray-300{% endif %}">
                                                     {{ group.is_private|yesno:"Private,Public" }}
                                                 </span>
                                             </div>
@@ -239,17 +401,17 @@
                                                 {% if group.is_private %}
                                                     <form action="{% url 'join_group' group.id %}" method="POST">
                                                         {% csrf_token %}
-                                                        <button type="submit" class="btn btn-sm bg-transparent border border-red-500 text-red-500 hover:bg-red-500 hover:text-white transition-colors">Request</button>
+                                                        <button type="submit" class="btn btn-sm bg-transparent border border-gray-500 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors">Request</button>
                                                     </form>
                                                 {% else %}
                                                     <form action="{% url 'join_group' group.id %}" method="POST">
                                                         {% csrf_token %}
-                                                        <button type="submit" class="btn btn-sm bg-red-500 text-white hover:bg-red-600 transition-colors">Join</button>
+                                                        <button type="submit" class="btn btn-sm bg-gray-700 text-white hover:bg-gray-600 transition-colors">Join</button>
                                                     </form>
                                                 {% endif %}
                                             {% else %}
-                                                <span class="badge bg-blue-500 bg-opacity-10 text-blue-400">
-                                                    <i class="fas fa-check me-1 text-white-500"></i> Joined
+                                                <span class="badge bg-gray-700 text-gray-300">
+                                                    <i class="fas fa-check me-1"></i> Joined
                                                 </span>
                                             {% endif %}
                                         </div>
@@ -264,7 +426,7 @@
                                     <i class="fas fa-users fa-3x text-gray-400 mb-3"></i>
                                     <h4 class="h5 text-gray-300">No communities found</h4>
                                     <p class="text-gray-400 small">Be the first to create one!</p>
-                                    <button class="btn bg-red-500 text-white mt-2 hover:bg-red-600 transition-colors" type="button" data-bs-toggle="modal" data-bs-target="#addGroupModal">
+                                    <button class="btn bg-gray-700 text-white mt-2 hover:bg-gray-600 transition-colors" type="button" data-bs-toggle="modal" data-bs-target="#addGroupModal">
                                         <i class="fas fa-plus me-1"></i> Create Community
                                     </button>
                                 </div>
@@ -294,9 +456,9 @@
                                             </div>
                                             <div class="flex-grow-1">
                                                 <h3 class="h5 mb-1">
-                                                    <a href="{% url 'group_detail' group.id %}" class="text-decoration-none text-gray-400 hover:text-red-400 stretched-link">{{ group.name }}</a>
+                                                    <a href="{% url 'group_detail' group.id %}" class="text-decoration-none text-white hover:text-gray-300 stretched-link">{{ group.name }}</a>
                                                 </h3>
-                                                <span class="badge bg-green-500 bg-opacity-10 text-white-400">Public</span>
+                                                <span class="badge bg-gray-700 text-gray-300">Public</span>
                                             </div>
                                         </div>
                                         <p class="small text-gray-300 mb-3">{{ group.description|truncatechars:100 }}</p>
@@ -305,10 +467,10 @@
                                             {% if request.user not in group.members.all %}
                                                 <form action="{% url 'join_group' group.id %}" method="POST">
                                                     {% csrf_token %}
-                                                    <button type="submit" class="btn btn-sm bg-red-500 text-white hover:bg-red-600 transition-colors">Join</button>
+                                                    <button type="submit" class="btn btn-sm bg-gray-700 text-white hover:bg-gray-600 transition-colors">Join</button>
                                                 </form>
                                             {% else %}
-                                                <span class="badge bg-blue-500 bg-opacity-10 text-blue-400">
+                                                <span class="badge bg-gray-700 text-gray-300">
                                                     <i class="fas fa-check me-1"></i> Joined
                                                 </span>
                                             {% endif %}
@@ -323,7 +485,7 @@
                                 <div class="card-body text-center py-5">
                                     <i class="fas fa-globe fa-3x text-gray-400 mb-3"></i>
                                     <h4 class="h5 text-gray-300">No public communities</h4>
-                                    <button class="btn bg-red-500 text-white mt-2 hover:bg-red-600 transition-colors" type="button" data-bs-toggle="modal" data-bs-target="#addGroupModal">
+                                    <button class="btn bg-gray-700 text-white mt-2 hover:bg-gray-600 transition-colors" type="button" data-bs-toggle="modal" data-bs-target="#addGroupModal">
                                         <i class="fas fa-plus me-1"></i> Create One
                                     </button>
                                 </div>
@@ -353,9 +515,9 @@
                                             </div>
                                             <div class="flex-grow-1">
                                                 <h3 class="h5 mb-1">
-                                                    <a href="{% url 'group_detail' group.id %}" class="text-decoration-none text-gray-400 hover:text-red-400 stretched-link">{{ group.name }}</a>
+                                                    <a href="{% url 'group_detail' group.id %}" class="text-decoration-none text-white hover:text-gray-300 stretched-link">{{ group.name }}</a>
                                                 </h3>
-                                                <span class="badge bg-red-500 bg-opacity-10 text-gray-500">Private</span>
+                                                <span class="badge bg-gray-700 text-gray-300">Private</span>
                                             </div>
                                         </div>
                                         <p class="small text-gray-300 mb-3">{{ group.description|truncatechars:100 }}</p>
@@ -363,17 +525,17 @@
                                             <small class="text-gray-400">{{ group.members.count }} members</small>
                                             {% if request.user not in group.members.all %}
                                                 {% if pending_requests.group.id %}
-                                                    <span class="badge bg-yellow-500 text-dark">
+                                                    <span class="badge bg-gray-700 text-gray-300">
                                                         <i class="fas fa-clock me-1"></i> Pending
                                                     </span>
                                                 {% else %}
                                                     <form action="{% url 'join_group' group.id %}" method="POST">
                                                         {% csrf_token %}
-                                                        <button type="submit" class="btn btn-sm bg-transparent border border-red-500 text-red-500 hover:bg-red-500 hover:text-white transition-colors">Request</button>
+                                                        <button type="submit" class="btn btn-sm bg-transparent border border-gray-500 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors">Request</button>
                                                     </form>
                                                 {% endif %}
                                             {% else %}
-                                                <span class="badge bg-blue-500 bg-opacity-10 text-blue-400">
+                                                <span class="badge bg-gray-700 text-gray-300">
                                                     <i class="fas fa-check me-1"></i> Joined
                                                 </span>
                                             {% endif %}
@@ -388,7 +550,7 @@
                                 <div class="card-body text-center py-5">
                                     <i class="fas fa-lock fa-3x text-gray-400 mb-3"></i>
                                     <h4 class="h5 text-gray-300">No private communities</h4>
-                                    <button class="btn bg-red-500 text-white mt-2 hover:bg-red-600 transition-colors" type="button" data-bs-toggle="modal" data-bs-target="#addGroupModal">
+                                    <button class="btn bg-gray-700 text-white mt-2 hover:bg-gray-600 transition-colors" type="button" data-bs-toggle="modal" data-bs-target="#addGroupModal">
                                         <i class="fas fa-plus me-1"></i> Create One
                                     </button>
                                 </div>
@@ -402,31 +564,31 @@
     </div>
 </div>
 
-<!-- Add Group Modal -->
+<!-- Add Group Modal (unchanged) -->
 <div class="modal fade" id="addGroupModal" tabindex="-1" aria-labelledby="addGroupModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow bg-[#0f161b] text-white">
             <div class="modal-header border-bottom-0 pb-0">
-                <h2 class="modal-title h5 text-red-500" id="addGroupModalLabel">Create New Community</h2>
+                <h2 class="modal-title h5 text-white" id="addGroupModalLabel">Create New Community</h2>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body pt-0">
                 <form id="createGroupForm" method="POST" enctype="multipart/form-data">  
                     {% csrf_token %}
                     <div class="mb-4">
-                        <label for="id_name" class="form-label text-red-500">Community Name</label>
+                        <label for="id_name" class="form-label text-gray-300">Community Name</label>
                         <input type="text" name="name" class="form-control form-control-lg bg-gray-800 border-gray-700 text-white" id="id_name" required placeholder="e.g. Photography Enthusiasts">
                         <small class="text-gray-400">Community names can be changed later</small>
                     </div>
 
                     <div class="mb-4">
-                        <label for="id_description" class="form-label text-red-500">Description</label>
+                        <label for="id_description" class="form-label text-gray-300">Description</label>
                         <textarea name="description" class="form-control bg-gray-800 border-gray-700 text-gray-400" id="id_description" rows="3" required placeholder="What's this community about?"></textarea>
                         <small class="text-gray-400">Tell people what this community is about</small>
                     </div>
 
                     <div class="mb-4">
-                        <label class="form-label mb-2 text-red-500">Community Type</label>
+                        <label class="form-label mb-2 text-gray-300">Community Type</label>
                         <div class="d-grid gap-2">
                             <label class="card cursor-pointer m-0 bg-gray-800 border-gray-700">
                                 <div class="card-body">
@@ -434,7 +596,7 @@
                                         <input class="form-check-input" type="radio" name="is_private" id="is_public" value="False" checked>
                                         <div class="ms-3">
                                             <div class="d-flex align-items-center mb-1">
-                                                <span class="badge bg-green-500 bg-opacity-10 text-green-400 me-2">
+                                                <span class="badge bg-gray-700 text-gray-300 me-2">
                                                     <i class="fas fa-globe-americas"></i>
                                                 </span>
                                                 <h3 class="h6 mb-0 text-white">Public Community</h3>
@@ -451,7 +613,7 @@
                                         <input class="form-check-input" type="radio" name="is_private" id="is_private" value="True">
                                         <div class="ms-3">
                                             <div class="d-flex align-items-center mb-1">
-                                                <span class="badge bg-red-500 bg-opacity-10 text-red-500 me-2">
+                                                <span class="badge bg-gray-700 text-gray-300 me-2">
                                                     <i class="fas fa-lock"></i>
                                                 </span>
                                                 <h3 class="h6 mb-0 text-white">Private Community</h3>
@@ -470,177 +632,14 @@
         </div>
 
         <div class="d-grid">
-            <button type="submit" class="btn btn-lg bg-red-500 text-white hover:bg-red-600 transition-colors">
+            <button type="submit" class="btn btn-lg bg-gray-700 text-white hover:bg-gray-600 transition-colors">
                 <i class="fas fa-plus me-2"></i> Create Community
             </button>
         </div>
     </form>
 </div>
-</div>
-</div>
-</div>
 
-<style>
-    /* Custom scrollbar for the sidebar sections */
-    .custom-scrollbar {
-        scrollbar-width: thin;
-        scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
-    }
-    
-    .custom-scrollbar::-webkit-scrollbar {
-        width: 6px;
-    }
-    
-    .custom-scrollbar::-webkit-scrollbar-track {
-        background: transparent;
-    }
-    
-    .custom-scrollbar::-webkit-scrollbar-thumb {
-        background-color: rgba(255, 255, 255, 0.2);
-        border-radius: 20px;
-    }
-
-    /* Style for rounded images and containers */
-    .round {
-        border-radius: 50%!important;
-    }
-
-    /* Hover effects */
-    .transition-all {
-        transition: all 0.3s ease;
-    }
-    
-    .hover\:bg-gray-700:hover {
-        background-color: #2d3748!important;
-    }
-    
-    .hover\:bg-gray-800:hover {
-        background-color: #1f2937!important;
-    }
-    
-    .hover\:bg-red-500:hover {
-        background-color: #ef4444!important;
-    }
-    
-    .hover\:bg-red-600:hover {
-        background-color: #dc2626!important;
-    }
-    
-    .hover\:text-white:hover {
-        color: #ffffff!important;
-    }
-    
-    .hover\:text-red-400:hover {
-        color: #f87171!important;
-    }
-    
-    .hover\:text-red-500:hover {
-        color: #ef4444!important;
-    }
-    
-    .hover\:shadow-lg:hover {
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2)!important;
-    }
-    
-    /* Text colors */
-    .text-red-500 {
-        color: #ef4444!important;
-    }
-    
-    .text-gray-300 {
-        color: #d1d5db!important;
-    }
-    
-    .text-gray-400 {
-        color: #9ca3af!important;
-    }
-    
-    .text-green-400 {
-        color: #4ade80!important;
-    }
-    
-    .text-blue-400 {
-        color: #60a5fa!important;
-    }
-    
-    /* Background colors */
-    .bg-\[\#0f161b\] {
-        background-color: #0f161b!important;
-    }
-    
-    .bg-gray-700 {
-        background-color: #374151!important;
-    }
-    
-    .bg-gray-800 {
-        background-color: #1f2937!important;
-    }
-    
-    .bg-red-500 {
-        background-color: #ef4444!important;
-    }
-    
-    .bg-green-500 {
-        background-color: #10b981!important;
-    }
-    
-    .bg-blue-500 {
-        background-color: #3b82f6!important;
-    }
-    
-    .bg-opacity-10 {
-        --tw-bg-opacity: 0.1!important;
-    }
-    
-    /* Cursor styles */
-    .cursor-pointer {
-        cursor: pointer!important;
-    }
-    
-    /* Form focus styles */
-    .form-control:focus {
-        background-color: #1f2937;
-        border-color: #ef4444;
-        box-shadow: 0 0 0 0.25rem rgba(239, 68, 68, 0.25);
-    }
-
-    /* Card selection styles for radio buttons */
-    .form-check-input:checked + div .h6 {
-        color: #ef4444!important;
-    }
-    
-    /* Modal animations */
-    .modal.fade .modal-dialog {
-        transition: transform 0.3s ease-out;
-    }
-    
-    .modal.fade .modal-content {
-        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
-    }
-</style>
-<!-- Add JavaScript for Image Preview -->
-<script>
-// Toggle visibility function for sidebar sections
-function toggleVisibility(id) {
-const element = document.getElementById(id);
-if (element.classList.contains('hidden')) {
-element.classList.remove('hidden');
-} else {
-element.classList.add('hidden');
-}
-}
-
-// Image preview functionality
-document.getElementById('id_profile_image').addEventListener('change', function(e) {
-const file = e.target.files[0];
-if (file) {
-const reader = new FileReader();
-reader.onload = function(event) {
-    const preview = document.getElementById('imagePreview');
-    preview.innerHTML = `<img src="${event.target.result}" alt="Preview" class="rounded-full w-100 h-100">`;
-}
-reader.readAsDataURL(file);
-}
-});
-</script>
+{% block extra_js %}
+<script src="{% static 'social/js/group/group_list.js' %}"></script>
+{% endblock extra_js %}
 {% endblock %}

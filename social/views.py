@@ -3,12 +3,11 @@ from time import localtime
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from django.urls import reverse_lazy
-from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
+from django.contrib.auth.mixins import UserPassesTestMixin
 from django.views import View
 from django.views.generic.edit import UpdateView, DeleteView
 from django.db.models import Q
 from django.http import HttpResponseNotFound, JsonResponse
-
 from social.task import send_event_reminder
 from .models import Feedback, GroupJoinRequest, Post, Comment, UserProfile, Group, Message, Notification, User, MessageStatus
 from .forms import FeedbackForm, PostForm, CommentForm, GroupForm, ProfileSetupForm
@@ -20,7 +19,6 @@ from django.utils import timezone
 from django.db.models import Count
 from django.shortcuts import get_object_or_404, render
 from django.http import JsonResponse
-from django.utils import timezone
 from .models import Conversation, Message, MessageStatus, Like, SharedPost
 from django.contrib.auth.models import User
 from django.core.paginator import Paginator
@@ -30,41 +28,40 @@ from django.dispatch import receiver
 from django.contrib import messages
 from .forms import ReportForm 
 from django import forms
-from itertools import chain
 from .models import Post, SharedPost, Group, Event
 from .forms import PostForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import View
-
 from django.shortcuts import render, redirect
-from django.views import View
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.core.paginator import Paginator
-from django.utils import timezone
 from django.db.models import Count, Case, When, IntegerField, F, ExpressionWrapper, FloatField, Q, Exists, OuterRef
 from datetime import timedelta
 import random
 from .utils import extract_and_assign_hashtags, get_mixed_feed
-from django.shortcuts import render, redirect
 from .forms import EventForm
-from .models import Event
-
-from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from .models import Event, EventImage, EventFile
-
-from django.shortcuts import render, redirect
-from .forms import EventForm
-from .models import EventImage
-
-from django.shortcuts import render, redirect
-from .forms import EventForm
 from .models import Rule
 
 from django.shortcuts import get_object_or_404, redirect
 from django.db.utils import IntegrityError
 from .models import Conversation, User
+from django.shortcuts import get_object_or_404, redirect
+from django.contrib import messages
+from .models import Group, GroupMembership, MutedUser
+from django.contrib.auth.models import User
+from django.shortcuts import redirect
 
+from django.http import HttpResponseNotFound
+from django.shortcuts import get_object_or_404, redirect, render
+from django.contrib.auth.models import User
+from django.contrib import messages
+from .models import Group, GroupMembership, MutedUser
+
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib import messages
+from django.http import HttpResponseNotFound
+from django.contrib.auth.models import User
+from .models import Group, GroupMembership, MutedUser
 
 
 
@@ -79,7 +76,7 @@ def conversation_search(request):
 
     # Further filter by search query if it exists
     if query:
-        conversations = conversations.filter(name__icontains=query)  # Filter by name if query exists
+        conversations = conversations.filter(name__icontains=query) 
 
     return render(request, 'social/conversation_search_result.html', {'results': conversations, 'query': query})
 
@@ -94,9 +91,6 @@ def user_list_view(request):
     return render(request, 'social/user_list.html', context)
 
 
-
-from django.db.models import Count, F, OuterRef, Subquery
-from .models import Conversation, Message, MessageStatus
 @csrf_exempt
 def send_message(request, conversation_id):
     conversation = get_object_or_404(Conversation, id=conversation_id)
@@ -108,7 +102,6 @@ def send_message(request, conversation_id):
     if request.method == 'POST':
         body = request.POST.get('body')
         if body:
-            # Create the message
             message = Message.objects.create(conversation=conversation, sender=request.user, content=body)
             print(f"Message created: {message}")
             
@@ -138,14 +131,12 @@ def mark_message_as_read(request, message_id):
         message = Message.objects.get(id=message_id)
         message_status = MessageStatus.objects.get(message=message, user=request.user)
         message_status.is_read = True
-        message_status.read_at = timezone.now()  # Set the read_at timestamp
+        message_status.read_at = timezone.now()  
         message_status.save()
         print(f"Message {message_id} marked as read.")
     except MessageStatus.DoesNotExist:
-        # Handle case where message status doesn't exist, possibly creating it
+
         pass
-
-
 
 
 def get_unread_message_count(request):
@@ -289,10 +280,6 @@ def conversation_list(request):
     return render(request, 'social/conversation_list.html', context)
 
 
-
-
-
-
 def open_conversation(request, conversation_id):
     # Fetch the conversation the user is trying to open
     conversation = get_object_or_404(Conversation, id=conversation_id)
@@ -315,25 +302,6 @@ def open_conversation(request, conversation_id):
     }
 
     return render(request, 'social/open_conversation.html', context)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-from django.shortcuts import render
-from django.utils import timezone
-
 
 class PostListView(LoginRequiredMixin, View):
     def get_combined_posts(self, user):
@@ -535,7 +503,7 @@ class PostListView(LoginRequiredMixin, View):
         # Prepare the context for rendering
         context = {
             'combined_posts': page_obj,
-            'form': form,  # Use the form with errors
+            'form': form,  
             'public_groups': public_groups,
             'private_groups': private_groups,
             'groups': groups,
@@ -548,10 +516,7 @@ class PostListView(LoginRequiredMixin, View):
         return render(request, 'social/post_list.html', context)
 
 
-from django.shortcuts import render
 from django.views.generic import ListView
-from .models import Post, Hashtag, Group
-from django.db.models import Count
 
 class HashtagPostListView(ListView):
     model = Post
@@ -587,28 +552,13 @@ class HashtagPostListView(ListView):
         return context
 
 
-
-
-    
-    
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.http import JsonResponse
-from django.template.loader import render_to_string
-from .models import Post
-
-from django.shortcuts import render
-from django.http import JsonResponse
-from django.core.paginator import Paginator
-from django.template.loader import render_to_string
-from .models import Post
-
 class GetLatestPostsView(View):
     def get(self, request, *args, **kwargs):
         try:
             # Prefetch related images for posts to avoid lazy loading issues
             posts = Post.objects.prefetch_related('images').order_by('-created_on')
             
-            paginator = Paginator(posts, 5)  # 5 posts per page
+            paginator = Paginator(posts, 5)  
             page_number = request.GET.get('page', 1)
             page_obj = paginator.get_page(page_number)
 
@@ -707,28 +657,6 @@ class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     def test_func(self):
         return self.request.user == self.get_object().author
 
-from django.shortcuts import render
-from django.views import View
-from .models import UserProfile, Post
-
-from django.shortcuts import render, get_object_or_404
-from .models import UserProfile
-from django.contrib.auth.models import User
-
-from django.shortcuts import render, get_object_or_404
-from django.views import View
-from .models import UserProfile
-from django.contrib.auth.models import User
-
-from django.shortcuts import render, get_object_or_404
-from django.views import View
-from .models import User
-
-from django.shortcuts import get_object_or_404, render
-from django.views import View
-from .models import Post
-from django.contrib.auth.models import User
-
 
 class ProfileView(View):
     def get(self, request, pk):
@@ -742,7 +670,7 @@ class ProfileView(View):
             return render(request, 'social/profile_not_found.html')
 
         # 3) Fetch posts by this user (author is a ForeignKey to User model)
-        posts = Post.objects.filter(author=user).order_by('-created_on')  # Filter by 'author' field
+        posts = Post.objects.filter(author=user).order_by('-created_on')  
 
         # 4) Render the profile page with the user profile and posts
         return render(request, 'social/profile.html', {
@@ -781,12 +709,6 @@ class RemoveFollower(LoginRequiredMixin, View):
         profile = UserProfile.objects.get(pk=pk)
         profile.followers.remove(request.user)
         return redirect('profile', pk=pk)
-
-from django.views import View
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import render
-from django.db.models import Q
-from .models import Post, Comment, UserProfile, Group
 
 class SearchView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
@@ -858,27 +780,16 @@ def create_group(request):
     if request.method == 'POST':
         form = GroupForm(request.POST, request.FILES, user=request.user)
         if form.is_valid():
-            print("Form is valid")  # Check if form validation is passing
+            print("Form is valid")  
             form.save()
-            return redirect('group_list')  # Redirect after successful form save
+            return redirect('group_list')  
         else:
-            print("Form is not valid")  # Check form validation failure
-            print(form.errors)  # Debugging: print form errors to the console
+            print("Form is not valid") 
+            print(form.errors)  
     else:
         form = GroupForm(user=request.user)
     
     return render(request, 'groups/create_group.html', {'form': form})
-
-
-from django.shortcuts import render
-from .models import Group
-
-from itertools import chain
-import random
-
-from itertools import chain
-import random
-from django.db.models import Count
 
 def group_list(request):
     # Fetch public and private groups as before
@@ -895,17 +806,17 @@ def group_list(request):
     user_groups = Group.objects.filter(members=request.user)
 
     # NEW: Get the filter parameter from the GET request (default to 'trending')
-    filter_type = request.GET.get('filter', 'trending')  # Default to 'trending' if no filter is provided
+    filter_type = request.GET.get('filter', 'trending')  
     
     # Apply filters based on the chosen filter type
     if filter_type == 'trending':
-        filtered_groups = Group.objects.order_by('-created_at')  # Example: Sort by creation date (newest first)
+        filtered_groups = Group.objects.order_by('-created_at')  
     elif filter_type == 'top':
-        filtered_groups = Group.objects.annotate(num_members=Count('members')).order_by('-num_members')  # Sort by number of members
+        filtered_groups = Group.objects.annotate(num_members=Count('members')).order_by('-num_members')  #
     elif filter_type == 'fresh':
-        filtered_groups = Group.objects.order_by('-created_at')  # Example: Fresh groups, newest first
+        filtered_groups = Group.objects.order_by('-created_at') 
     else:
-        filtered_groups = Group.objects.all()  # Default fallback if the filter is not recognized
+        filtered_groups = Group.objects.all()  
 
     # Split the filtered groups into public and private
     public_filtered_groups = filtered_groups.filter(is_private=False)
@@ -916,7 +827,7 @@ def group_list(request):
         form = GroupForm(request.POST, request.FILES, user=request.user)
         if form.is_valid():
             form.save()
-            return redirect('group_list')  # Redirect to the same page after successful creation
+            return redirect('group_list')  
         else:
             print("Form is not valid")
             print(form.errors)
@@ -930,8 +841,8 @@ def group_list(request):
         'form': form,
         'all_groups': all_groups,
         'user_groups': user_groups,
-        'filtered_groups': filtered_groups,  # Pass the filtered groups to the template
-        'filter': filter_type,  # Pass the current filter type to the template
+        'filtered_groups': filtered_groups,  
+        'filter': filter_type,  
     }
 
     return render(request, 'groups/group_list.html', context)
@@ -953,30 +864,6 @@ def leave_group(request, group_id):
 
     return redirect('group_list') 
 
-from .models import Group, Post, GroupJoinRequest
-
-from django.contrib import messages
-from .models import Group, Post, GroupJoinRequest
-
-from .models import Group, Post, GroupJoinRequest, GroupRule  # Make sure GroupRule is imported
-
-from .forms import GroupRuleForm
-
-from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib import messages
-from .models import Group, Post, GroupJoinRequest
-from .forms import GroupRuleForm
-from django.contrib.auth.decorators import login_required
-
-from django.contrib import messages
-from .models import Group, GroupJoinRequest, Post, PostImage
-from .forms import GroupRuleForm
-from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib import messages
-from .models import Group, Post, GroupJoinRequest, GroupRule
-from .forms import GroupRuleForm
-from django.contrib.auth.decorators import login_required
-from .models import GroupMembership
 @login_required
 def group_detail(request, group_id):
    
@@ -1017,7 +904,7 @@ def group_detail(request, group_id):
         # Handle post creation logic if the form is submitted
         if request.method == 'POST' and 'create_post' in request.POST:
             body = request.POST.get('body')
-            images = request.FILES.getlist('images')  # Retrieve the uploaded images
+            images = request.FILES.getlist('images')  
             
             if body:
                 post = Post.objects.create(
@@ -1029,9 +916,9 @@ def group_detail(request, group_id):
                     PostImage.objects.create(post=post, image=image)
                 
                 messages.success(request, "Post created successfully.")
-                return redirect('group_detail', group_id=group.id)  # Redirect after successful post creation
+                return redirect('group_detail', group_id=group.id)  
             else:
-                messages.error(request, "Post content cannot be empty.")  # Handle empty post content
+                messages.error(request, "Post content cannot be empty.")  
     
     context = {
         'group': group,
@@ -1058,7 +945,7 @@ def join_group(request, group_id):
     if group.is_private:
         if group.join_mode == 'auto':
             group.members.add(request.user)
-            # Update or create a join request with status 'approved'
+            # Update or create a join request with status approved
             if join_request:
                 join_request.status = 'approved'
                 join_request.save()
@@ -1068,7 +955,6 @@ def join_group(request, group_id):
         else:
             if join_request:
                 if join_request.status in ['rejected', 'approved']:
-                    # Re-request: reset to pending
                     join_request.status = 'pending'
                     join_request.save()
                     messages.success(request, "Join request re-submitted. Please wait for admin approval.")
@@ -1119,7 +1005,6 @@ def admin_approval(request, group_id):
         request_id = request.POST.get('request_id')
         join_request = get_object_or_404(GroupJoinRequest, id=request_id)
 
-        # Optional: allow admin to re-approve or re-reject (or block repeat actions)
         if join_request.status == 'approved':
             messages.info(request, f"{join_request.user.username} has already been approved.")
         elif join_request.status == 'rejected':
@@ -1156,43 +1041,26 @@ def admin_approval(request, group_id):
     return render(request, 'groups/admin_approval.html', context)
 
 
-    
 @login_required
 def group_settings(request, group_id):
     group = get_object_or_404(Group, id=group_id)
 
     # Check if the user is an admin of the group
     if not group.is_admin(request.user):
-        return redirect('home')  # Or show an error page
+        return redirect('home')  
     
     if request.method == 'POST':
         form = GroupForm(request.POST, request.FILES, instance=group)
         if form.is_valid():
             form.save()
-            return redirect('group_settings', group_id=group.id)  # Redirect to settings page after saving
+            return redirect('group_settings', group_id=group.id)  
     else:
         form = GroupForm(instance=group)
     
     return render(request, 'groups/group_settings.html', {'form': form, 'group': group})
 
 
-from django.shortcuts import get_object_or_404, redirect
-from django.contrib import messages
-from .models import Group, GroupMembership, MutedUser
-from django.contrib.auth.models import User
-from django.shortcuts import redirect
 
-from django.http import HttpResponseNotFound
-from django.shortcuts import get_object_or_404, redirect, render
-from django.contrib.auth.models import User
-from django.contrib import messages
-from .models import Group, GroupMembership, MutedUser
-
-from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib import messages
-from django.http import HttpResponseNotFound
-from django.contrib.auth.models import User
-from .models import Group, GroupMembership, MutedUser
 
 def manage_users(request, group_id):
     group = get_object_or_404(Group, id=group_id)
@@ -1276,19 +1144,11 @@ def manage_users(request, group_id):
     return render(request, 'groups/manage_users.html', context)
 
 
-
-
-# //groupviews-------------------------------------------------------
-
-
-
-
-
 @login_required
 def notifications_api(request):
     page = request.GET.get('page', 1)  # Current page number
     notifications = Notification.objects.filter(user=request.user, read=False).order_by('-timestamp')
-    paginator = Paginator(notifications, 10)  # 10 notifications per page
+    paginator = Paginator(notifications, 10)  
     notifications_page = paginator.get_page(page)
 
     notifications_data = [
@@ -1336,7 +1196,7 @@ def toggle_like(request, post_id):
         like, created = Like.objects.get_or_create(user=request.user, post=post)
 
         if not created:
-            like.delete()  # Unlike the post
+            like.delete()  
             liked = False
         else:
             liked = True
@@ -1349,7 +1209,7 @@ def toggle_like(request, post_id):
                     message=f'Your post "{post.body[:20]}" has been liked by {request.user.username}.',
                     timestamp=timezone.now(),
                     read=False,
-                    link=reverse('post-detail', kwargs={'pk': post.pk})  # ✅ This is the fix
+                    link=reverse('post-detail', kwargs={'pk': post.pk}) 
                 )
 
         return JsonResponse({
@@ -1395,7 +1255,7 @@ def share_post(request, post_id):
         return JsonResponse({
             'success': True,
             'message': 'Post shared successfully!',
-            'shared_post_url': shared_post.get_absolute_url()  # Ensure get_absolute_url works
+            'shared_post_url': shared_post.get_absolute_url() 
         })
 
     return JsonResponse({'success': False, 'error': 'Invalid request method'}, status=400)
@@ -1405,7 +1265,7 @@ def share_post(request, post_id):
 def create_reply_notification(sender, instance, created, **kwargs):
     # Check if the comment is a reply
     if created and instance.parent:
-        parent_comment = instance.parent  # Get the parent comment
+        parent_comment = instance.parent  
         
         notified_user = parent_comment.author
    
@@ -1417,7 +1277,7 @@ def create_reply_notification(sender, instance, created, **kwargs):
                 notification_type='comment',  
                 message=f"{instance.author.username} replied to your comment.",
                 read=False,
-                link=reverse('post-detail', kwargs={'pk': instance.post.pk})  # Use instance.post.pk here
+                link=reverse('post-detail', kwargs={'pk': instance.post.pk})  
             )
             
 
@@ -1465,7 +1325,7 @@ class CustomLoginView(LoginView):
     def form_valid(self, form):
         user = form.get_user()
         if user.profile.is_banned:
-            return redirect('banned_user')  # Redirect to your custom banned page
+            return redirect('banned_user')  
         return super().form_valid(form)
 
 def banned_user(request):
@@ -1479,18 +1339,14 @@ class BannedUserView(TemplateView):
     template_name = 'social/banned_user.html'
 
 # events
-
-
-
-
 def create_event(request):
     if request.method == 'POST':
         form = EventForm(request.POST, request.FILES)
         if form.is_valid():
             # Save the event and set the creator to the logged-in user
-            event = form.save(commit=False)  # Do not save the event yet, we need to set the creator
-            event.created_by = request.user  # Set the logged-in user as the creator
-            event.save()  # Now save the event
+            event = form.save(commit=False)  
+            event.created_by = request.user  
+            event.save()  
 
             images = request.FILES.getlist('images')
             for image in images:
@@ -1502,7 +1358,7 @@ def create_event(request):
                 event.save()
 
             # Redirect to event list or event detail page
-            return redirect('event_list')  # Or wherever you want to redirect after creation
+            return redirect('event_list')  
 
     else:
         form = EventForm()
@@ -1544,7 +1400,7 @@ def event_detail(request, pk):
 @login_required
 def follower_list(request, user_id):
     profile = get_object_or_404(UserProfile, user__id=user_id)
-    followers = profile.followers.all()  # Get all followers
+    followers = profile.followers.all()  
     context = {
         'profile': profile,
         'followers': followers,
@@ -1555,7 +1411,7 @@ def follower_list(request, user_id):
 @login_required
 def followed_list(request, user_id):
     profile = get_object_or_404(UserProfile, user__id=user_id)
-    followed_users = UserProfile.objects.filter(followers=profile.user)  # Users followed by this user
+    followed_users = UserProfile.objects.filter(followers=profile.user)  
     context = {
         'profile': profile,
         'followed_users': followed_users,
@@ -1595,12 +1451,6 @@ def mark_as_read(request, room_name):
     return JsonResponse({'status': 'success'})
 
 
-
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
-from .models import Conversation
-from django.contrib.auth.models import User
-
 @login_required
 def start_conversation(request, user_id):
     receiver = get_object_or_404(User, pk=user_id)
@@ -1627,17 +1477,14 @@ def start_conversation(request, user_id):
 
     # Redirect to the conversation list or directly into the conversation room
     return redirect("conversation_list")
- # Adjust the redirect URL as needed
 
 
 
 
-from django.shortcuts import render, redirect
-from .forms import ProfileSetupForm
-from .municipality_data import municipality_barangay_data  # Import the data
 
-from django.shortcuts import render, redirect
-from .forms import ProfileSetupForm
+
+from .municipality_data import municipality_barangay_data 
+
 @login_required
 
 @login_required
@@ -1664,7 +1511,7 @@ def account_setup(request):
             context = {
                 'form': form,
                 'municipality_barangay_data': municipality_barangay_data,
-                'warnings': warnings,  # Include warnings in context
+                'warnings': warnings,  
             }
 
             return redirect('post-list')
@@ -1677,16 +1524,15 @@ def account_setup(request):
     context = {
         'form': form,
         'municipality_barangay_data': municipality_barangay_data,
-        'warnings': warnings,  # Include warnings in context
+        'warnings': warnings,  #
     }
 
     return render(request, 'social/account_setup.html', context)
 
 
 
-from django.db.models import Count
+
 from .models import Post, Like, Comment, SharedPost, Hashtag
-from django.contrib.auth.models import User
 
 def get_personalized_feed(user, limit=10):
     """
@@ -1780,19 +1626,17 @@ def create_group_rule(request, group_id):
 
 
 from django.core.mail import send_mail
-
 from django.core.mail import send_mail
-from django.utils import timezone
 from .models import EventReminder
 
 
 class EventReminderForm(forms.ModelForm):
     class Meta:
         model = EventReminder
-        fields = ['event']  # The user will automatically be linked to the reminder
+        fields = ['event']  
 
     def __init__(self, *args, **kwargs):
-        user = kwargs.get('user')  # Make sure to pass the user when instantiating
+        user = kwargs.get('user')  
         super().__init__(*args, **kwargs)
         if user:
             self.fields['event'].queryset = Event.objects.all()
@@ -1800,16 +1644,9 @@ class EventReminderForm(forms.ModelForm):
 
 
 
-import logging
-from django.contrib import messages
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
-from .forms import EventReminderForm
-from .models import Event
+
 from .task import send_event_reminder
 
-
-# Initialize logger
 logger = logging.getLogger(__name__)
 
 @login_required
@@ -1830,11 +1667,11 @@ def set_event_reminder(request, event_id):
                 reminder_email = form.cleaned_data['email']
                 send_confirmation_email(event_reminder, reminder_email)
 
-                # Define reminder intervals in hours (5-day logic)
-                reminder_hours = [24, 72, 120]  # Adjusted to 1 day, 3 days, 5 days
+                # Define reminder intervals in hours 
+                reminder_hours = [24, 72, 120]  
 
                 for hours in reminder_hours:
-                    countdown_seconds = hours * 60 * 60  # convert to seconds
+                    countdown_seconds = hours * 60 * 60 
                     send_event_reminder.apply_async(args=[event_reminder.id], countdown=countdown_seconds)
 
                 messages.success(request, 'Event reminder has been set successfully!')
@@ -1856,18 +1693,6 @@ def set_event_reminder(request, event_id):
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-# new stuff
 from django.core.mail import send_mail
 from django.utils import timezone
 from django.conf import settings
@@ -1877,7 +1702,7 @@ def send_confirmation_email(event_reminder, user_email):
     event_date = timezone.localtime(event_reminder.event.date)
 
     # Format the event date in a readable format
-    formatted_event_date = event_date.strftime("%B %d, %Y, %I:%M %p")  # Example: "April 28, 2025, 8:07 PM"
+    formatted_event_date = event_date.strftime("%B %d, %Y, %I:%M %p") 
 
     # Get the location based on the event type
     if event_reminder.event.location_type == 'inside':
@@ -1907,8 +1732,8 @@ def send_confirmation_email(event_reminder, user_email):
     send_mail(
         subject,
         message,
-        settings.DEFAULT_FROM_EMAIL,  # Sender email
-        [user_email],  # User email
+        settings.DEFAULT_FROM_EMAIL,  
+        [user_email], 
         fail_silently=False,
     )
 

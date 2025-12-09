@@ -1,0 +1,144 @@
+.custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+}
+
+
+.round {
+    border-radius: 50%!important;
+}
+.nav-pills .nav-link{
+    color: white;
+}
+.nav-pills .nav-link.active {
+    background: linear-gradient(to right, #dc2626, #b91c1c) !important;
+    color: white !important;
+    border: none !important;
+}
+.nav-pills .nav-link.active i {
+    color: white !important;
+}
+
+.transition-all {
+    transition: all 0.3s ease;
+}
+
+.hover\:bg-gray-700:hover {
+    background-color: #2d3748!important;
+}
+
+.hover\:bg-gray-800:hover {
+    background-color: #1f2937!important;
+}
+
+.hover\:bg-red-500:hover {
+    background-color: #ef4444!important;
+}
+
+.hover\:bg-red-600:hover {
+    background-color: #dc2626!important;
+}
+
+.hover\:text-white:hover {
+    color: #ffffff!important;
+}
+
+.hover\:text-red-400:hover {
+    color: #f87171!important;
+}
+
+.hover\:text-red-500:hover {
+    color: #ef4444!important;
+}
+
+.hover\:shadow-lg:hover {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2)!important;
+}
+
+
+.text-red-500 {
+    color: #ef4444!important;
+}
+
+.text-gray-300 {
+    color: #d1d5db!important;
+}
+
+.text-gray-400 {
+    color: #9ca3af!important;
+}
+
+.text-green-400 {
+    color: #4ade80!important;
+}
+
+.text-blue-400 {
+    color: #60a5fa!important;
+}
+
+
+.bg-\[\#0f161b\] {
+    background-color: #0f161b!important;
+}
+
+.bg-gray-700 {
+    background-color: #374151!important;
+}
+
+.bg-gray-800 {
+    background-color: #1f2937!important;
+}
+
+.bg-red-500 {
+    background-color: #ef4444!important;
+}
+
+.bg-green-500 {
+    background-color: #10b981!important;
+}
+
+.bg-blue-500 {
+    background-color: #3b82f6!important;
+}
+
+.bg-opacity-10 {
+    --tw-bg-opacity: 0.1!important;
+}
+
+
+.cursor-pointer {
+    cursor: pointer!important;
+}
+
+.form-control:focus {
+    background-color: #1f2937;
+    border-color: #ef4444;
+    box-shadow: 0 0 0 0.25rem rgba(239, 68, 68, 0.25);
+}
+
+
+.form-check-input:checked + div .h6 {
+    color: #ef4444!important;
+}
+
+
+.modal.fade .modal-dialog {
+    transition: transform 0.3s ease-out;
+}
+
+.modal.fade .modal-content {
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+}

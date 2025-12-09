@@ -32,7 +32,6 @@ from .models import Report, Evidence, UserUnderInvestigation
 
 
 
-
 class ReportAdmin(admin.ModelAdmin):
     change_form_template = "social/admin/report.html"
 

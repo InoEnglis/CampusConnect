@@ -1,8 +1,11 @@
 {% extends 'landing/base.html' %}
 
 {% block content %}
+
+{% load static %}
+
 <div class="min-h-screen bg-slate-950 text-white">
-  <!-- Header with wave background -->
+  <!-- Header -->
   <div class="relative overflow-hidden bg-red-500">
     <div class="absolute inset-0">
       <svg class="absolute bottom-0 w-full h-48 text-slate-950 opacity-20" viewBox="0 0 1440 320" preserveAspectRatio="none">
@@ -21,10 +24,9 @@
     </div>
   </div>
 
-  <!-- Main content area -->
+  <!--content area -->
   <div class="px-4 py-12 mx-auto max-w-7xl sm:px-6 lg:px-8">
     <div class="max-w-3xl mx-auto">
-      <!-- Content Card -->
       <div class="p-6 mb-8 bg-slate-900 rounded-xl shadow-xl">
         <h2 class="flex items-center mb-4 text-lg font-medium text-indigo-300">
           <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -33,7 +35,7 @@
           Content you're reporting
         </h2>
         
-        <!-- Post Preview -->
+        <!-- reported post preview -->
         <div class="overflow-hidden bg-slate-800 rounded-xl">
           <div class="p-4">
             {% include 'social/post_card.html' with post=post %}
@@ -48,7 +50,7 @@
         <form id="reportForm" method="post" action="{% url 'report-post' post.id %}" class="space-y-8">
           {% csrf_token %}
           
-          <!-- Reason Selection -->
+          <!-- Reason selection -->
           <div>
             <label for="reason" class="block mb-2 text-sm font-medium text-slate-300">
               Why are you reporting this content? <span class="text-rose-500">*</span>
@@ -73,7 +75,7 @@
           </div>
           
           
-          <!-- Additional Details -->
+          <!-- Optional additional details  -->
           <div>
             <label for="additional_comments" class="block mb-2 text-sm font-medium text-slate-300">
               Additional details
@@ -83,7 +85,7 @@
               placeholder="Help us understand the issue by providing specific details...">{{ form.additional_comments.value }}</textarea>
           </div>
           
-          <!-- Form Actions -->
+          <!-- Form actions -->
           <div class="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4">
             <button type="submit"
               class="inline-flex items-center justify-center px-6 py-3 text-base font-medium text-white bg-red-500 rounded-lg shadow-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:w-auto sm:order-2 w-full">
@@ -97,7 +99,7 @@
         </form>
       </div>
       
-      <!-- Information Card -->
+      <!-- Information card -->
       <div class="p-6 mb-8  bg-red rounded-xl shadow-xl">
         <h3 class="flex items-center mb-4 text-lg font-medium text-white">
           <svg class="w-5 h-5 mr-2 text-indigo-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -133,7 +135,6 @@
 <!-- Success Modal -->
 <div id="successModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
   <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-    <!-- Background overlay -->
     <div class="fixed inset-0 transition-opacity bg-slate-900 bg-opacity-75 backdrop-blur-sm"></div>
 
     <!-- Modal content -->
@@ -164,77 +165,7 @@
   </div>
 </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  const form = document.getElementById('reportForm');
-  const successModal = document.getElementById('successModal');
-  const modalContent = document.getElementById('modalContent');
-  const modalCloseButton = document.getElementById('modalCloseButton');
-  
-  // Handle form submission
-  form.addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    const formData = new FormData(form);
-    const submitButton = form.querySelector('button[type="submit"]');
-    
-    // Show loading state
-    submitButton.disabled = true;
-    submitButton.innerHTML = `
-      <svg class="w-5 h-5 mr-3 -ml-1 text-white animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-      </svg>
-      Processing...
-    `;
-    
-    fetch(form.action, {
-      method: 'POST',
-      body: formData,
-      headers: {
-        'X-CSRFToken': formData.get('csrfmiddlewaretoken'),
-        'X-Requested-With': 'XMLHttpRequest'
-      }
-    })
-    .then(response => response.json())
-    .then(data => {
-      if (data.status === 'success') {
-        // Show success modal
-        document.getElementById('modalTitle').textContent = 'Report Submitted';
-        document.getElementById('modalMessage').textContent = data.message || 'Thank you for your report. Our team will review it promptly.';
-        successModal.classList.remove('hidden');
-      } else {
-        // Handle error case
-        document.getElementById('modalTitle').textContent = 'Something Went Wrong';
-        document.getElementById('modalMessage').textContent = data.message || 'We encountered an issue processing your report. Please try again.';
-        successModal.classList.remove('hidden');
-        submitButton.disabled = false;
-        submitButton.innerHTML = 'Submit Report';
-      }
-    })
-    .catch(error => {
-      console.error('Error:', error);
-      document.getElementById('modalTitle').textContent = 'Connection Error';
-      document.getElementById('modalMessage').textContent = 'Unable to connect to our servers. Please check your connection and try again.';
-      successModal.classList.remove('hidden');
-      submitButton.disabled = false;
-      submitButton.innerHTML = 'Submit Report';
-    });
-  });
-  
-  // Close modal and redirect
-  modalCloseButton.addEventListener('click', function() {
-    successModal.classList.add('hidden');
-    window.location.href = "{% url 'post-list' %}";
-  });
-  
-  // Close modal when clicking background
-  successModal.addEventListener('click', function(e) {
-    if (e.target === successModal) {
-      successModal.classList.add('hidden');
-      window.location.href = "{% url 'post-list' %}";
-    }
-  });
-});
-</script>
+{% block extra_js %}
+<script src="{% static 'social/js/report/report.js' %}"></script>
+{% endblock extra_js %} 
 {% endblock %}

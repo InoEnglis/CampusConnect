@@ -1,0 +1,153 @@
+body {
+  background-color: #15202b;
+}
+
+.post-card {
+  background-color: #15202b;
+  border: 1px solid #15202b;
+  border-radius: 4px;
+  margin-bottom: 10px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.post-card h5 {
+  color: #0079d3;
+}
+
+.post-card p {
+  color: #1c1c1c;
+}
+
+.btn-primary {
+  background-color: #0079d3;
+  border-color: #0079d3;
+  width: 3rem;
+  height: 3rem;
+}
+
+.btn-primary:hover {
+  background-color: #0064b7;
+  border-color: #0064b7;
+}
+
+.sticky-top {
+  top: 20px;
+}
+
+/* Scrollable Sidebars */
+.col-md-2,
+.col-md-3 {
+  height: 100vh;
+  overflow-y: auto;
+}
+
+/* Main Content Area */
+.col-12.col-md-7 {
+  height: 100vh;
+  overflow-y: auto;
+}
+
+/* Right Sidebar Scrollbar */
+.col-md-3 {
+  scrollbar-width: thin; /* For Firefox */
+  scrollbar-color: #555 #0f161b; /* Thumb and track colors */
+}
+
+.col-md-3::-webkit-scrollbar {
+  width: 8px; /* Width of the scrollbar */
+}
+
+.col-md-3::-webkit-scrollbar-track {
+  background: #0f161b;
+  border-radius: 10px;
+}
+
+.col-md-3::-webkit-scrollbar-thumb {
+  background: #555; /* Color of the scrollbar thumb */
+  border-radius: 10px;
+}
+
+.col-md-3::-webkit-scrollbar-thumb:hover {
+  background: #777; /* Lighter color on hover */
+}
+
+/* Left Sidebar Scrollbar */
+.col-md-2 {
+  scrollbar-width: thin; /* For Firefox */
+  scrollbar-color: #555 #0f161b; /* Thumb and track colors */
+}
+
+.col-md-2::-webkit-scrollbar {
+  width: 8px; /* Width of the scrollbar */
+}
+
+.col-md-2::-webkit-scrollbar-track {
+  background: #0f161b;
+  border-radius: 10px;
+}
+
+.col-md-2::-webkit-scrollbar-thumb {
+  background: #555; /* Color of the scrollbar thumb */
+  border-radius: 10px;
+}
+
+.col-md-2::-webkit-scrollbar-thumb:hover {
+  background: #777; /* Lighter color on hover */
+}
+
+/* Main Content Area Scrollbar */
+.col-12.col-md-7 {
+  scrollbar-width: thin; /* For Firefox */
+  scrollbar-color: #555 #0f161b; /* Thumb and track colors */
+}
+
+.col-12.col-md-7::-webkit-scrollbar {
+  width: 8px; /* Width of the scrollbar */
+}
+
+.col-12.col-md-7::-webkit-scrollbar-track {
+  background: #0f161b;
+  border-radius: 10px;
+}
+
+.col-12.col-md-7::-webkit-scrollbar-thumb {
+  background: #555;
+  border-radius: 10px;
+}
+
+.col-12.col-md-7::-webkit-scrollbar-thumb:hover {
+  background: #777;
+}
+
+/* Custom styling for the textarea */
+
+#uploadProgressBar {
+  transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+/* Floating progress container animation */
+#floatingProgressContainer {
+  transition: opacity 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #192734;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #38444d;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #1da1f2;
+}
+
+
