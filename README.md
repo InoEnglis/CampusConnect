@@ -16,7 +16,9 @@ PostgreSQL (optional you can use the default databse of django which is sqlite--
 Clone the repository
 
 1. git clone https://github.com/YourUsername/CampusConnect.git
+   
 2. cd to the project
+   
 3. Create a virtual environment
    python -m venv venv
    Activate the virtual environment
@@ -27,9 +29,10 @@ Mac/Linux:
 source venv/bin/activate
 
 4. Install dependencies
+5. 
 pip install -r requirements.txt
 
-5. Create a .env file (or set them in your system) with:
+6. Create a .env file (or set them in your system) with:
 
 DJANGO_SECRET_KEY=your_secret_key
 DEBUG=True
@@ -47,21 +50,31 @@ python manage.py createsuperuser
 type in your terminal: python manage.py runserver
 ----NOTE:----
 use daphne to use websocket features:
+
 type in your terminal:  daphne -p 8000 (project's name).asgi:application.
+
 The system might get laggy because daphne is not meant to serve media files and i recommend using nginx for it. (you can do it locally)
 
-3. Start Redis (if not running, media uploads will not work)
+4. Start Redis (if not running, media uploads will not work)
+   
 redis-server
 
 
 Features
 1. User authentication and profiles
+   
 2. Create, edit, and delete posts
+   
 3.Commenting and file uploads (images, video, documents)
+
 4.Groups with privacy settings and join requests
+
 5.Real-time chat using WebSockets(not working for now)
+
 6.Admin panel with user and content moderation
+
 7.Feedback system
+
 8. Personalization of feed (You might not feel this if u have few users).
 
 Addtional NOTE:
