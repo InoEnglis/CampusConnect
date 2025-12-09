@@ -12,7 +12,7 @@ To completely run the project, you'll need:
 
 3. Redis (for WebSockets and Celery tasks)
 
-4. PostgreSQL (optional you can use the default databse of django which is sqlite--Avoid using it in production)
+4. PostgreSQL (optional. You can use the default databse of django which is sqlite--Avoid using it in production)
 
 -------Installation----------
 
